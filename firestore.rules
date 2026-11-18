@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function validSave() {
+      return request.resource.data.keys().hasOnly(['app', 'name', 'data', 'updated', 'ver', 'score'])
+        && request.resource.data.app in ['math-garden', 'rainbow-dragon']
+        && request.resource.data.name is string && request.resource.data.name.size() <= 20
+        && request.resource.data.data is string && request.resource.data.data.size() < 300000
+        && request.resource.data.updated is int
+        && request.resource.data.ver is int && request.resource.data.ver >= 2
+        && request.resource.data.score is int && request.resource.data.score >= 0;
+    }
+    // เซฟเกม: 1 เอกสารต่อ (แอป + ชื่อผู้เล่น + PIN) เข้ารหัสเป็น SHA-256
+    // เซฟเกม: ต้องมาจากเวอร์ชันใหม่ (ver 2) และแอพมังกรห้ามเซฟที่คืบหน้าน้อยกว่าบน cloud ทับ
+    match /saves/{id} {
+      allow get: if id.size() == 64;
+      allow create: if id.size() == 64 && validSave();
+      allow update: if id.size() == 64 && validSave()
+        && (request.resource.data.app != 'rainbow-dragon' || request.resource.data.score >= resource.data.get('score', 0));
+      allow list, delete: if false;
+    }
+    // ตารางอันดับ: เก็บแค่ชื่อและจำนวน (ไม่มีเซฟ ไม่มี PIN) ทุกคนดูได้
+    match /board/{id} {
+      allow get, list: if true;
+      allow create, update: if id.size() == 64
+        && request.resource.data.keys().hasOnly(['app', 'name', 'score', 'dragons', 'veh', 'heroes', 'lessons', 'ds', 'hs', 'vs', 'updated'])
+        && request.resource.data.app in ['math-garden', 'rainbow-dragon']
+        && request.resource.data.name is string && request.resource.data.name.size() <= 20
+        && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score < 100000
+        && request.resource.data.dragons is int && request.resource.data.dragons <= 8
+        && request.resource.data.veh is int && request.resource.data.veh <= 10
+        && request.resource.data.heroes is int && request.resource.data.heroes <= 6
+        && request.resource.data.lessons is int
+        && request.resource.data.ds is string && request.resource.data.ds.size() <= 12
+        && request.resource.data.hs is string && request.resource.data.hs.size() <= 80
+        && request.resource.data.vs is string && request.resource.data.vs.size() <= 80
+        && request.resource.data.updated is int;
+      allow delete: if false;
+    }
+  }
+}
