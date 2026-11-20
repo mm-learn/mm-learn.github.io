@@ -261,6 +261,14 @@ textarea{width:100%;border-radius:12px;border:2px solid var(--line);background:v
 .s2homes{display:grid;gap:10px;margin:10px 0}.s2home{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px;border-radius:18px;border:2px solid var(--kc);background:var(--card2);color:var(--ink);font-size:15px}.s2home .he{font-size:36px}.s2home b{font-size:20px}.s2home .pe{margin-top:4px;font-weight:600}
 .gear{display:flex;gap:10px;align-items:center;padding:8px 10px;margin:6px 0;border-radius:14px;background:var(--card2);border:1px solid var(--line)}.gear.own{border-color:var(--ok)}.gear .ge{font-size:30px}.gear.lockrow{opacity:.55}
 .s2me .go{white-space:nowrap}.s2cin video{object-fit:contain}
+
+.s2stage{border-radius:18px;padding:12px;background:radial-gradient(circle at 70% 20%,color-mix(in srgb,var(--bc) 45%,#0A0F24),#0A0F24);border:1px solid var(--line);min-height:250px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;overflow:hidden}
+.s2stage.cp{min-height:150px}.s2stage .en{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.s2stage .sp{font-size:84px;line-height:1;filter:drop-shadow(0 6px 10px #000);animation:bob 1.8s ease-in-out infinite}.s2stage.cp .sp{font-size:56px}
+.s2stage .sp.hit{animation:hit .4s}.s2stage .al{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}.s2stage .ally{display:flex;align-items:flex-end;gap:4px}.s2stage .pt.lunge{animation:lunge .5s}
+.hpb{background:rgba(10,15,36,.82);border:1px solid var(--line);border-radius:12px;padding:6px 10px;min-width:150px}.hpb b{font-size:14px}.hpb small{color:var(--soft)}.hpb .bar{height:10px;margin:3px 0}.hpb .bar i{background:linear-gradient(90deg,#FF2E4D,#FF8A3D)}.hpb.me .bar i{background:linear-gradient(90deg,#3DDC84,#2EE6C7)}
+.s2log{margin:10px 0;padding:10px 12px;border-radius:14px;background:var(--card2);border:1px solid var(--line);min-height:44px;font-size:16px}
+.s2cmd{display:grid;grid-template-columns:1fr 1fr;gap:10px}.s2cmd button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--card2);color:var(--ink);font-size:30px;min-height:76px}.s2cmd button span{font-size:15px;font-weight:600}.s2cmd button:disabled{opacity:.4}
+.s2chest{background:none;border:0;font-size:34px;animation:bob 2s ease-in-out infinite;filter:drop-shadow(0 0 10px #ffd23d)}.s2chest.done{animation:none;filter:grayscale(.8);opacity:.6}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -772,7 +780,7 @@ function startLesson(p){L={p,qs:buildQs(p),i:0,res:[],phase:"run",queue:null,key
 function openLesson(){let el=$(".lesson");if(!el){el=document.createElement("div");el.className="lesson";document.body.appendChild(el)}
  el.innerHTML=`<div class="lhead"><button class="x" id="lx" aria-label="ออก">✕</button><div class="prog"><i id="lp"></i></div><span class="chip">💡${S.bulbs}</span></div><div class="lbody" id="lb"></div><div class="foot" id="lf"><div class="in"></div></div>`;
  $("#lx").onclick=()=>{if(L&&L.phase!=="sum"&&!confirm("ออกจากบทเรียนนี้? ความคืบหน้าบทนี้จะหายนะ"))return;closeLesson()}}
-function closeLesson(){try{speechSynthesis.cancel()}catch(e){}const el=$(".lesson");if(el)el.remove();L=null;BOSS=null;route()}
+function closeLesson(){try{speechSynthesis.cancel()}catch(e){}const el=$(".lesson");if(el)el.remove();L=null;BOSS=null;S2B=null;route()}
 function progress(){const done=L.pos||0,tot=L.queue.length;$("#lp").style.width=(done/tot*100)+"%"}
 let ANS=null;
 function showQ(){const qi=L.queue[L.pos||0];if(qi===undefined)return summary();const q=L.qs[qi];L.cur=qi;ANS=null;progress();
@@ -806,6 +814,7 @@ function check(){const q=L.qs[L.cur];const ok=GRADE[q.k](q,ANS);const qi=L.cur;
  ok?SND.ok():SND.no();if(ok&&L.gain)beep([[1500,.05]]);
  document.querySelectorAll("#qa button,#qa canvas").forEach(b=>{if(b.tagName==="BUTTON")b.disabled=true});
  if(ok)document.querySelectorAll("#qa .sel").forEach(b=>b.classList.add("good"));else document.querySelectorAll("#qa .sel").forEach(b=>b.classList.add("bad"));
+ if(typeof S2B!=="undefined"&&S2B)return s2bHit(ok);
  if(BOSS)return bossHit(ok);
  setFoot("fb",ok)}
 
@@ -1357,7 +1366,7 @@ const S2K=[
  {id:"t",th:"Thief",nm:"เมืองท่าริมทะเล",e:"🔮",c:"#2E8BE6",leg:"คราเคน",sub:"วิทยาศาสตร์และเทคโนโลยี",pet:["🦅","เหยี่ยวน้อย","เหยี่ยว","เหยี่ยวฟ้าใส"],bg:"linear-gradient(160deg,#0d3550,#0a1430)"},
  {id:"g",th:"Gaul",nm:"เมืองทะเลทราย",e:"🏜️",c:"#E6A92E",leg:"ช้างเผือก",sub:"สังคมศึกษา",pet:["🐘","ช้างน้อย","ช้างงา","ช้างเผือก"],bg:"linear-gradient(160deg,#4a3a10,#1a1430)"}];
 const S2KB=Object.fromEntries(S2K.map(k=>[k.id,k]));
-const s2=()=>{S.s2=S.s2||{};const s=S.s2;s.blk=s.blk||{};s.gear=s.gear||{};s.eq=s.eq||{};s.pets=s.pets||[];return s};
+const s2=()=>{S.s2=S.s2||{};const s=S.s2;s.blk=s.blk||{};s.gear=s.gear||{};s.eq=s.eq||{};s.pets=s.pets||[];s.bs=s.bs||{};s.ch=s.ch||{};return s};
 const BLK={wood:["🪵","ไม้"],stone:["🪨","หิน"]};
 const GEAR=[{id:"sword",e:"🗡️",th:"ดาบไม้",c:{wood:3},slot:"w"},{id:"shield",e:"🛡️",th:"โล่ไม้",c:{wood:4},slot:"s"},{id:"bow",e:"🏹",th:"ธนูไม้",c:{wood:3},slot:"w"},{id:"helm",e:"🪖",th:"หมวกไม้",c:{wood:5},slot:"h"},{id:"flag",e:"🚩",th:"ธงอัศวิน",c:{wood:2},slot:"f"}];
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -1394,7 +1403,7 @@ const S2LV=[
 const S2ZONE=[{th:"เมืองตัวเลข",sub:"จำนวน หลัก ค่า เปรียบเทียบ"},{th:"สะพานปริศนา",sub:"บวก ลบ ตัวไม่ทราบค่า โจทย์ปัญหา"}];
 S2LV.forEach(l=>{PAGES[l.id]={t:l.t};Object.defineProperty(PAGES[l.id],"qs",{get:()=>G2[l.g](),enumerable:true})});
 const s2cleared=()=>S2LV.filter(l=>pageDone(l.id)).length;
-const s2open=i=>i===0||pageDone(S2LV[i-1].id);
+const s2open=i=>i===0||(pageDone(S2LV[i-1].id)&&(i!==6||!!s2().bs.b1));
 const s2stage=()=>{const c=s2cleared();return c>=10?3:c>=5?2:1};
 /* ---- ghost text when the device has no voice ---- */
 function ghostText(t){let g=document.getElementById("ghost");if(!g){g=document.createElement("div");g.id="ghost";g.setAttribute("aria-hidden","true");document.body.appendChild(g)}g.textContent=t;g.classList.add("on");clearTimeout(ghostText.t);ghostText.t=setTimeout(()=>g.classList.remove("on"),9000)}
@@ -1413,13 +1422,15 @@ function s2page(){const s=s2();
  h+=`<section class="world" style="background:${S2K[0].bg}"><h3><span>${S2K[0].e} Knight · ${S2K[0].sub}</span><small>${s2cleared()}/${S2LV.length}</small></h3>`;
  S2ZONE.forEach((Z,zi)=>{h+=`<div class="s2zone"><b>${Z.th}</b><small>${Z.sub}</small></div><div class="path">`;
   S2LV.forEach((l,i)=>{if(l.z!==zi)return;const open=s2open(i),done=pageDone(l.id),stars=S.prog[l.id]?S.prog[l.id].stars||0:0,off=[0,40,60,20,-30,-55][(i)%6];
-   h+=`<div class="nodewrap" style="transform:translateX(${off}px)"><button class="node ${done?"done":open?"open":""}" data-k2="${l.id}" ${open?"":"disabled"} aria-label="${l.t}">${done?"✓":open?"▶":"🔒"}<span class="pg">${i+1}</span>${done?`<span class="st">${"⭐".repeat(stars)}</span>`:""}</button><div class="lbl">${l.t}</div></div>`});
+   h+=`<div class="nodewrap" style="transform:translateX(${off}px)"><button class="node ${done?"done":open?"open":""}" data-k2="${l.id}" ${open?"":"disabled"} aria-label="${l.t}">${done?"✓":open?"▶":"🔒"}<span class="pg">${i+1}</span>${done?`<span class="st">${"⭐".repeat(stars)}</span>`:""}</button><div class="lbl">${l.t}</div></div>`
+   const ck=Object.keys(S2CHEST).find(c=>S2CHEST[c]===l.id);if(ck&&done)h+=`<div class="nodewrap" style="transform:translateX(${-off+30}px)"><button class="s2chest ${s.ch[ck]?"done":""}" data-ch="${ck}" aria-label="หีบสมบัติ">${s.ch[ck]?"📭":"🎁"}</button></div>`;
+   const bk=Object.keys(S2BOSS).find(c=>S2BOSS[c].after===l.id);if(bk){const B=S2BOSS[bk],bo=done;h+=`<div class="nodewrap"><button class="node boss ${s.bs[bk]?"done":bo?"open":""}" data-bs="${bk}" ${bo?"":"disabled"} aria-label="บอส ${B.n}">${s.bs[bk]?"🏆":B.e}</button><div class="lbl">บอส: ${B.n}</div></div>`}});
   h+=`</div>`});
  h+=`</section>`;
  [S2K[1],S2K[2]].forEach(k=>{h+=`<section class="s2fog" style="--kc:${k.c}"><div class="fogic">${k.e}</div><div><b>${k.th} · ${k.nm}</b><div class="note">${k.sub} · ซ่อนอยู่ในหมอกของจอมโกลาหล</div><div class="note">เปิดในอัปเดตถัดไป · ${k.leg}รออยู่</div></div></section>`});
  app.innerHTML=`<div class="wrap">${h}</div>`;
  app.querySelectorAll("[data-k2]").forEach(b=>b.onclick=()=>startLesson(b.dataset.k2));
- $("#s2craft").onclick=s2craft;
+ $("#s2craft").onclick=s2craft;app.querySelectorAll("[data-bs]").forEach(b=>b.onclick=()=>s2bStart(b.dataset.bs));app.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>s2chest(b.dataset.ch));
  const cur=app.querySelector(".node.open");if(cur){const go=()=>{if(TAB==="s2"&&document.body.contains(cur)&&!document.querySelector(".lesson"))cur.scrollIntoView({block:"center"})};setTimeout(go,30);setTimeout(go,350)}}
 function s1done(){return [0,1,2,3,4,5,6,7].every(w=>S.boss[w])}
 function s2locked(){const fin=s1done();
@@ -1455,6 +1466,54 @@ function s2Finish(stars){S.daily.les=1;const p=L.p,pr=S.prog[p]||{},was=pr.done,
  const home=S2KB[s.home]||S2K[0],st=s2stage();
  const m=modal(`<div style="text-align:center"><div style="font-size:60px">${grew?home.pet[0]:"🏆"}</div><h2>${grew?`${home.pet[st]} โตขึ้นแล้ว!`:"ผ่านด่านแล้ว!"}</h2><p>ได้ ${BLK.wood[0]} ไม้ ×${gainW}${gainS?` · ${BLK.stone[0]} หิน ×${gainS}`:""}${bulb?" · 💡 +1":""}</p><button class="go" id="rok">เยี่ยม!</button><button class="go ghost sm" id="rcr">🔨 ไปโต๊ะคราฟต์</button></div>`,"stay");
  m.querySelector("#rok").onclick=()=>m.remove();m.querySelector("#rcr").onclick=()=>{m.remove();s2craft()};confetti(90)}
+
+/* ===== Season 2 boss battle (turn-based, FF / Pokemon style) ===== */
+let S2B=null;
+const S2BOSS={
+ b1:{n:"อัศวินหมอกดำ",e:"👺",hp:90,atk:9,pool:[1,2,3,4,5,6],after:"k6",rew:{wood:6,stone:3},c:"#E04B3A",say:"อัศวินหมอกดำขวางทางอยู่ เอาชนะมันให้ได้!"},
+ b2:{n:"มังกรหมอกเงา",e:"🐲",hp:115,atk:10,pool:[7,8,9,10,11,12,13,14],after:"k14",rew:{wood:8,stone:6},c:"#7A4BE0",say:"มังกรหมอกเงาของจอมโกลาหลปรากฏตัวแล้ว!"}};
+function s2bPlayer(){const s=s2();let bonus=(s2stage()-1)*2,def=0;if(s.eq.w==="sword")bonus+=4;if(s.eq.w==="bow")bonus+=3;if(s.eq.s)def+=2;if(s.eq.h)def+=1;return{bonus,def}}
+function s2bStage(compact){const b=S2B,home=S2KB[s2().home]||S2K[0],st=s2stage();
+ return `<div class="s2stage ${compact?"cp":""}" id="s2stage" style="--bc:${b.B.c}"><div class="en"><div class="hpb"><b>${b.B.n}</b><div class="bar"><i style="width:${b.hp/b.max*100}%"></i></div><small>${b.hp}/${b.max}</small></div><div class="sp" id="s2e">${b.B.e}</div></div>
+ <div class="al"><div class="ally">${s2hero(compact?60:80)}<span class="pt" id="s2p" style="font-size:${compact?26:34}px">${home.pet[0]}</span></div><div class="hpb me"><b>${esc(S.name)}</b><div class="bar"><i style="width:${b.me/b.mmax*100}%"></i></div><small>${b.me}/${b.mmax}${b.guard?" · 🛡️":""}</small></div></div></div>`}
+function s2bStart(id){const B=S2BOSS[id],pl=s2bPlayer();
+ const pool=B.pool.flatMap(g=>G2[g]().filter(x=>x.k==="mc"||x.k==="num"));
+ S2B={id,B,hp:B.hp,max:B.hp,me:100,mmax:100,guard:0,streak:0,pool,pl,log:"",mode:"atk"};
+ L={p:"s2boss"+id,qs:[],i:0,res:[],phase:"run",queue:[],key:false,earned:0,first:false,pos:0};
+ openLesson();SND.roar();s2bMenu(B.say)}
+function s2bMenu(msg){const b=S2B;if(msg!==undefined)b.log=msg;
+ $("#lp").style.width=(100-b.hp/b.max*100)+"%";
+ $("#lb").innerHTML=s2bStage()+`<div class="s2log">${esc(b.log||"จะทำอะไรดี?")}</div><div class="s2cmd"><button data-c="atk">⚔️<span>โจมตี</span></button><button data-c="grd">🛡️<span>ตั้งรับ</span></button><button data-c="pot" ${S.bulbs>0&&b.me<b.mmax?"":"disabled"}>🧪<span>ฟื้นพลัง 💡1</span></button><button data-c="run">🏃<span>ถอย</span></button></div><p class="note" style="text-align:center">โจมตี = ตอบโจทย์ ถูกเพื่อทำดาเมจ · ตั้งรับ = ตอบถูกเพื่อกันการโจมตีรอบหน้า</p>`;
+ setFootEmpty();const f=$("#lf");f.className="foot";
+ $("#lb").querySelectorAll("[data-c]").forEach(x=>x.onclick=()=>{SND.tap();const c=x.dataset.c;
+  if(c==="run"){if(confirm("ถอยจากการต่อสู้? ต้องเริ่มสู้ใหม่นะ"))closeLesson();return}
+  if(c==="pot"){S.bulbs--;b.me=Math.min(b.mmax,b.me+30);save();SND.gem();const d=boss_attack(b,false);b.log=`🧪 ฟื้นพลัง +30 · ${d}`;if(b.me<=0)return s2bLose();s2bMenu();return}
+  b.mode=c;const q=pick(b.pool);L.qs.push(q);L.queue=[L.qs.length-1];L.pos=0;showQ();const t=$("#tskip");if(t)t.remove();
+  const d=document.createElement("div");d.innerHTML=s2bStage(true);$("#lb").prepend(d.firstChild)})}
+function boss_attack(b,wrong){const rage=b.hp<=b.max*.4;let d=Math.max(2,(rage?b.B.atk+4:b.B.atk)-b.pl.def);if(wrong)d+=8;
+ if(b.guard){b.guard=0;return "🛡️ กันการโจมตีของบอสได้!"}
+ b.me=Math.max(0,b.me-d);SND.roar();return `${b.B.e} ${rage?"บ้าคลั่ง! ":""}โจมตี -${d}`}
+function s2bHit(ok){const b=S2B,fx=$("#s2e"),ps=$("#s2p");let log="";
+ if(b.mode==="atk"){if(ok){b.streak++;let d=12+b.pl.bonus+rnd(0,4);const crit=b.streak%3===0;if(crit)d=Math.round(d*1.5);b.hp=Math.max(0,b.hp-d);log=`⚔️ โจมตีโดน -${d}${crit?" · สัตว์คู่ใจช่วยโจมตี! 💥":""}`;SND.fire();setTimeout(SND.hit,250);if(fx)fx.classList.add("hit");if(crit&&ps)ps.classList.add("lunge")}else{b.streak=0;log="❌ พลาด!"}}
+ else{if(ok){b.guard=1;const h=Math.min(8,b.mmax-b.me);b.me+=h;log=`🛡️ ตั้งรับสำเร็จ${h?` · ฟื้น +${h}`:""}`;SND.gem()}else{b.streak=0;log="❌ ตั้งรับไม่ทัน"}}
+ if(b.hp>0)log+=" · "+boss_attack(b,b.mode==="atk"&&!ok);
+ b.log=log;const st=$("#s2stage");if(st){const d=document.createElement("div");d.innerHTML=s2bStage(true);setTimeout(()=>{st.outerHTML=d.firstChild.outerHTML},350)}
+ const f=$("#lf");f.className="foot "+(ok?"good":"bad");f.firstChild.innerHTML=`<div class="fb">${esc(log)}</div><button class="go ${ok?"teal":"fire"}" id="nx">ต่อไป</button>`;
+ $("#nx").onclick=()=>{if(b.hp<=0)s2bWin();else if(b.me<=0)s2bLose();else s2bMenu()};$("#nx").focus()}
+function s2bWin(){const b=S2B,s=s2(),first=!s.bs[b.id];s.bs[b.id]=1;const r=b.B.rew,g={};
+ Object.keys(r).forEach(k=>{g[k]=first?r[k]:Math.ceil(r[k]/3);s.blk[k]=(s.blk[k]||0)+g[k]});S.coins+=first?40:10;if(first)S.gems+=1;save();SND.win();confetti(120);
+ $("#lp").style.width="100%";$("#lb").innerHTML=`<div class="sum"><div class="big">🏆</div><h2>ชนะ ${b.B.n}!</h2><p>${Object.keys(g).map(k=>`${BLK[k][0]} ×${g[k]}`).join(" · ")} · 💰${first?40:10}${first?" · 💎 +1":""}</p>${first&&b.id==="b1"?`<p class="note">สะพานปริศนาเปิดแล้ว!</p>`:""}${first&&b.id==="b2"?`<p class="note">Knight ปลอดหมอกแล้ว! เมือง Thief กับ Gaul รออยู่ในอัปเดตถัดไป</p>`:""}<button class="go teal" id="out">กลับแผนที่</button></div>`;setFootEmpty();$("#out").onclick=()=>{S2B=null;closeLesson()}}
+function s2bLose(){const b=S2B,s2s=s2();s2s.blk.wood=(s2s.blk.wood||0)+1;save();
+ $("#lb").innerHTML=`<div class="sum"><div class="big">😵</div><h2>พ่ายแพ้ ${b.B.n}</h2><p>ได้ 🪵 ×1 เป็นกำลังใจ ลองคราฟต์ดาบหรือโล่ไม้ให้แข็งแกร่งขึ้น แล้วกลับมาสู้ใหม่</p><button class="go fire" id="again">⚔️ สู้อีกครั้ง</button><button class="go ghost" id="out">กลับแผนที่</button></div>`;setFootEmpty();
+ const id=b.id;$("#again").onclick=()=>{$(".lesson").remove();S2B=null;s2bStart(id)};$("#out").onclick=()=>{S2B=null;closeLesson()}}
+/* ===== treasure chests on the map ===== */
+const S2CHEST={c1:"k2",c2:"k5",c3:"k9",c4:"k12"};
+function s2chest(id){const s=s2();if(s.ch[id])return toast("เปิดหีบนี้ไปแล้ว");const zone=S2LV.find(l=>l.id===S2CHEST[id]).z;
+ const a=rnd(12,45),b=rnd(6,30),ans=a+b,opts=shuf([ans,...uniqN(3,ans-6,ans+6,ans)]);
+ const m=modal(`<div style="text-align:center"><div style="font-size:60px">🎁</div><h2>พบหีบสมบัติ!</h2><p>ตอบให้ถูกเพื่อเปิดหีบ</p><b style="font-size:28px">${a} + ${b} = ?</b><div class="opts c2" style="margin-top:10px">${opts.map(o=>`<button class="opt big" data-v="${o}">${o}</button>`).join("")}</div></div>`);
+ say(`พบหีบสมบัติ ${a} บวก ${b} เท่ากับเท่าไร`,"th");
+ m.querySelectorAll("[data-v]").forEach(x=>x.onclick=()=>{if(+x.dataset.v===ans){s.ch[id]=1;const w=rnd(2,4),st=zone>=1?rnd(1,2):0,bl=Math.random()<.3?1:0;s.blk.wood=(s.blk.wood||0)+w;if(st)s.blk.stone=(s.blk.stone||0)+st;if(bl)S.bulbs++;save();SND.gem();confetti(60);
+   m.querySelector(".sheet").innerHTML=`<div style="text-align:center"><div style="font-size:60px">✨</div><h2>เปิดหีบได้แล้ว!</h2><p>🪵 ×${w}${st?` · 🪨 ×${st}`:""}${bl?" · 💡 +1":""}</p><button class="go" id="cok">เยี่ยม!</button></div>`;m.querySelector("#cok").onclick=()=>{m.remove();route()}}else{SND.no();x.disabled=true;x.classList.add("bad");toast("ยังไม่ถูก ลองอีกครั้ง")}})}
 
 /* ===== online save: player name + PIN, stored in Firebase Firestore (REST) ===== */
 const OL_APP="rainbow-dragon",OL_KEY=OL_APP+"-session",OL_CFG=window.FB_CONFIG||{};
@@ -1559,7 +1618,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795194405";let OL_VCHK=0;
+const OL_VER="1795194850";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
