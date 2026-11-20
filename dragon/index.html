@@ -269,6 +269,8 @@ textarea{width:100%;border-radius:12px;border:2px solid var(--line);background:v
 .s2log{margin:10px 0;padding:10px 12px;border-radius:14px;background:var(--card2);border:1px solid var(--line);min-height:44px;font-size:16px}
 .s2cmd{display:grid;grid-template-columns:1fr 1fr;gap:10px}.s2cmd button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--card2);color:var(--ink);font-size:30px;min-height:76px}.s2cmd button span{font-size:15px;font-weight:600}.s2cmd button:disabled{opacity:.4}
 .s2chest{background:none;border:0;font-size:34px;animation:bob 2s ease-in-out infinite;filter:drop-shadow(0 0 10px #ffd23d)}.s2chest.done{animation:none;filter:grayscale(.8);opacity:.6}
+
+.s2tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.s2tabs button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:8px 4px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--soft);font-size:12px}.s2tabs button span{font-size:26px}.s2tabs button b{font-size:15px;color:var(--ink)}.s2tabs button.on{border-color:var(--kc);background:var(--card2)}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -906,7 +908,7 @@ function ansText(q){const a=q.a;switch(q.k){
  case"ord":return q.it.map(optHTML).join(" → ");case"sort":return q.bins.map((b,bi)=>`<u>${esc(b)}</u>: ${q.it.filter(x=>x[1]===bi).map(x=>optHTML(x[0])).join(", ")}`).join("<br>");
  case"spell":return esc(q.w.join(" "));case"trace":return esc(q.t)}}
 function keyHTML(qs){return `<h3 style="margin-top:18px;text-align:left">📖 เฉลย</h3><ul class="key" style="padding:0">${qs.map((q,i)=>`<li>${i+1}. ${q.ul?ulText(q):esc(q.q||"ลากเส้นตามประโยค")} ${q.im?`<img src="${IMG[q.im]}" alt="">`:""}<br>ตอบ: <b>${ansText(q)}</b></li>`).join("")}</ul>`}
-function finishLesson(stars){if(typeof L.p==="string"&&L.p[0]==="k")return s2Finish(stars);S.daily.les=1;const p=L.p,pr=S.prog[p]||{},wasDone=pr.done,firstPerfect=L.qs.every((_,i)=>L.res[i]&&L.res[i].first);
+function finishLesson(stars){if(typeof L.p==="string"&&PAGES[L.p]&&PAGES[L.p].s2)return s2Finish(stars);S.daily.les=1;const p=L.p,pr=S.prog[p]||{},wasDone=pr.done,firstPerfect=L.qs.every((_,i)=>L.res[i]&&L.res[i].first);
  S.prog[p]={done:1,stars:Math.max(pr.stars||0,stars)};let gem=0,grown=null,bulb=0;
  if(!wasDone){S.bulbs++;bulb=1;const di=curDragon();if(di<7){const C=COLORS[di],before=S.dxp[C.id]||0;S.dxp[C.id]=before+1;if(stageOf(before)!==stageOf(before+1))grown={di,st:stageOf(before+1)};else grown={di,st:-1}}}
  if(firstPerfect&&!pr.perfect){gem=1;S.gems++;S.prog[p].perfect=1}
@@ -1367,8 +1369,8 @@ const S2K=[
  {id:"g",th:"Gaul",nm:"เมืองทะเลทราย",e:"🏜️",c:"#E6A92E",leg:"ช้างเผือก",sub:"สังคมศึกษา",pet:["🐘","ช้างน้อย","ช้างงา","ช้างเผือก"],bg:"linear-gradient(160deg,#4a3a10,#1a1430)"}];
 const S2KB=Object.fromEntries(S2K.map(k=>[k.id,k]));
 const s2=()=>{S.s2=S.s2||{};const s=S.s2;s.blk=s.blk||{};s.gear=s.gear||{};s.eq=s.eq||{};s.pets=s.pets||[];s.bs=s.bs||{};s.ch=s.ch||{};return s};
-const BLK={wood:["🪵","ไม้"],stone:["🪨","หิน"]};
-const GEAR=[{id:"sword",e:"🗡️",th:"ดาบไม้",c:{wood:3},slot:"w"},{id:"shield",e:"🛡️",th:"โล่ไม้",c:{wood:4},slot:"s"},{id:"bow",e:"🏹",th:"ธนูไม้",c:{wood:3},slot:"w"},{id:"helm",e:"🪖",th:"หมวกไม้",c:{wood:5},slot:"h"},{id:"flag",e:"🚩",th:"ธงอัศวิน",c:{wood:2},slot:"f"}];
+const BLK={wood:["🪵","ไม้"],stone:["🪨","หิน"],pearl:["🦪","ไข่มุก"],sand:["🏜️","ทราย"]};
+const GEAR=[{id:"sword",e:"🗡️",th:"ดาบไม้",c:{wood:3},slot:"w",atk:4},{id:"shield",e:"🛡️",th:"โล่ไม้",c:{wood:4},slot:"s",def:2},{id:"bow",e:"🏹",th:"ธนูไม้",c:{wood:3},slot:"w",atk:3},{id:"helm",e:"🪖",th:"หมวกไม้",c:{wood:5},slot:"h",def:1},{id:"flag",e:"🚩",th:"ธงอัศวิน",c:{wood:2},slot:"f"},{id:"staff",e:"🪄",th:"ไม้เท้าไข่มุก",c:{wood:2,pearl:3},slot:"w",atk:6},{id:"dshield",e:"🪞",th:"โล่ทราย",c:{wood:2,sand:3},slot:"s",def:4}];
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const uniqN=(n,a,b,not)=>{const s=new Set(),lim=b-a;while(s.size<Math.min(n,lim))s.add(rnd(a,b));s.delete(not);let g=0;while(s.size<n&&g++<50){const v=rnd(a,b);if(v!==not)s.add(v)}return [...s].slice(0,n)};
 const mcn=(q,a,x)=>{const o=shuf([a,...uniqN(3,Math.max(0,a-5),a+5,a)]);return MC(q,o.map(String),o.indexOf(a),null,Object.assign({big:1},x||{}))};
@@ -1400,11 +1402,14 @@ const S2LV=[
  {id:"k1",t:"ค่ายนับทหาร",z:0,g:1},{id:"k2",t:"หอคอยเลข 100",z:0,g:2},{id:"k3",t:"หลักและค่า",z:0,g:3},{id:"k4",t:"สนามมากน้อย",z:0,g:4},{id:"k5",t:"แถวทัพเรียงกัน",z:0,g:5},{id:"k6",t:"นับข้ามก้าว",z:0,g:6},
  {id:"k7",t:"สะพานบวกเลข",z:1,g:7},{id:"k8",t:"สะพานบวกสองหลัก",z:1,g:8},{id:"k9",t:"ประตูลบเลข",z:1,g:9},{id:"k10",t:"ประตูลบสองหลัก",z:1,g:10},
  {id:"k11",t:"ปริศนาเลขหาย",z:1,g:11},{id:"k12",t:"ตลาดโจทย์บวก",z:1,g:12},{id:"k13",t:"ตลาดโจทย์ลบ",z:1,g:13},{id:"k14",t:"ด่านรวมพลอัศวิน",z:1,g:14}];
-const S2ZONE=[{th:"เมืองตัวเลข",sub:"จำนวน หลัก ค่า เปรียบเทียบ"},{th:"สะพานปริศนา",sub:"บวก ลบ ตัวไม่ทราบค่า โจทย์ปัญหา"}];
-S2LV.forEach(l=>{PAGES[l.id]={t:l.t};Object.defineProperty(PAGES[l.id],"qs",{get:()=>G2[l.g](),enumerable:true})});
+const S2ZONE={k:[{th:"เมืองตัวเลข",sub:"จำนวน หลัก ค่า เปรียบเทียบ"},{th:"สะพานปริศนา",sub:"บวก ลบ ตัวไม่ทราบค่า โจทย์ปัญหา"}],t:[{th:"ห้องแล็บและป่าใหญ่",sub:"นักสำรวจ ร่างกาย พืช สัตว์ ที่อยู่อาศัย"},{th:"โรงงานและฐานหุ่นยนต์",sub:"วัสดุ เสียง ท้องฟ้า และคำสั่งโค้ด"}],g:[{th:"ลานคุณธรรม",sub:"ศีลธรรม หน้าที่ ความเป็นไทย"},{th:"ตลาดและแผนที่ทะเลทราย",sub:"เงิน เวลา ทิศ ชุมชน"}]};
+S2LV.forEach(l=>l.k="k");const GEN={};S2LV.forEach(l=>GEN[l.id]=G2[l.g]);
+S2LV.find(l=>l.id==="k7").gate="b1";
+function regPage(l){PAGES[l.id]={t:l.t,s2:1};Object.defineProperty(PAGES[l.id],"qs",{get:()=>GEN[l.id](),enumerable:true})}
+S2LV.forEach(regPage);
 const s2cleared=()=>S2LV.filter(l=>pageDone(l.id)).length;
-const s2open=i=>i===0||(pageDone(S2LV[i-1].id)&&(i!==6||!!s2().bs.b1));
-const s2stage=()=>{const c=s2cleared();return c>=10?3:c>=5?2:1};
+const s2open=l=>{const A=S2LV.filter(x=>x.k===l.k),ix=A.indexOf(l);return ix<=0||(pageDone(A[ix-1].id)&&(!l.gate||!!s2().bs[l.gate]))};
+const s2stage=()=>{const c=s2cleared();return c>=20?3:c>=10?2:1};
 /* ---- ghost text when the device has no voice ---- */
 function ghostText(t){let g=document.getElementById("ghost");if(!g){g=document.createElement("div");g.id="ghost";g.setAttribute("aria-hidden","true");document.body.appendChild(g)}g.textContent=t;g.classList.add("on");clearTimeout(ghostText.t);ghostText.t=setTimeout(()=>g.classList.remove("on"),9000)}
 /* ---- hero avatar ---- */
@@ -1414,24 +1419,28 @@ function s2blocks(){const b=s2().blk;return Object.keys(BLK).map(k=>`<span class
 /* ---- main page ---- */
 function s2page(){const s=s2();
  if(!s.on)return s2locked();
- const home=S2KB[s.home]||S2K[0],P=home.pet,st=s2stage();
+ const home=S2KB[s.home]||S2K[0],P=home.pet,st=s2stage(),vk=S2KB[S2VIEW]||home;
  let h=`<div class="s2top"><div><h2>⚔️ Season 2</h2><small>The Three Chaos Kingdoms</small></div><div>${s2blocks()}</div></div>
  <div class="card s2me">${s2hero(104)}<div style="flex:1;min-width:0"><b>${esc(S.name)}</b> <small class="note">นักผจญภัยแห่ง ${home.th}</small>
-  <div class="s2pet"><span class="pe" style="font-size:${28+st*8}px">${P[0]}</span><div><b>${P[st]}</b><div class="note">สัตว์คู่ใจ · ร่างที่ ${st}/3</div></div></div>
-  <div class="row2"><button class="go ghost sm" id="s2craft">🔨 โต๊ะคราฟต์</button></div></div></div>`;
- h+=`<section class="world" style="background:${S2K[0].bg}"><h3><span>${S2K[0].e} Knight · ${S2K[0].sub}</span><small>${s2cleared()}/${S2LV.length}</small></h3>`;
- S2ZONE.forEach((Z,zi)=>{h+=`<div class="s2zone"><b>${Z.th}</b><small>${Z.sub}</small></div><div class="path">`;
-  S2LV.forEach((l,i)=>{if(l.z!==zi)return;const open=s2open(i),done=pageDone(l.id),stars=S.prog[l.id]?S.prog[l.id].stars||0:0,off=[0,40,60,20,-30,-55][(i)%6];
-   h+=`<div class="nodewrap" style="transform:translateX(${off}px)"><button class="node ${done?"done":open?"open":""}" data-k2="${l.id}" ${open?"":"disabled"} aria-label="${l.t}">${done?"✓":open?"▶":"🔒"}<span class="pg">${i+1}</span>${done?`<span class="st">${"⭐".repeat(stars)}</span>`:""}</button><div class="lbl">${l.t}</div></div>`
+  <div class="s2pet"><span class="pe" style="font-size:${28+st*8}px">${P[0]}</span><div><b>${P[st]}</b><div class="note">สัตว์คู่ใจ · ร่างที่ ${st}/3 · ผ่านแล้ว ${s2cleared()} ด่าน</div></div></div>
+  <div class="note">${s.pets.map(id=>S2KB[id]?S2KB[id].pet[0]:"").join(" ")}</div>
+  <div class="row2"><button class="go ghost sm" id="s2craft">🔨 โต๊ะคราฟต์</button></div></div></div>
+ <div class="s2tabs">${S2K.map(k=>`<button class="${k.id===vk.id?"on":""}" data-vk="${k.id}" style="--kc:${k.c}"><span>${k.e}</span><b>${k.th}</b><small>${k.sub.replace("วิทยาศาสตร์และเทคโนโลยี","วิทย์/เทคโน")}</small></button>`).join("")}</div>`;
+ const lv=S2LV.filter(l=>l.k===vk.id),zones=S2ZONE[vk.id],cl=lv.filter(l=>pageDone(l.id)).length;
+ h+=`<section class="world" style="background:${vk.bg}"><h3><span>${vk.e} ${vk.th} · ${vk.nm}</span><small>${cl}/${lv.length}</small></h3>`;
+ zones.forEach((Z,zi)=>{h+=`<div class="s2zone"><b>${Z.th}</b><small>${Z.sub}</small></div><div class="path">`;
+  lv.forEach((l,i)=>{if(l.z!==zi)return;const open=s2open(l),done=pageDone(l.id),stars=S.prog[l.id]?S.prog[l.id].stars||0:0,off=[0,40,60,20,-30,-55][i%6];
+   h+=`<div class="nodewrap" style="transform:translateX(${off}px)"><button class="node ${done?"done":open?"open":""}" data-k2="${l.id}" ${open?"":"disabled"} aria-label="${l.t}">${done?"✓":open?"▶":"🔒"}<span class="pg">${i+1}</span>${done?`<span class="st">${"⭐".repeat(stars)}</span>`:""}</button><div class="lbl">${l.t}</div></div>`;
    const ck=Object.keys(S2CHEST).find(c=>S2CHEST[c]===l.id);if(ck&&done)h+=`<div class="nodewrap" style="transform:translateX(${-off+30}px)"><button class="s2chest ${s.ch[ck]?"done":""}" data-ch="${ck}" aria-label="หีบสมบัติ">${s.ch[ck]?"📭":"🎁"}</button></div>`;
-   const bk=Object.keys(S2BOSS).find(c=>S2BOSS[c].after===l.id);if(bk){const B=S2BOSS[bk],bo=done;h+=`<div class="nodewrap"><button class="node boss ${s.bs[bk]?"done":bo?"open":""}" data-bs="${bk}" ${bo?"":"disabled"} aria-label="บอส ${B.n}">${s.bs[bk]?"🏆":B.e}</button><div class="lbl">บอส: ${B.n}</div></div>`}});
+   const bk=Object.keys(S2BOSS).find(c=>S2BOSS[c].after===l.id);if(bk){const B=S2BOSS[bk];h+=`<div class="nodewrap"><button class="node boss ${s.bs[bk]?"done":done?"open":""}" data-bs="${bk}" ${done?"":"disabled"} aria-label="บอส ${B.n}">${s.bs[bk]?"🏆":B.e}</button><div class="lbl">บอส: ${B.n}</div></div>`}});
   h+=`</div>`});
  h+=`</section>`;
- [S2K[1],S2K[2]].forEach(k=>{h+=`<section class="s2fog" style="--kc:${k.c}"><div class="fogic">${k.e}</div><div><b>${k.th} · ${k.nm}</b><div class="note">${k.sub} · ซ่อนอยู่ในหมอกของจอมโกลาหล</div><div class="note">เปิดในอัปเดตถัดไป · ${k.leg}รออยู่</div></div></section>`});
  app.innerHTML=`<div class="wrap">${h}</div>`;
+ app.querySelectorAll("[data-vk]").forEach(b=>b.onclick=()=>{SND.tap();S2VIEW=b.dataset.vk;s2page()});
  app.querySelectorAll("[data-k2]").forEach(b=>b.onclick=()=>startLesson(b.dataset.k2));
  $("#s2craft").onclick=s2craft;app.querySelectorAll("[data-bs]").forEach(b=>b.onclick=()=>s2bStart(b.dataset.bs));app.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>s2chest(b.dataset.ch));
  const cur=app.querySelector(".node.open");if(cur){const go=()=>{if(TAB==="s2"&&document.body.contains(cur)&&!document.querySelector(".lesson"))cur.scrollIntoView({block:"center"})};setTimeout(go,30);setTimeout(go,350)}}
+let S2VIEW="";
 function s1done(){return [0,1,2,3,4,5,6,7].every(w=>S.boss[w])}
 function s2locked(){const fin=s1done();
  app.innerHTML=`<div class="wrap"><div class="s2lock"><img src="s2/banner.jpg" alt="The Three Chaos Kingdoms"><h2>Season 2 · The Three Chaos Kingdoms</h2>
@@ -1460,24 +1469,23 @@ function s2craft(){const s=s2();
  const m=modal("<div></div>");draw()}
 /* ---- finish a Season 2 lesson ---- */
 function s2Finish(stars){S.daily.les=1;const p=L.p,pr=S.prog[p]||{},was=pr.done,s=s2(),lv=S2LV.find(l=>l.id===p);
- S.prog[p]={done:1,stars:Math.max(pr.stars||0,stars)};const gainW=was?1:2+stars,gainS=was?0:(lv.z>=1?stars:0);s.blk.wood=(s.blk.wood||0)+gainW;if(gainS)s.blk.stone=(s.blk.stone||0)+gainS;
- let bulb=0;if(!was){S.bulbs++;bulb=1}const before=!was?s2cleared()-1:-1,grew=!was&&(s2cleared()===5||s2cleared()===10);
+ S.prog[p]={done:1,stars:Math.max(pr.stars||0,stars)};const gainW=was?1:2+stars,sp=lv.k==="t"?"pearl":lv.k==="g"?"sand":"stone",gainS=was?0:(lv.k==="k"?(lv.z>=1?stars:0):stars);s.blk.wood=(s.blk.wood||0)+gainW;if(gainS)s.blk[sp]=(s.blk[sp]||0)+gainS;
+ let bulb=0;if(!was){S.bulbs++;bulb=1}const grew=!was&&(s2cleared()===5||s2cleared()===10||s2cleared()===20);
  save();const el=$(".lesson");if(el)el.remove();L=null;route();
  const home=S2KB[s.home]||S2K[0],st=s2stage();
- const m=modal(`<div style="text-align:center"><div style="font-size:60px">${grew?home.pet[0]:"🏆"}</div><h2>${grew?`${home.pet[st]} โตขึ้นแล้ว!`:"ผ่านด่านแล้ว!"}</h2><p>ได้ ${BLK.wood[0]} ไม้ ×${gainW}${gainS?` · ${BLK.stone[0]} หิน ×${gainS}`:""}${bulb?" · 💡 +1":""}</p><button class="go" id="rok">เยี่ยม!</button><button class="go ghost sm" id="rcr">🔨 ไปโต๊ะคราฟต์</button></div>`,"stay");
+ const m=modal(`<div style="text-align:center"><div style="font-size:60px">${grew?home.pet[0]:"🏆"}</div><h2>${grew?`${home.pet[st]} โตขึ้นแล้ว!`:"ผ่านด่านแล้ว!"}</h2><p>ได้ ${BLK.wood[0]} ไม้ ×${gainW}${gainS?` · ${BLK[sp][0]} ${BLK[sp][1]} ×${gainS}`:""}${bulb?" · 💡 +1":""}</p><button class="go" id="rok">เยี่ยม!</button><button class="go ghost sm" id="rcr">🔨 ไปโต๊ะคราฟต์</button></div>`,"stay");
  m.querySelector("#rok").onclick=()=>m.remove();m.querySelector("#rcr").onclick=()=>{m.remove();s2craft()};confetti(90)}
-
 /* ===== Season 2 boss battle (turn-based, FF / Pokemon style) ===== */
 let S2B=null;
 const S2BOSS={
- b1:{n:"อัศวินหมอกดำ",e:"👺",hp:90,atk:9,pool:[1,2,3,4,5,6],after:"k6",rew:{wood:6,stone:3},c:"#E04B3A",say:"อัศวินหมอกดำขวางทางอยู่ เอาชนะมันให้ได้!"},
- b2:{n:"มังกรหมอกเงา",e:"🐲",hp:115,atk:10,pool:[7,8,9,10,11,12,13,14],after:"k14",rew:{wood:8,stone:6},c:"#7A4BE0",say:"มังกรหมอกเงาของจอมโกลาหลปรากฏตัวแล้ว!"}};
-function s2bPlayer(){const s=s2();let bonus=(s2stage()-1)*2,def=0;if(s.eq.w==="sword")bonus+=4;if(s.eq.w==="bow")bonus+=3;if(s.eq.s)def+=2;if(s.eq.h)def+=1;return{bonus,def}}
+ b1:{n:"อัศวินหมอกดำ",e:"👺",hp:90,atk:9,pool:["k1","k2","k3","k4","k5","k6"],after:"k6",k:"k",rew:{wood:6,stone:3},c:"#E04B3A",say:"อัศวินหมอกดำขวางทางอยู่ เอาชนะมันให้ได้!"},
+ b2:{n:"มังกรหมอกเงา",e:"🐲",hp:115,atk:10,pool:["k7","k8","k9","k10","k11","k12","k13","k14"],after:"k14",k:"k",rew:{wood:8,stone:6},c:"#7A4BE0",final:1,say:"มังกรหมอกเงาของจอมโกลาหลปรากฏตัวแล้ว!"}};
+function s2bPlayer(){const s=s2();let bonus=(s2stage()-1)*2,def=0;Object.values(s.eq).forEach(id=>{const g=GEAR.find(x=>x.id===id);if(g){bonus+=g.atk||0;def+=g.def||0}});return{bonus,def}}
 function s2bStage(compact){const b=S2B,home=S2KB[s2().home]||S2K[0],st=s2stage();
  return `<div class="s2stage ${compact?"cp":""}" id="s2stage" style="--bc:${b.B.c}"><div class="en"><div class="hpb"><b>${b.B.n}</b><div class="bar"><i style="width:${b.hp/b.max*100}%"></i></div><small>${b.hp}/${b.max}</small></div><div class="sp" id="s2e">${b.B.e}</div></div>
  <div class="al"><div class="ally">${s2hero(compact?60:80)}<span class="pt" id="s2p" style="font-size:${compact?26:34}px">${home.pet[0]}</span></div><div class="hpb me"><b>${esc(S.name)}</b><div class="bar"><i style="width:${b.me/b.mmax*100}%"></i></div><small>${b.me}/${b.mmax}${b.guard?" · 🛡️":""}</small></div></div></div>`}
 function s2bStart(id){const B=S2BOSS[id],pl=s2bPlayer();
- const pool=B.pool.flatMap(g=>G2[g]().filter(x=>x.k==="mc"||x.k==="num"));
+ const pool=B.pool.flatMap(g=>GEN[g]().filter(x=>x.k==="mc"||x.k==="num"));
  S2B={id,B,hp:B.hp,max:B.hp,me:100,mmax:100,guard:0,streak:0,pool,pl,log:"",mode:"atk"};
  L={p:"s2boss"+id,qs:[],i:0,res:[],phase:"run",queue:[],key:false,earned:0,first:false,pos:0};
  openLesson();SND.roar();s2bMenu(B.say)}
@@ -1501,19 +1509,96 @@ function s2bHit(ok){const b=S2B,fx=$("#s2e"),ps=$("#s2p");let log="";
  const f=$("#lf");f.className="foot "+(ok?"good":"bad");f.firstChild.innerHTML=`<div class="fb">${esc(log)}</div><button class="go ${ok?"teal":"fire"}" id="nx">ต่อไป</button>`;
  $("#nx").onclick=()=>{if(b.hp<=0)s2bWin();else if(b.me<=0)s2bLose();else s2bMenu()};$("#nx").focus()}
 function s2bWin(){const b=S2B,s=s2(),first=!s.bs[b.id];s.bs[b.id]=1;const r=b.B.rew,g={};
- Object.keys(r).forEach(k=>{g[k]=first?r[k]:Math.ceil(r[k]/3);s.blk[k]=(s.blk[k]||0)+g[k]});S.coins+=first?40:10;if(first)S.gems+=1;save();SND.win();confetti(120);
- $("#lp").style.width="100%";$("#lb").innerHTML=`<div class="sum"><div class="big">🏆</div><h2>ชนะ ${b.B.n}!</h2><p>${Object.keys(g).map(k=>`${BLK[k][0]} ×${g[k]}`).join(" · ")} · 💰${first?40:10}${first?" · 💎 +1":""}</p>${first&&b.id==="b1"?`<p class="note">สะพานปริศนาเปิดแล้ว!</p>`:""}${first&&b.id==="b2"?`<p class="note">Knight ปลอดหมอกแล้ว! เมือง Thief กับ Gaul รออยู่ในอัปเดตถัดไป</p>`:""}<button class="go teal" id="out">กลับแผนที่</button></div>`;setFootEmpty();$("#out").onclick=()=>{S2B=null;closeLesson()}}
+ Object.keys(r).forEach(k=>{g[k]=first?r[k]:Math.ceil(r[k]/3);s.blk[k]=(s.blk[k]||0)+g[k]});S.coins+=first?40:10;if(first)S.gems+=1;if(first&&b.B.final&&!s.pets.includes(b.B.k))s.pets.push(b.B.k);save();SND.win();confetti(120);
+ $("#lp").style.width="100%";$("#lb").innerHTML=`<div class="sum"><div class="big">🏆</div><h2>ชนะ ${b.B.n}!</h2><p>${Object.keys(g).map(k=>`${BLK[k][0]} ×${g[k]}`).join(" · ")} · 💰${first?40:10}${first?" · 💎 +1":""}</p>${first&&b.id==="b1"?`<p class="note">สะพานปริศนาเปิดแล้ว!</p>`:""}${first&&b.B.final?`<p class="note">ปลอดหมอกแล้ว! ${S2KB[b.B.k].leg} ตื่นขึ้นมาเป็นสัตว์คู่ใจใหม่ของเธอ ${S2KB[b.B.k].pet[0]}</p>`:""}<button class="go teal" id="out">กลับแผนที่</button></div>`;setFootEmpty();$("#out").onclick=()=>{S2B=null;closeLesson()}}
 function s2bLose(){const b=S2B,s2s=s2();s2s.blk.wood=(s2s.blk.wood||0)+1;save();
  $("#lb").innerHTML=`<div class="sum"><div class="big">😵</div><h2>พ่ายแพ้ ${b.B.n}</h2><p>ได้ 🪵 ×1 เป็นกำลังใจ ลองคราฟต์ดาบหรือโล่ไม้ให้แข็งแกร่งขึ้น แล้วกลับมาสู้ใหม่</p><button class="go fire" id="again">⚔️ สู้อีกครั้ง</button><button class="go ghost" id="out">กลับแผนที่</button></div>`;setFootEmpty();
  const id=b.id;$("#again").onclick=()=>{$(".lesson").remove();S2B=null;s2bStart(id)};$("#out").onclick=()=>{S2B=null;closeLesson()}}
 /* ===== treasure chests on the map ===== */
-const S2CHEST={c1:"k2",c2:"k5",c3:"k9",c4:"k12"};
-function s2chest(id){const s=s2();if(s.ch[id])return toast("เปิดหีบนี้ไปแล้ว");const zone=S2LV.find(l=>l.id===S2CHEST[id]).z;
- const a=rnd(12,45),b=rnd(6,30),ans=a+b,opts=shuf([ans,...uniqN(3,ans-6,ans+6,ans)]);
- const m=modal(`<div style="text-align:center"><div style="font-size:60px">🎁</div><h2>พบหีบสมบัติ!</h2><p>ตอบให้ถูกเพื่อเปิดหีบ</p><b style="font-size:28px">${a} + ${b} = ?</b><div class="opts c2" style="margin-top:10px">${opts.map(o=>`<button class="opt big" data-v="${o}">${o}</button>`).join("")}</div></div>`);
- say(`พบหีบสมบัติ ${a} บวก ${b} เท่ากับเท่าไร`,"th");
- m.querySelectorAll("[data-v]").forEach(x=>x.onclick=()=>{if(+x.dataset.v===ans){s.ch[id]=1;const w=rnd(2,4),st=zone>=1?rnd(1,2):0,bl=Math.random()<.3?1:0;s.blk.wood=(s.blk.wood||0)+w;if(st)s.blk.stone=(s.blk.stone||0)+st;if(bl)S.bulbs++;save();SND.gem();confetti(60);
-   m.querySelector(".sheet").innerHTML=`<div style="text-align:center"><div style="font-size:60px">✨</div><h2>เปิดหีบได้แล้ว!</h2><p>🪵 ×${w}${st?` · 🪨 ×${st}`:""}${bl?" · 💡 +1":""}</p><button class="go" id="cok">เยี่ยม!</button></div>`;m.querySelector("#cok").onclick=()=>{m.remove();route()}}else{SND.no();x.disabled=true;x.classList.add("bad");toast("ยังไม่ถูก ลองอีกครั้ง")}})}
+const S2CHEST={c1:"k2",c2:"k5",c3:"k9",c4:"k12",tc1:"t2",tc2:"t6",gc1:"g2",gc2:"g6"};
+function s2chest(id){const s=s2();if(s.ch[id])return toast("เปิดหีบนี้ไปแล้ว");const lvl=S2LV.find(l=>l.id===S2CHEST[id]),zone=lvl.z,kk=lvl.k;
+ let qt,opts,ai;const mcs=GEN[lvl.id]().filter(x=>x.k==="mc"&&x.o.length>=2);
+ if(kk!=="k"&&mcs.length){const q=pick(mcs);qt=q.q;opts=q.o;ai=q.a}else{const a=rnd(12,45),b=rnd(6,30),ans=a+b;opts=shuf([ans,...uniqN(3,ans-6,ans+6,ans)]);ai=opts.indexOf(ans);qt=`${a} + ${b} = ?`;opts=opts.map(String)}
+ const m=modal(`<div style="text-align:center"><div style="font-size:60px">🎁</div><h2>พบหีบสมบัติ!</h2><p>ตอบให้ถูกเพื่อเปิดหีบ</p><b style="font-size:22px">${esc(qt)}</b><div class="opts" style="margin-top:10px">${opts.map((o,i)=>`<button class="opt" data-v="${i}">${esc(o)}</button>`).join("")}</div></div>`);
+ say(qt,"th");
+ m.querySelectorAll("[data-v]").forEach(x=>x.onclick=()=>{if(+x.dataset.v===ai){s.ch[id]=1;const sp=kk==="t"?"pearl":kk==="g"?"sand":"stone",w=rnd(2,4),st=(kk!=="k"||zone>=1)?rnd(1,2):0,bl=Math.random()<.3?1:0;s.blk.wood=(s.blk.wood||0)+w;if(st)s.blk[sp]=(s.blk[sp]||0)+st;if(bl)S.bulbs++;save();SND.gem();confetti(60);
+   m.querySelector(".sheet").innerHTML=`<div style="text-align:center"><div style="font-size:60px">✨</div><h2>เปิดหีบได้แล้ว!</h2><p>🪵 ×${w}${st?` · ${BLK[sp][0]} ×${st}`:""}${bl?" · 💡 +1":""}</p><button class="go" id="cok">เยี่ยม!</button></div>`;m.querySelector("#cok").onclick=()=>{m.remove();route()}}else{SND.no();x.disabled=true;x.classList.add("bad");toast("ยังไม่ถูก ลองอีกครั้ง")}})}
+
+/* ===== Season 2 content: Thief (science + technology) and Gaul (social studies) ===== */
+const FACT=(sec,lines,extra)=>()=>{const items=lines.map(l=>{const [q,a,d]=l.split("|");return{q,a,d:d?d.split(","):[]}});
+ const out=[H(sec)];sample(items,Math.min(10,items.length)).forEach(it=>{const pool=items.filter(x=>x.a!==it.a).map(x=>x.a);
+  const wr=[...shuf(it.d),...shuf(pool)].filter((v,i,a)=>a.indexOf(v)===i&&v!==it.a).slice(0,2),o=shuf([it.a,...wr]);
+  out.push(MC(it.q,o,o.indexOf(it.a),null,{say:it.q}))});
+ if(extra){const e=extra();if(e)out.push(...e)}return out};
+const SORT2=(q,bins,a,b)=>()=>[SO(q,bins,shuf([...sample(a,3).map(x=>[x,0]),...sample(b,3).map(x=>[x,1])]))];
+const ORD=(rows)=>()=>{const r=pick(rows);return [O(r[0],r[1])]};
+/* ---------- Thief ---------- */
+const GT={
+ t1:FACT("ทักษะนักวิทยาศาสตร์",[
+  "เราใช้อวัยวะใดในการมองเห็น|ตา|หู,จมูก","เราใช้อวัยวะใดในการดมกลิ่น|จมูก|ตา,ลิ้น","เราใช้อวัยวะใดในการฟังเสียง|หู|ตา,มือ","เราใช้อวัยวะใดในการรับรส|ลิ้น|จมูก,หู","เราใช้อวัยวะใดในการสัมผัสความร้อนเย็น|ผิวหนัง|ตา,หู",
+  "เครื่องมือใดช่วยให้เห็นของเล็กๆ ชัดขึ้น|แว่นขยาย|ไม้บรรทัด,เทอร์โมมิเตอร์","เครื่องมือใดใช้วัดความยาว|ไม้บรรทัด|เทอร์โมมิเตอร์,เครื่องชั่ง","เครื่องมือใดใช้วัดอุณหภูมิ|เทอร์โมมิเตอร์|ไม้บรรทัด,แว่นขยาย","เครื่องมือใดใช้ชั่งน้ำหนัก|เครื่องชั่ง|ไม้บรรทัด,นาฬิกา","เครื่องมือใดใช้ดูเวลา|นาฬิกา|เครื่องชั่ง,ไม้บรรทัด",
+  "การดูสิ่งต่างๆ อย่างตั้งใจ เรียกว่าอะไร|การสังเกต|การกิน,การนอน","การนำสิ่งของมาแยกเป็นกลุ่ม เรียกว่าอะไร|การจำแนก|การสังเกต,การวัด","ถ้าสงสัยอะไร นักวิทยาศาสตร์ควรทำอย่างไร|ตั้งคำถามและทดลอง|เดาแล้วเลิก,ไม่สนใจ","ก่อนทำการทดลองควรทำสิ่งใด|ใส่ถุงมือและแว่นป้องกัน|วิ่งเล่น,ชิมสารเคมี"]),
+ t2:FACT("ร่างกายมหัศจรรย์",[
+  "อวัยวะใดสูบฉีดเลือดไปทั่วร่างกาย|หัวใจ|ปอด,กระเพาะ","อวัยวะใดช่วยในการหายใจ|ปอด|หัวใจ,ฟัน","อวัยวะใดย่อยอาหาร|กระเพาะอาหาร|ปอด,สมอง","อวัยวะใดสั่งการร่างกายและใช้คิด|สมอง|หัวใจ,ตับ","ฟันมีหน้าที่อะไร|บดเคี้ยวอาหาร|ฟังเสียง,ดมกลิ่น",
+  "กระดูกช่วยทำอะไร|ค้ำจุนร่างกาย|ย่อยอาหาร,สูบฉีดเลือด","เรามีนิ้วมือข้างละกี่นิ้ว|5 นิ้ว|4 นิ้ว,6 นิ้ว","ข้อศอกอยู่ที่แขนหรือขา|แขน|ขา,หัว","หัวเข่าอยู่ที่แขนหรือขา|ขา|แขน,หัว","อาหารชนิดใดช่วยให้กระดูกและฟันแข็งแรง|นม|ลูกอม,น้ำอัดลม",
+  "ควรแปรงฟันวันละกี่ครั้ง|อย่างน้อย 2 ครั้ง|ไม่ต้องแปรง,สัปดาห์ละครั้ง","ก่อนกินอาหารควรทำอะไร|ล้างมือ|วิ่งเล่น,นอน","ผักและผลไม้ช่วยให้ร่างกายเป็นอย่างไร|แข็งแรง|ป่วย,เหนื่อย","การออกกำลังกายช่วยให้ร่างกายเป็นอย่างไร|แข็งแรง|อ่อนแอ,ง่วง"]),
+ t3:FACT("ป่าพืชและสัตว์",[
+  "ส่วนของพืชที่ดูดน้ำจากดินคือส่วนใด|ราก|ใบ,ดอก","ส่วนของพืชที่ทำอาหารโดยใช้แสงแดดคือส่วนใด|ใบ|ราก,ลำต้น","ส่วนของพืชที่ชูใบและดอกให้สูงขึ้นคือส่วนใด|ลำต้น|ราก,ผล","ส่วนของพืชที่เจริญเป็นผลคือส่วนใด|ดอก|ราก,ใบ","เมล็ดงอกเป็นอะไร|ต้นอ่อน|ผล,ราก",
+  "พืชต้องการสิ่งใดเพื่อเจริญเติบโต|น้ำ แสงแดด อากาศ|ขนม,โทรทัศน์","สัตว์ที่มีขนปกคลุมตัวคือ|แมว|ปลา,นก","สัตว์ที่มีขนนกคือ|นก|หมา,งู","สัตว์ที่มีเกล็ดคือ|ปลา|แมว,ไก่","สัตว์ใดกินพืชเป็นอาหาร|วัว|เสือ,สิงโต","สัตว์ใดกินเนื้อเป็นอาหาร|เสือ|วัว,ม้า","สัตว์ใดออกลูกเป็นไข่|ไก่|แมว,หมา","สัตว์ใดออกลูกเป็นตัว|แมว|ไก่,เต่า","สัตว์ใดบินได้|นก|ปลา,วัว"]),
+ t4:FACT("บ้านของสิ่งมีชีวิต",[
+  "ปลาอาศัยอยู่ที่ใด|ในน้ำ|บนต้นไม้,ในถ้ำ","นกส่วนใหญ่ทำรังอยู่ที่ใด|บนต้นไม้|ในน้ำ,ใต้ดิน","ไส้เดือนอาศัยอยู่ที่ใด|ในดิน|บนฟ้า,ในน้ำลึก","ค้างคาวมักอาศัยอยู่ที่ใด|ในถ้ำ|ในทะเล,ในรัง","ปูทะเลอาศัยอยู่ที่ใด|ชายทะเล|ในทะเลทราย,บนยอดเขา",
+  "อูฐอาศัยอยู่ในที่แบบใด|ทะเลทราย|ขั้วโลก,ในน้ำ","หมีขาวอาศัยอยู่ที่ใด|ขั้วโลก|ทะเลทราย,ป่าฝน","สิ่งใดเป็นสิ่งมีชีวิต|ต้นไม้|ก้อนหิน,โต๊ะ","สิ่งใดไม่ใช่สิ่งมีชีวิต|ก้อนหิน|แมว,ดอกไม้","สิ่งมีชีวิตทุกชนิดต้องการสิ่งใด|อาหาร น้ำ อากาศ|โทรศัพท์,ของเล่น","สิ่งมีชีวิตสามารถทำสิ่งใดได้|เจริญเติบโต|เป็นสนิม,แตกร้าว","ที่อยู่อาศัยของสิ่งมีชีวิตให้อะไรแก่สัตว์|อาหารและที่หลบภัย|ขนมและของเล่น,เงินและบัตร"],
+  SORT2("แยกสิ่งมีชีวิต และสิ่งไม่มีชีวิต",["สิ่งมีชีวิต","ไม่มีชีวิต"],["🐟","🌳","🐶","🌻","🐦"],["🪨","🚗","⚽","🪑","📱"])),
+ t5:FACT("โรงงานวัสดุ",[
+  "ช้อนโลหะทำจากวัสดุใด|โลหะ|ผ้า,ไม้","ขวดน้ำพลาสติกทำจากวัสดุใด|พลาสติก|แก้ว,ผ้า","แก้วน้ำใสๆ ที่แตกง่ายทำจากวัสดุใด|แก้ว|ไม้,ผ้า","เสื้อผ้าทำจากวัสดุใด|ผ้า|หิน,โลหะ","โต๊ะไม้ทำจากวัสดุใด|ไม้|แก้ว,กระดาษ",
+  "วัสดุใดมองทะลุได้ (ใส)|แก้ว|ไม้,โลหะ","วัสดุใดนุ่มและยืดหยุ่นได้|ยาง|หิน,เหล็ก","วัสดุใดแข็งมาก|เหล็ก|สำลี,ผ้า","วัสดุใดดูดซับน้ำได้ดี|ผ้าเช็ดตัว|พลาสติก,แก้ว","เรือใบลอยน้ำได้ เพราะวัสดุใดเบากว่าน้ำ|ไม้|เหล็กก้อน,หิน",
+  "ก้อนหินในน้ำจะเป็นอย่างไร|จม|ลอย,ละลาย","ขนนกในน้ำจะเป็นอย่างไร|ลอย|จม,ละลาย","ถุงมือกันความร้อนควรทำจากวัสดุใด|ผ้าหนา|โลหะ,น้ำแข็ง","ร่มกันฝนควรทำจากวัสดุที่|กันน้ำ|ดูดน้ำ,ใส"]),
+ t6:FACT("หุบเขาเสียง",[
+  "เสียงเกิดจากสิ่งใด|การสั่นสะเทือน|การเงียบ,การนอน","เมื่อตีกลอง ผิวกลองจะทำอย่างไร|สั่น|นิ่ง,ละลาย","เสียงกระซิบเป็นเสียงแบบใด|เบา|ดัง,สูงมาก","เสียงฟ้าร้องเป็นเสียงแบบใด|ดัง|เบา,ไม่มีเสียง","เสียงนกร้องเป็นเสียงแบบใด|สูง|ต่ำ,ไม่มีเสียง",
+  "เสียงเรือใหญ่เป็นเสียงแบบใด|ต่ำ|สูง,แหลม","เครื่องดนตรีใดตีให้เกิดเสียง|กลอง|ขลุ่ย,ไวโอลิน","เครื่องดนตรีใดเป่าให้เกิดเสียง|ขลุ่ย|กลอง,ฉิ่ง","เครื่องดนตรีใดสีให้เกิดเสียง|ซอ|กลอง,แตร","เราฟังเสียงด้วยอวัยวะใด|หู|ตา,จมูก","เสียงดังมากๆ ทำให้เกิดอะไรกับหู|เจ็บหูได้|ได้ยินดีขึ้น,หูใหญ่ขึ้น","ควรทำอย่างไรเมื่ออยู่ใกล้เสียงดังมาก|ปิดหูหรือหลีกเลี่ยง|ตะโกนใส่,เข้าใกล้ขึ้น"]),
+ t7:FACT("ถ้ำหินกับท้องฟ้า",[
+  "ดวงอาทิตย์ปรากฏบนท้องฟ้าตอนใด|กลางวัน|กลางคืน,ทุกเวลา","ดวงจันทร์และดวงดาวเห็นชัดตอนใด|กลางคืน|กลางวัน,เที่ยงวัน","ดวงอาทิตย์ให้อะไรแก่โลก|แสงและความร้อน|ฝน,เสียง","ดวงอาทิตย์ขึ้นทางทิศใด|ทิศตะวันออก|ทิศตะวันตก,ทิศเหนือ","ดวงอาทิตย์ตกทางทิศใด|ทิศตะวันตก|ทิศตะวันออก,ทิศใต้",
+  "ห้ามมองดวงอาทิตย์ตรงๆ เพราะอะไร|ทำให้ตาเสีย|ทำให้ผมยาว,ทำให้หิว","ก้อนหินมีลักษณะอย่างไร|แข็ง|นุ่ม,เหลว","หินที่ใช้สร้างบ้านต้องมีลักษณะอย่างไร|แข็งแรง|เปราะบาง,เบาเหมือนขนนก","หินบางก้อนเกิดจากสิ่งใดในธรรมชาติ|ภูเขาไฟและการทับถม|การตัดผม,การร้องเพลง","ท้องฟ้ากลางวันมักมีสีอะไร|สีฟ้า|สีเขียว,สีชมพู","เมฆลอยอยู่ที่ใด|บนท้องฟ้า|ใต้ดิน,ในแก้ว","ฝนตกลงมาจากอะไร|เมฆ|ต้นไม้,ภูเขา","ดวงจันทร์ปรากฏบนท้องฟ้าตอนกลางคืน มีรูปร่างเปลี่ยนไป เรียกว่า|ข้างขึ้นข้างแรม|ฝนตก,ลมแรง"]),
+ t8:FACT("ฐานหุ่นยนต์บิตตี้",[
+  "การทำตามลำดับขั้นตอนที่ถูกต้อง เรียกว่าอะไร|อัลกอริทึม|ขนมหวาน,การนอน","ชุดคำสั่งที่สั่งให้คอมพิวเตอร์ทำงาน เรียกว่าอะไร|โปรแกรม|ผัก,ของเล่น","คำสั่ง ⬆️ ทำให้หุ่นยนต์เดินอย่างไร|เดินไปข้างหน้า|ถอยหลัง,หมุนตัว","คำสั่ง ⬅️ ทำให้หุ่นยนต์เดินอย่างไร|เลี้ยวซ้าย|เลี้ยวขวา,เดินตรง","คำสั่ง ➡️ ทำให้หุ่นยนต์เดินอย่างไร|เลี้ยวขวา|เลี้ยวซ้าย,เดินตรง",
+  "ถ้าโปรแกรมทำงานผิด เราควรทำอย่างไร|หาและแก้คำสั่งที่ผิด|เลิกเล่น,ทุบเครื่อง","ข้อใดเป็นรหัสผ่านที่ปลอดภัย|ผสมตัวอักษรและตัวเลขยาวๆ|1234,ชื่อตัวเอง","เราควรบอกรหัสผ่านกับใคร|เฉพาะผู้ปกครอง|เพื่อนทุกคน,คนแปลกหน้า","ถ้ามีคนแปลกหน้าขอข้อมูลส่วนตัวทางอินเทอร์เน็ต ควรทำอย่างไร|ไม่ให้และบอกผู้ใหญ่|ให้ทันที,ตอบกลับไปหา","ข้อใดคือการใช้อินเทอร์เน็ตอย่างปลอดภัย|ขอผู้ปกครองก่อนกดลิงก์แปลกๆ|กดทุกลิงก์,แชร์รูปบ้าน","เวลาใช้หน้าจอควรทำอย่างไร|พักสายตาเป็นระยะ|จ้องไม่หยุด,นอนดูทั้งคืน","เซนเซอร์ของหุ่นยนต์ทำหน้าที่คล้ายอะไรของคน|ตาและหู|ฟัน,ผม"],
+  ORD([["เรียงขั้นตอนการแปรงฟัน",["บีบยาสีฟัน","แปรงฟันให้ทั่ว","บ้วนปาก","เก็บแปรงสีฟัน"]],["เรียงขั้นตอนการทำแซนด์วิช",["หยิบขนมปัง","ทาเนยหรือแยม","ประกบขนมปัง","กินอย่างอร่อย"]],["เรียงขั้นตอนการข้ามถนน",["หยุดที่ขอบทาง","มองซ้ายขวา","เดินข้ามเมื่อปลอดภัย","ถึงอีกฝั่ง"]]]))};
+/* ---------- Gaul ---------- */
+const GG={
+ g1:FACT("ลานคุณธรรม",[
+  "การพูดความจริงเสมอ เรียกว่าอะไร|ความซื่อสัตย์|ความขี้เกียจ,ความโกรธ","การช่วยเหลือผู้อื่นโดยไม่หวังสิ่งตอบแทน เรียกว่า|ความมีน้ำใจ|ความเห็นแก่ตัว,ความอิจฉา","การรู้บุญคุณพ่อแม่ เรียกว่า|ความกตัญญู|ความเกลียด,ความหยาบคาย","เมื่อพบเพื่อนทำของตก ควรทำอย่างไร|ช่วยเก็บและคืน|เก็บไว้เอง,ทิ้งไป","เมื่อทำผิด ควรทำอย่างไร|ขอโทษและแก้ไข|โกหก,โทษคนอื่น",
+  "ศีลข้อแรกคือการไม่ทำอะไร|ไม่ฆ่าสัตว์|ไม่ล้างมือ,ไม่ร้องเพลง","การไม่หยิบของคนอื่นโดยไม่ได้รับอนุญาต เรียกว่า|ไม่ลักขโมย|ไม่ออกกำลัง,ไม่นอน","คำพูดที่ดีควรเป็นอย่างไร|สุภาพ|หยาบคาย,โกหก","เด็กดีควรทำอย่างไรกับผู้ใหญ่|ไหว้ทักทาย|เมินเฉย,ล้อเลียน","เด็กๆ ทำบุญได้ด้วยวิธีใด|ใส่บาตรหรือแบ่งปันสิ่งของ|ทำลายของ,แย่งของเล่น","การเคารพสถานที่ศักดิ์สิทธิ์ ควรทำอย่างไร|แต่งกายสุภาพและสงบ|วิ่งเล่นเสียงดัง,ตะโกน","การแบ่งปันขนมกับเพื่อน แสดงถึงอะไร|การเอื้อเฟื้อ|ความโลภ,ความหยาบ"]),
+ g2:FACT("บ้านและโรงเรียน",[
+  "สมาชิกในครอบครัวมีใครบ้าง|พ่อ แม่ พี่ น้อง|เพื่อนบ้านทุกคน,คนแปลกหน้า","เด็กๆ ช่วยงานบ้านได้อย่างไร|เก็บของเล่นเข้าที่|ทิ้งขยะในห้อง,ขีดเขียนผนัง","เมื่อครูเข้าห้อง นักเรียนควรทำอย่างไร|ลุกขึ้นทำความเคารพ|ส่งเสียงดัง,วิ่งเล่น","เวลาซื้อของที่ร้านค้าควรทำอย่างไร|ต่อแถวตามลำดับ|แซงคิว,ผลัก","ก่อนออกจากบ้านไปโรงเรียน ควรทำอะไร|บอกลาผู้ปกครอง|หนีออกไปเงียบๆ,ไม่ต้องบอกใคร",
+  "ครูมีหน้าที่อะไร|สอนความรู้|ขายของ,ขับรถ","นักเรียนมีหน้าที่อะไร|ตั้งใจเรียน|หลับในห้อง,ขีดเขียนโต๊ะ","เมื่อเพื่อนถูกรังแก ควรทำอย่างไร|บอกครูหรือผู้ใหญ่|หัวเราะเยาะ,ร่วมรังแก","การรักษาความสะอาดห้องเรียน ทำอย่างไร|ช่วยกันเก็บกวาด|ทิ้งขยะไว้,ปล่อยรก","กฎของห้องสมุดคือ|พูดเบาๆ|ตะโกน,วิ่งเล่น","การรอคิวแสดงถึงอะไร|การมีระเบียบวินัย|ความเกียจคร้าน,ความโกรธ","เมื่อต้องการยืมของเพื่อน ควรพูดว่า|ขอยืมได้ไหม|เอามานะ,ขโมยไว้","เมื่อได้รับของจากผู้อื่น ควรพูดว่า|ขอบคุณ|ไม่เป็นไร,ไม่ต้อง"]),
+ g3:FACT("เมืองไทยของเรา",[
+  "ธงชาติไทยมีกี่สี|3 สี|2 สี,5 สี","ธงชาติไทยมีสีอะไรบ้าง|แดง ขาว น้ำเงิน|เขียว เหลือง ดำ,ชมพู ส้ม ม่วง","เมืองหลวงของประเทศไทยคือ|กรุงเทพมหานคร|เชียงใหม่,ภูเก็ต","การทักทายแบบไทยคือ|การไหว้|การโบกมือ,การจับมือ","ภาษาประจำชาติของไทยคือ|ภาษาไทย|ภาษาจีน,ภาษาอังกฤษ",
+  "เทศกาลสงกรานต์เป็นเทศกาลอะไร|วันปีใหม่ไทย เล่นน้ำ|วันฮาโลวีน,วันตรุษจีน","เทศกาลลอยกระทงทำอะไร|ลอยกระทงในน้ำ|เล่นสกี,ซื้อของขวัญ","อาหารไทยที่มีรสเผ็ดเปรี้ยว เช่น|ต้มยำกุ้ง|พิซซ่า,ซูชิ","ผลไม้ไทยที่ได้ชื่อว่าราชาผลไม้คือ|ทุเรียน|แอปเปิล,องุ่น","สัตว์ประจำชาติไทยคือ|ช้างไทย|สิงโต,จิงโจ้","ช้างเผือกมีความสำคัญในประวัติศาสตร์ไทย เพราะเป็นสัญลักษณ์ของ|ความเป็นมงคล|ความเศร้า,ความกลัว","ดอกไม้ประจำชาติไทยคือ|ดอกราชพฤกษ์|ดอกกุหลาบ,ดอกทานตะวัน","เมื่อได้ยินเพลงชาติ ควรทำอย่างไร|ยืนตรงเคารพ|นั่งเล่น,พูดคุย","เราควรภูมิใจในสิ่งใด|ความเป็นไทย|การทะเลาะ,การโกหก"]),
+ g4:FACT("ตลาดนัดออมสิน",[
+  "เหรียญที่มีค่ามากที่สุดในสามเหรียญนี้คือเหรียญกี่บาท|10 บาท|1 บาท,5 บาท","ธนบัตรใบละ 20 บาทมีสีอะไร|สีเขียว|สีแดง,สีม่วง","ธนบัตรใบละ 100 บาทมีสีอะไร|สีแดง|สีเขียว,สีน้ำเงิน","เงิน 10 บาท เท่ากับเหรียญ 5 บาทกี่เหรียญ|2 เหรียญ|1 เหรียญ,3 เหรียญ","เงิน 10 บาท เท่ากับเหรียญ 1 บาทกี่เหรียญ|10 เหรียญ|5 เหรียญ,2 เหรียญ",
+  "เราเก็บเงินออมไว้ที่ใดได้|กระปุกออมสิน|ถังขยะ,ในน้ำ","ประโยชน์ของการออมเงินคือ|มีเงินไว้ใช้ในอนาคต|ใช้หมดทันที,ทำให้เงินหาย","ก่อนซื้อของเราควรทำอย่างไร|ดูว่าจำเป็นหรือไม่|ซื้อทุกอย่าง,ซื้อตามเพื่อน","เมื่อซื้อของแล้วควรรับอะไรกลับมา|เงินทอนและใบเสร็จ|ไม่ต้องรับอะไร,แค่ขนม","ถ้าซื้อของแล้วได้เงินทอนน้อยเกินไป ควรทำอย่างไร|บอกผู้ขายสุภาพๆ|เงียบไว้,ตะโกนด่า","ผู้ที่ขายสินค้าเรียกว่า|ผู้ขาย|ผู้ซื้อ,ผู้ชม","ผู้ที่ซื้อสินค้าเรียกว่า|ผู้ซื้อ|ผู้ขาย,ผู้ดู"],
+  ()=>{const q=[H("ซื้อของและทอนเงิน")];for(let i=0;i<4;i++){const p=rnd(3,9),pay=pick([10,20]);const pr=pay===10?rnd(2,9):rnd(11,19);q.push(N(`ซื้อลูกอมราคา ${pr} บาท จ่ายเงิน ${pay} บาท ได้เงินทอนกี่บาท`,pay-pr))}return q}),
+ g5:FACT("พิพิธภัณฑ์กาลเวลา",[
+  "วันก่อนวันนี้เรียกว่า|เมื่อวาน|พรุ่งนี้,มะรืนนี้","วันหลังวันนี้เรียกว่า|พรุ่งนี้|เมื่อวาน,เมื่อวานซืน","1 สัปดาห์มีกี่วัน|7 วัน|5 วัน,10 วัน","วันแรกของสัปดาห์ตามปฏิทินไทยคือ|วันอาทิตย์|วันจันทร์,วันศุกร์","วันหลังวันจันทร์คือ|วันอังคาร|วันอาทิตย์,วันพุธ",
+  "1 ปีมีกี่เดือน|12 เดือน|10 เดือน,7 เดือน","เหตุการณ์ที่เกิดขึ้นนานมาแล้ว เรียกว่า|อดีต|อนาคต,ปัจจุบัน","เหตุการณ์ที่กำลังเกิดขึ้นตอนนี้ เรียกว่า|ปัจจุบัน|อดีต,อนาคต","เหตุการณ์ที่ยังไม่เกิดขึ้น เรียกว่า|อนาคต|อดีต,ปัจจุบัน","รูปถ่ายสมัยเด็กของเรา เป็นเรื่องของเวลาใด|อดีต|อนาคต,พรุ่งนี้","นาฬิกามีเข็มสั้นบอกอะไร|ชั่วโมง|นาที,วินาที","ตอนเช้าเรามักทำอะไร|ตื่นนอน แปรงฟัน|ดูดาว,นอนหลับสนิท","ฤดูที่ฝนตกมากในประเทศไทยคือ|ฤดูฝน|ฤดูหนาวจัด,ฤดูหิมะ"]),
+ g6:FACT("แผนที่นักผจญภัย",[
+  "ทิศที่ดวงอาทิตย์ขึ้นคือ|ทิศตะวันออก|ทิศตะวันตก,ทิศใต้","ทิศที่ดวงอาทิตย์ตกคือ|ทิศตะวันตก|ทิศตะวันออก,ทิศเหนือ","ทิศตรงข้ามกับทิศเหนือคือ|ทิศใต้|ทิศตะวันออก,ทิศตะวันตก","ทิศตรงข้ามกับทิศตะวันออกคือ|ทิศตะวันตก|ทิศเหนือ,ทิศใต้","เครื่องมือบอกทิศคือ|เข็มทิศ|ไม้บรรทัด,เครื่องชั่ง",
+  "แผนที่ช่วยเราทำอะไร|หาเส้นทางและสถานที่|ดูทีวี,ทำอาหาร","แผนผังห้องเรียนช่วยให้รู้อะไร|ตำแหน่งของสิ่งต่างๆ|อากาศวันนี้,ราคาขนม","ถ้าหันหน้าไปทางทิศเหนือ ด้านหลังคือทิศ|ทิศใต้|ทิศเหนือ,ทิศตะวันออก","การทิ้งขยะลงถังช่วยอะไร|ทำให้สิ่งแวดล้อมสะอาด|ทำให้เมืองรก,ทำให้แมลงเยอะ","การปิดน้ำทุกครั้งหลังใช้ ช่วยอะไร|ประหยัดน้ำ|ทำให้น้ำเสีย,ทำให้ฝนตก","การปิดไฟเมื่อไม่ใช้ ช่วยอะไร|ประหยัดไฟฟ้า|ทำให้ร้อน,ทำให้มืดตลอด","การปลูกต้นไม้ช่วยอะไร|ให้ร่มเงาและอากาศดี|ทำให้โลกร้อน,ทำให้น้ำท่วม","ถ้าเดินหลงทางควรทำอย่างไร|ขอความช่วยเหลือจากผู้ใหญ่ที่ไว้ใจ|เดินไปไกลๆ,ไปกับคนแปลกหน้า"]),
+ g7:FACT("ลานฮีโร่ชุมชน",[
+  "ใครช่วยรักษาคนป่วย|หมอ|ตำรวจ,คนขับรถ","ใครช่วยดูแลความปลอดภัยและจับคนร้าย|ตำรวจ|ครู,พ่อค้า","ใครช่วยดับไฟไหม้|พนักงานดับเพลิง|ชาวนา,นักดนตรี","ใครปลูกข้าวให้เรากิน|ชาวนา|หมอ,ตำรวจ","ใครสอนหนังสือเด็กๆ|ครู|หมอ,ชาวประมง",
+  "ใครขายของในตลาด|พ่อค้าแม่ค้า|นักบิน,ครู","ใครขับเครื่องบิน|นักบิน|หมอ,ชาวนา","ใครจับปลาในทะเล|ชาวประมง|ชาวนา,ครู","ใครซ่อมรถยนต์|ช่างซ่อมรถ|หมอ,ครู","เมื่อเกิดเหตุฉุกเฉิน เราโทรเบอร์ใด|191 หรือ 1669|123456,000000","การช่วยกันทำความสะอาดชุมชนเรียกว่า|การร่วมมือกัน|การทะเลาะ,การขโมย","เราควรปฏิบัติต่อทุกอาชีพอย่างไร|ให้เกียรติและขอบคุณ|ดูถูก,ไม่สนใจ","ชุมชนที่ดีทุกคนควรทำอย่างไร|ช่วยเหลือกัน|แย่งกัน,ไม่พูดกัน"])};
+/* ---------- register levels / bosses ---------- */
+const TL=[["t1","ห้องแล็บนักสำรวจ",0],["t2","ร่างกายมหัศจรรย์",0],["t3","ป่าพืชและสัตว์",0],["t4","บ้านของสิ่งมีชีวิต",0],["t5","โรงงานวัสดุ",1],["t6","หุบเขาเสียง",1],["t7","ถ้ำหินกับท้องฟ้า",1],["t8","ฐานหุ่นยนต์บิตตี้",1]];
+const GL=[["g1","วัดแห่งคุณธรรม",0],["g2","บ้านและโรงเรียน",0],["g3","เมืองไทยของเรา",0],["g4","ตลาดนัดออมสิน",1],["g5","พิพิธภัณฑ์กาลเวลา",1],["g6","แผนที่นักผจญภัย",1],["g7","ลานฮีโร่ชุมชน",1]];
+TL.forEach(([id,t,z])=>{const l={id,t,z,k:"t"};S2LV.push(l);GEN[id]=GT[id];regPage(l)});
+GL.forEach(([id,t,z])=>{const l={id,t,z,k:"g"};S2LV.push(l);GEN[id]=GG[id];regPage(l)});
+S2LV.find(l=>l.id==="t5").gate="tb1";S2LV.find(l=>l.id==="g4").gate="gb1";
+Object.assign(S2BOSS,{
+ tb1:{n:"ปลาหมึกหมอก",e:"🦑",hp:90,atk:9,pool:["t1","t2","t3","t4"],after:"t4",k:"t",rew:{wood:6,pearl:3},c:"#2E8BE6",say:"ปลาหมึกหมอกพ่นหมึกดำขวางท่าเรือ!"},
+ tb2:{n:"คราเคนเงา",e:"🐙",hp:115,atk:10,pool:["t5","t6","t7","t8"],after:"t8",k:"t",final:1,rew:{wood:8,pearl:6},c:"#1F5FBF",say:"คราเคนเงาของจอมโกลาหลผุดขึ้นจากทะเล!"},
+ gb1:{n:"พายุทรายหลงทิศ",e:"🌪️",hp:90,atk:9,pool:["g1","g2","g3"],after:"g3",k:"g",rew:{wood:6,sand:3},c:"#E6A92E",say:"พายุทรายหลงทิศพัดกลบเส้นทางคาราวาน!"},
+ gb2:{n:"ยักษ์ทรายหมอกเงา",e:"🗿",hp:115,atk:10,pool:["g4","g5","g6","g7"],after:"g7",k:"g",final:1,rew:{wood:8,sand:6},c:"#B8741F",say:"ยักษ์ทรายหมอกเงาของจอมโกลาหลปลุกขึ้นมาแล้ว!"}});
+Object.assign(S2CHEST,{});
 
 /* ===== online save: player name + PIN, stored in Firebase Firestore (REST) ===== */
 const OL_APP="rainbow-dragon",OL_KEY=OL_APP+"-session",OL_CFG=window.FB_CONFIG||{};
@@ -1618,7 +1703,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795194850";let OL_VCHK=0;
+const OL_VER="1795199782";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
