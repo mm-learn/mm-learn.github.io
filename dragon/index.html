@@ -1877,6 +1877,152 @@ async function cityVisit(c){try{await loadThree()}catch(e){return toast("โห�
  el.querySelector("#like").onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{const r=await fetch(olCUrl(c.id,"&updateMask.fieldPaths=likes"),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{likes:{integerValue:String(c.likes+1)}}})});
   if(!r.ok)throw 0;c.likes++;el.querySelector("#lk").textContent=c.likes;s.liked[c.id]=true;save();SND.gem();confetti(40)}catch(err){b.disabled=false;toast("ส่ง 👍 ไม่สำเร็จ ลองใหม่")}}}
 
+/* ===== Season 2 phase 5: more zones — Knight measurement + Olympiad, Thief robot lab, Gaul caravan road ===== */
+let DYN=0;const svgQ=(body,w,h)=>{const id="dy"+(DYN++);IMG[id]="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w*2}" height="${h*2}" font-family="Kanit,Tahoma,sans-serif">${body}</svg>`);return id};
+const TX=(x,y,t,s,c,a)=>`<text x="${x}" y="${y}" font-size="${s||16}" fill="${c||"#222"}" text-anchor="${a||"middle"}" dominant-baseline="central">${t}</text>`;
+const mcT=(q,ans,wr,im,x)=>{const o=shuf([ans,...wr.filter((v,i,a)=>v!==ans&&a.indexOf(v)===i).slice(0,3)]);return MC(q,o,o.indexOf(ans),im,x)};
+const rep=(n,f)=>{const a=[];for(let i=0;i<n;i++)a.push(f(i));return a};
+/* ---------- drawings ---------- */
+function drClock(h,half){const a=((h%12)+(half?.5:0))/12*Math.PI*2,m=half?Math.PI:0,cx=80,cy=80;let s=`<circle cx="80" cy="80" r="72" fill="#fff" stroke="#333" stroke-width="5"/>`;
+ for(let i=1;i<=12;i++){const t=i/12*Math.PI*2;s+=TX(cx+58*Math.sin(t),cy-58*Math.cos(t),i,15)}
+ s+=`<line x1="80" y1="80" x2="${cx+36*Math.sin(a)}" y2="${cy-36*Math.cos(a)}" stroke="#d33" stroke-width="7" stroke-linecap="round"/><line x1="80" y1="80" x2="${cx+56*Math.sin(m)}" y2="${cy-56*Math.cos(m)}" stroke="#235" stroke-width="4" stroke-linecap="round"/><circle cx="80" cy="80" r="5" fill="#333"/>`;return svgQ(s,160,160)}
+const COIN={1:["#c9c9c9",16],2:["#e6c25a",17],5:["#d9d9d9",19],10:["#e8b94a",21]},BILL={20:"#5fae5f",50:"#5f86d8",100:"#d8605f"};
+function drMoney(list){let x=8,s="";list.forEach(v=>{if(BILL[v]){s+=`<rect x="${x}" y="22" width="78" height="44" rx="5" fill="${BILL[v]}" stroke="#333"/>${TX(x+39,44,v,20,"#fff")}`;x+=86}else{const [c,r]=COIN[v];s+=`<circle cx="${x+r}" cy="44" r="${r}" fill="${c}" stroke="#555" stroke-width="2"/>${TX(x+r,44,v,v>=10?14:16)}`;x+=r*2+8}});return svgQ(s,Math.max(x,60),88)}
+function drBars(lens,cols){let s="";lens.forEach((l,i)=>{s+=`<rect x="10" y="${10+i*34}" width="${l*22}" height="24" rx="6" fill="${cols[i]}"/>`});return svgQ(s,10+Math.max(...lens)*22+10,lens.length*34+10)}
+function drRuler(n,emo){let s=`<rect x="10" y="50" width="${10*30+20}" height="40" fill="#f3d27a" stroke="#8a6a2a"/>`;for(let i=0;i<=10;i++){s+=`<line x1="${20+i*30}" y1="50" x2="${20+i*30}" y2="${i%5?62:70}" stroke="#333" stroke-width="2"/>`+TX(20+i*30,80,i,13)}
+ s+=`<rect x="20" y="18" width="${n*30}" height="24" rx="8" fill="#ff9f43" stroke="#a55"/>${TX(20+n*15,30,emo,18)}`;return svgQ(s,340,100)}
+function drScale(L,R,tilt){const t=tilt||0;let s=`<polygon points="150,150 135,180 165,180" fill="#8a6a2a"/><line x1="150" y1="150" x2="150" y2="70" stroke="#8a6a2a" stroke-width="6"/><g transform="rotate(${t*13} 150 70)"><line x1="40" y1="70" x2="260" y2="70" stroke="#5a4020" stroke-width="6"/>
+ <path d="M10 110 h90 l-10 18 h-70z" fill="#c9a36a"/><path d="M200 110 h90 l-10 18 h-70z" fill="#c9a36a"/><line x1="40" y1="70" x2="25" y2="110" stroke="#555"/><line x1="40" y1="70" x2="85" y2="110" stroke="#555"/><line x1="260" y1="70" x2="215" y2="110" stroke="#555"/><line x1="260" y1="70" x2="275" y2="110" stroke="#555"/>
+ ${TX(55,96,L,L.length>6?16:24)}${TX(245,96,R,R.length>6?16:24)}</g>`;return svgQ(s,300,190)}
+function drShape(k){const c="#5fa8f5",st=`fill="${c}" stroke="#235" stroke-width="3"`,P={3:"80,15 145,130 15,130",4:"25,25 135,25 135,135 25,135",5:"80,12 148,62 122,140 38,140 12,62",6:"45,15 115,15 150,78 115,140 45,140 10,78"};
+ return svgQ(k==="o"?`<circle cx="80" cy="78" r="62" ${st}/>`:k==="e"?`<ellipse cx="80" cy="78" rx="72" ry="44" ${st}/>`:k==="r"?`<rect x="10" y="40" width="140" height="76" ${st}/>`:`<polygon points="${P[k]}" ${st}/>`,160,155)}
+function drBarModel(whole,a,b,qWhole){let s=`<rect x="10" y="40" width="${a/whole*280}" height="36" fill="#7cc6ff" stroke="#235"/><rect x="${10+a/whole*280}" y="40" width="${b/whole*280}" height="36" fill="#ffcf6b" stroke="#235"/>`;
+ s+=TX(10+a/whole*140,58,qWhole==="a"?"?":a,18)+TX(10+a/whole*280+b/whole*140,58,qWhole==="b"?"?":b,18)+`<path d="M10 90 v8 h280 v-8" fill="none" stroke="#333" stroke-width="2"/>`+TX(150,112,qWhole==="w"?"?":whole,18);return svgQ(s,300,125)}
+function drSudoku(g){let s="";for(let r=0;r<4;r++)for(let c=0;c<4;c++){const v=g[r][c];s+=`<rect x="${10+c*40}" y="${10+r*40}" width="40" height="40" fill="${v==="?"?"#fff3b0":"#fff"}" stroke="#999"/>`+(v?TX(30+c*40,30+r*40,v,22,v==="?"?"#d33":"#123"):"")}
+ s+=`<rect x="10" y="10" width="160" height="160" fill="none" stroke="#123" stroke-width="4"/><line x1="90" y1="10" x2="90" y2="170" stroke="#123" stroke-width="4"/><line x1="10" y1="90" x2="170" y2="90" stroke="#123" stroke-width="4"/>`;return svgQ(s,180,180)}
+function drCubes(H){/* H[row][col], row 0 = back */const cw=26,ch=15,hh=28;let s="";const ox=110,oy=40;
+ const cube=(x,y,z)=>{const px=ox+(x-y)*cw,py=oy+(x+y)*ch-z*hh+80;return `<polygon points="${px},${py} ${px+cw},${py+ch} ${px},${py+2*ch} ${px-cw},${py+ch}" fill="#9fd3ff" stroke="#235"/><polygon points="${px-cw},${py+ch} ${px},${py+2*ch} ${px},${py+2*ch+hh} ${px-cw},${py+ch+hh}" fill="#5b9bd5" stroke="#235"/><polygon points="${px+cw},${py+ch} ${px},${py+2*ch} ${px},${py+2*ch+hh} ${px+cw},${py+ch+hh}" fill="#3f7ab8" stroke="#235"/>`};
+ const L=[];for(let y=0;y<H.length;y++)for(let x=0;x<H[0].length;x++)for(let z=0;z<H[y][x];z++)L.push([x,y,z]);L.sort((a,b)=>(a[0]+a[1])-(b[0]+b[1])||a[2]-b[2]).forEach(c=>s+=cube(...c));return svgQ(s,230,230)}
+function drFan(k){/* triangle with k lines from apex */let s=`<polygon points="150,15 285,170 15,170" fill="#fff6d6" stroke="#333" stroke-width="3"/>`;for(let i=1;i<=k;i++){const x=15+270*i/(k+1);s+=`<line x1="150" y1="15" x2="${x}" y2="170" stroke="#333" stroke-width="3"/>`}return svgQ(s,300,185)}
+function drStrip(n){let s="";for(let i=0;i<n;i++)s+=`<rect x="${10+i*50}" y="20" width="50" height="50" fill="#e8f4ff" stroke="#333" stroke-width="3"/>`;return svgQ(s,20+n*50,90)}
+function drPyr(rows){/* rows top..bottom, values or "?" */let s="";const W=60;rows.forEach((r,i)=>{const off=(rows.length-1-i)*W/2;r.forEach((v,j)=>{const x=10+off+j*W,y=10+i*44;s+=`<rect x="${x}" y="${y}" width="${W}" height="44" fill="${v==="?"?"#fff3b0":"#fff"}" stroke="#555" stroke-width="2"/>`+TX(x+W/2,y+22,v,20,v==="?"?"#d33":"#123")})});return svgQ(s,20+rows.length*W,20+rows.length*44)}
+function drGrid(n,cells,opt){let s="";const Z=46;for(let r=0;r<n;r++)for(let c=0;c<n;c++)s+=`<rect x="${10+c*Z}" y="${10+r*Z}" width="${Z}" height="${Z}" fill="${(r+c)%2?"#f4f0e2":"#fffaf0"}" stroke="#bba"/>`;
+ cells.forEach(([r,c,t,lab])=>{s+=TX(10+c*Z+Z/2,10+r*Z+Z/2,t,26);if(lab)s+=TX(10+c*Z+10,10+r*Z+10,lab,13,"#c22")});
+ if(opt&&opt.compass)s+=`<g transform="translate(${n*Z+40},40)"><circle r="24" fill="#fff" stroke="#555"/><polygon points="0,-20 6,0 -6,0" fill="#c22"/><polygon points="0,20 6,0 -6,0" fill="#999"/>${TX(0,-33,"เหนือ",12,"#c22")}${TX(0,33,"ใต้",12)}</g>${TX(n*Z+40,100,"ออก ➡",11)}${TX(n*Z+40,116,"⬅ ตก",11)}`;
+ return svgQ(s,n*Z+(opt&&opt.compass?84:20),n*Z+20)}
+/* ---------- Knight zone 2: measurement fort ---------- */
+const COLS=[["แดง","#e74c3c"],["ฟ้า","#3498db"],["เขียว","#2ecc71"],["ส้ม","#f39c12"],["ม่วง","#9b59b6"]];
+const G5={
+ k15:()=>{const q=[H("ยาว-สั้น และการวัด")];for(let i=0;i<3;i++){const cs=sample(COLS,3),ls=uniqN(3,3,11);const lg=i%2?Math.min(...ls):Math.max(...ls);q.push(mcT(`แท่งสีไหน${i%2?"สั้น":"ยาว"}ที่สุด`,"สี"+cs[ls.indexOf(lg)][0],cs.map(c=>"สี"+c[0]),drBars(ls,cs.map(c=>c[1]))))}
+  for(let i=0;i<4;i++){const n=rnd(2,9),e=pick(["✏️","🖍️","🔑","🥕","🐛"]);q.push(N(`${e} ยาวกี่เซนติเมตร`,n,drRuler(n,e)))}
+  const a=rnd(3,9),b=rnd(2,a-1);q.push(N(`เชือกยาว ${a} เมตร ตัดออก ${b} เมตร เหลือยาวกี่เมตร`,a-b));const c=rnd(4,9),d=rnd(2,6);q.push(N(`ดาบยาว ${c} คืบ ด้ามยาว ${d} คืบ รวมยาวกี่คืบ`,c+d));return q},
+ k16:()=>{const q=[H("ตาชั่งอัศวิน")];const IT=[["🍉","แตงโม",9],["🎃","ฟักทอง",8],["🧱","อิฐ",6],["🍎","แอปเปิล",2],["🪶","ขนนก",0],["🎈","ลูกโป่ง",0],["⚽","ลูกบอล",3]];
+  for(let i=0;i<4;i++){const [A,B]=sample(IT.filter((x,j,a)=>a.findIndex(y=>y[2]===x[2])===j),2);const heavy=A[2]>B[2]?A:B;q.push(mcT(`ตาชั่งเอียงแบบนี้ สิ่งใดหนักกว่า`,heavy[1],[A[1],B[1]],drScale(A[0],B[0],A[2]>B[2]?-1:1)))}
+  for(let i=0;i<3;i++){const n=rnd(2,5),it=pick(IT.slice(0,3));q.push(N(`ตาชั่งสมดุล ${it[1]} หนักกี่กิโลกรัม (🟫 แต่ละก้อนหนัก 1 กิโลกรัม)`,n,drScale(it[0],"🟫".repeat(n),0)))}
+  const a=rnd(10,30),b=rnd(5,20);q.push(N(`เกราะหนัก ${a} กิโลกรัม โล่หนัก ${b} กิโลกรัม รวมหนักกี่กิโลกรัม`,a+b));return q},
+ k17:()=>{const q=[H("หอนาฬิกา")];for(let i=0;i<6;i++){const h=rnd(1,12),half=i>=3&&Math.random()<.6;const lab=(x,hf)=>`${x} นาฬิกา${hf?" 30 นาที":""}`;
+   q.push(mcT("นาฬิกาบอกเวลาเท่าไร",lab(h,half),[lab(h,!half),lab(h%12+1,half),lab((h+10)%12+1,half)],drClock(h,half)))}
+  for(let i=0;i<2;i++){const h=rnd(1,8),d=rnd(1,3);q.push(N(`ตอนนี้ ${h} นาฬิกา อีก ${d} ชั่วโมงจะเป็นกี่นาฬิกา`,h+d,drClock(h)))}
+  q.push(mcT("1 ชั่วโมงมีกี่นาที","60 นาที",["30 นาที","100 นาที","12 นาที"]));q.push(mcT("เข็มสั้นของนาฬิกาบอกอะไร","ชั่วโมง",["นาที","วัน","เดือน"]));return q},
+ k18:()=>{const q=[H("คลังเหรียญอัศวิน")];for(let i=0;i<5;i++){const L=sample([1,2,5,10,1,5,10,2],rnd(2,4)),bill=i>=3?[pick([20,50])]:[];const all=[...bill,...L.sort((a,b)=>b-a)];q.push(N("นับเงินรวมกี่บาท",all.reduce((a,b)=>a+b,0),drMoney(all)))}
+  for(let i=0;i<3;i++){const p=rnd(3,9),pay=10;q.push(N(`ซื้อขนมปังราคา ${p} บาท จ่ายเหรียญ 10 บาท ได้เงินทอนกี่บาท`,pay-p,drMoney([10])))}
+  q.push(mcT("ธนบัตรใบใดมีค่ามากที่สุด","100 บาท",["20 บาท","50 บาท","10 บาท"],drMoney([20,50,100])));return q},
+ k19:()=>{const q=[H("ลานรูปทรง")];const SH=[[3,"สามเหลี่ยม",3],[4,"สี่เหลี่ยมจัตุรัส",4],["r","สี่เหลี่ยมผืนผ้า",4],[5,"ห้าเหลี่ยม",5],[6,"หกเหลี่ยม",6],["o","วงกลม",0],["e","วงรี",0]];
+  sample(SH,5).forEach(s=>q.push(mcT("รูปนี้คือรูปอะไร",s[1],SH.map(x=>x[1]).filter(x=>x!==s[1]).sort(()=>Math.random()-.5),drShape(s[0]))));
+  sample(SH.filter(s=>s[2]),3).forEach(s=>q.push(N("รูปนี้มีมุมกี่มุม",s[2],drShape(s[0]))));
+  q.push(mcT("ลูกบอลมีรูปร่างคล้ายรูปทรงใด","ทรงกลม",["ทรงกระบอก","ทรงสี่เหลี่ยม","กรวย"]));q.push(mcT("กระป๋องน้ำอัดลมมีรูปร่างคล้ายรูปทรงใด","ทรงกระบอก",["ทรงกลม","กรวย","พีระมิด"]));return q},
+ k20:()=>{const q=[H("Bar Model กองทัพ")];for(let i=0;i<6;i++){const a=rnd(5,40),b=rnd(5,40),w=a+b,t=pick(["w","a","b"]);const ctx=pick([["ทหารราบ","ทหารม้า","ทหาร"],["ธงแดง","ธงฟ้า","ธง"],["ลูกธนู","หอก","อาวุธ"]]);
+   const txt=t==="w"?`มี${ctx[0]} ${a} คน และ${ctx[1]} ${b} คน รวมเป็น${ctx[2]}กี่คน`:t==="a"?`มี${ctx[2]}ทั้งหมด ${w} คน เป็น${ctx[1]} ${b} คน เป็น${ctx[0]}กี่คน`:`มี${ctx[2]}ทั้งหมด ${w} คน เป็น${ctx[0]} ${a} คน เป็น${ctx[1]}กี่คน`;
+   q.push(N(txt.replace(/คน/g,ctx[0]==="ทหารราบ"?"คน":"อัน"),t==="w"?w:t==="a"?a:b,drBarModel(w,a,b,t)))}
+  for(let i=0;i<2;i++){const a=rnd(10,30),d=rnd(3,12);q.push(N(`ปราสาทแดงมีหอคอย ${a+d} หลัง ปราสาทขาวมี ${a} หลัง ปราสาทแดงมีมากกว่ากี่หลัง`,d))}return q},
+/* ---------- Knight zone 3: Olympiad strategy tower ---------- */
+ k21:()=>{const q=[H("แบบรูปลับ")];const E=[["🔴","🔵"],["⭐","🌙"],["🐴","🛡️"],["🍎","🍌","🍇"]];
+  for(let i=0;i<4;i++){const set=pick(E),pat=pick(set.length===3?["ABC","AABC","ABCC"]:["AB","ABB","AAB","ABBA"]);const seq=[];for(let j=0;j<9;j++)seq.push(set["ABC".indexOf(pat[j%pat.length])]);const ans=seq[8];q.push(mcT(`${seq.slice(0,8).join(" ")} ❓ ถัดไปคืออะไร`,ans,set,null,{big:1,say:"ถัดไปคืออะไร"}))}
+  for(let i=0;i<4;i++){const st=rnd(1,20),d=pick([2,3,5,10,-2,-1]),s=rep(5,j=>st+d*j+(d<0?20:0));q.push(N(`${s.slice(0,4).join(", ")}, ❓ จำนวนถัดไปคืออะไร`,s[4]))}
+  q.push(N("1, 3, 6, 10, ❓ (เพิ่มขึ้น 2, 3, 4, ...) จำนวนถัดไปคืออะไร",15));q.push(N("1, 2, 4, 8, ❓ จำนวนถัดไปคืออะไร",16));return q},
+ k22:()=>{const q=[H("ตาชั่งสมดุล")];const F=[["🍎","🍌","🍉"],["🍒","🍊","🍍"],["🪙","💎","👑"]];
+  for(let i=0;i<4;i++){const [a,b,c]=pick(F),m=rnd(2,3),n=rnd(2,3);q.push(N(`ถ้า ${b} 1 ลูก หนักเท่ากับ ${a} ${m} ลูก และ ${c} 1 ลูก หนักเท่ากับ ${b} ${n} ลูก แล้ว ${c} 1 ลูก หนักเท่ากับ ${a} กี่ลูก`,m*n,drScale(b,a.repeat(m),0)))}
+  for(let i=0;i<3;i++){const v=rnd(2,6),k=rnd(2,4),e=pick(["🍎","🧀","🥚"]);q.push(N(`${e.repeat(k)} หนักรวม ${v*k} กิโลกรัม ${e} 1 ลูก หนักกี่กิโลกรัม`,v))}
+  for(let i=0;i<2;i++){const x=rnd(2,9),y=rnd(1,9);q.push(N(`ตาชั่งสมดุล: ด้านซ้ายมีกล่อง ❓ กับตุ้ม ${y} กิโลกรัม ด้านขวามีตุ้ม ${x+y} กิโลกรัม กล่องหนักกี่กิโลกรัม`,x,drScale("📦+"+y,String(x+y),0)))}return q},
+ k23:()=>{const q=[H("ซูโดกุ 4×4 · แต่ละแถว แต่ละคอลัมน์ และแต่ละกรอบ 2×2 มีเลข 1-4 ไม่ซ้ำ")];for(let i=0;i<7;i++){const {g,ans}=sudoku(i<3?5:i<6?7:8);q.push(N("ช่องสีเหลือง ❓ คือเลขอะไร",ans,drSudoku(g)))}return q},
+ k24:()=>{const q=[H("นับบล็อก 3 มิติ")];for(let i=0;i<7;i++){const R=i<3?1:2,C=i<5?2:3;const H2=[];for(let r=0;r<R;r++){H2.push(rep(C,()=>rnd(1,3)))}if(R===2)for(let c=0;c<C;c++)H2[1][c]=Math.min(H2[1][c],H2[0][c]);
+   q.push(N("มีบล็อกทั้งหมดกี่ก้อน (บล็อกที่อยู่ข้างใต้ก็นับด้วย)",H2.flat().reduce((a,b)=>a+b,0),drCubes(H2)))}return q},
+ k25:()=>{const q=[H("หลักรังนกพิราบ")];const c2=[["แดง","ฟ้า"],["ขาว","ดำ"]],c3=["แดง","ฟ้า","เขียว"];
+  for(let i=0;i<2;i++){const [a,b]=pick(c2),n=rnd(5,9),m=rnd(5,9);q.push(N(`ในกล่องมีถุงเท้าสี${a} ${n} ข้าง สี${b} ${m} ข้าง หลับตาหยิบ ต้องหยิบอย่างน้อยกี่ข้างจึงแน่ใจว่าได้สีเดียวกัน 1 คู่`,3))}
+  q.push(N(`ในถุงมีลูกแก้วสี${c3.join(" ")} อย่างละ 5 ลูก หลับตาหยิบ ต้องหยิบอย่างน้อยกี่ลูกจึงแน่ใจว่าได้สีเดียวกัน 2 ลูก`,4));
+  for(let i=0;i<2;i++){const r=rnd(3,8),b=rnd(2,7);q.push(N(`มีลูกอมรสส้ม ${r} เม็ด รสองุ่น ${b} เม็ด หลับตาหยิบ ต้องหยิบอย่างน้อยกี่เม็ดจึงแน่ใจว่าได้รสองุ่น 1 เม็ด`,r+1))}
+  [[3,3],[4,6],[5,10]].forEach(([n,a])=>q.push(N(`อัศวิน ${n} คน จับมือกันทุกคน คนละ 1 ครั้งกับทุกคน จับมือกันทั้งหมดกี่ครั้ง`,a)));
+  q.push(N("ห้องมีนักเรียน 13 คน แน่ใจได้ว่ามีอย่างน้อยกี่คนที่เกิดเดือนเดียวกัน",2));return q},
+ k26:()=>{const q=[H("นับรูปที่ซ่อนอยู่")];for(let i=0;i<4;i++){const k=rnd(1,3),r=k+1;q.push(N("ในภาพมีรูปสามเหลี่ยมทั้งหมดกี่รูป",r*(r+1)/2,drFan(k)))}
+  for(let i=0;i<4;i++){const n=rnd(2,4);q.push(N("ในภาพมีรูปสี่เหลี่ยมทั้งหมดกี่รูป (นับรูปใหญ่ด้วย)",n*(n+1)/2,drStrip(n)))}return q},
+ k27:()=>{const q=[H("ตรรกะอัศวิน")];for(let i=0;i<2;i++){const a=rnd(2,7),b=rnd(2,7);q.push(N(`ทหารเข้าแถว เซอร์ลีโออยู่ลำดับที่ ${a} จากหน้า และลำดับที่ ${b} จากหลัง แถวนี้มีทหารกี่คน`,a+b-1))}
+  for(let i=0;i<2;i++){const n=rnd(3,6),d=rnd(2,5);q.push(N(`ปักธง ${n} ผืนเป็นแถวตรง ห่างกันผืนละ ${d} เมตร ธงผืนแรกถึงผืนสุดท้ายห่างกันกี่เมตร`,(n-1)*d))}
+  {const r=rnd(1,3),c=rnd(1,3);q.push(N(`ไก่กับกระต่ายรวมกัน ${r+c} ตัว มีขารวม ${r*4+c*2} ขา มีกระต่ายกี่ตัว`,r))}
+  {const d=rnd(2,5),y=rnd(2,6);q.push(N(`พี่อายุมากกว่าน้อง ${d} ปี อีก ${y} ปี พี่จะอายุมากกว่าน้องกี่ปี`,d))}
+  {const n=rnd(5,9);q.push(N(`ตัดเชือกเป็น ${n} ท่อน ต้องตัดกี่ครั้ง`,n-1))}
+  q.push(mcT("เลโอสูงกว่ามิลา มิลาสูงกว่าเพจ ใครเตี้ยที่สุด","เพจ",["เลโอ","มิลา"]));q.push(mcT("บรูโน่วิ่งเร็วกว่าเรเวน แต่ช้ากว่ามิลา ใครวิ่งเร็วที่สุด","มิลา",["บรูโน่","เรเวน"]));return q},
+ k28:()=>{const q=[H("ปิรามิดตัวเลข · ช่องบน = ผลบวกของ 2 ช่องที่อยู่ข้างล่าง")];
+  for(let i=0;i<6;i++){const b=rep(3,()=>rnd(1,9)),m=[b[0]+b[1],b[1]+b[2]],t=m[0]+m[1];const rows=[[t],m,[...b]];let ans;
+   if(i<2){ans=t;rows[0]=["?"]}else if(i<4){const j=rnd(0,1);ans=m[j];rows[1]=m.map((v,k)=>k===j?"?":v)}else{const j=pick([0,2]);ans=b[j];rows[2]=b.map((v,k)=>k===j?"?":v);rows[1]=m}
+   q.push(N("ช่อง ❓ คือเลขอะไร",ans,drPyr(rows)))}
+  for(let i=0;i<2;i++){const s=rnd(10,20),a=rnd(2,s-5),b=rnd(1,s-a-1);q.push(N(`ทุกแถวบวกกันได้ ${s} เท่ากัน แถวหนึ่งมี ${a} กับ ${b} และ ❓ ช่อง ❓ คือเลขอะไร`,s-a-b))}return q}};
+function sudoku(hide){const base=[[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]],p=shuf([1,2,3,4]);let g=base.map(r=>r.map(v=>p[v-1]));
+ if(Math.random()<.5)g=[g[1],g[0],g[2],g[3]];if(Math.random()<.5)g=g.map(r=>[r[1],r[0],r[2],r[3]]);if(Math.random()<.5)g=g[0].map((_,c)=>g.map(r=>r[c]));
+ const tr=rnd(0,3),tc=rnd(0,3),ans=g[tr][tc];
+ for(let tries=0;tries<60;tries++){const cells=shuf(rep(16,i=>i).filter(i=>i!==tr*4+tc)).slice(0,hide-1);const v=g.map(r=>r.slice());cells.forEach(i=>v[Math.floor(i/4)][i%4]=0);v[tr][tc]=0;
+  const sols=new Set();const ok=(b,r,c,n)=>{for(let k=0;k<4;k++)if(b[r][k]===n||b[k][c]===n)return false;const br=r-r%2,bc=c-c%2;for(let a=0;a<2;a++)for(let d=0;d<2;d++)if(b[br+a][bc+d]===n)return false;return true};
+  const solve=b=>{for(let i=0;i<16;i++){const r=Math.floor(i/4),c=i%4;if(!b[r][c]){for(let n=1;n<=4;n++)if(ok(b,r,c,n)){b[r][c]=n;solve(b);b[r][c]=0}return}}sols.add(b[tr][tc])};solve(v.map(r=>r.slice()));
+  if(sols.size===1){const out=v.map(r=>r.map(x=>x||""));out[tr][tc]="?";return{g:out,ans}}}
+ const out=g.map(r=>r.slice());out[tr][tc]="?";return{g:out,ans}}
+/* ---------- Thief zone 3: Bitty's machine room ---------- */
+const DIRS={"➡️":[0,1],"⬅️":[0,-1],"⬆️":[-1,0],"⬇️":[1,0]};
+function walk(seq,r,c){seq.forEach(a=>{r+=DIRS[a][0];c+=DIRS[a][1]});return[r,c]}
+G5.t9=()=>{const q=[H("เขาวงกตของบิตตี้ · เลือกคำสั่งที่พาบิตตี้ 🤖 ไปถึงดาว ⭐ โดยไม่ชนหิน 🪨")];
+ for(let i=0;i<6;i++){const n=4,sr=3,sc=0,gr=rnd(0,2),gc=rnd(1,3),ups=sr-gr,rights=gc-sc,first=Math.random()<.5;
+  const good=first?[...rep(rights,()=>"➡️"),...rep(ups,()=>"⬆️")]:[...rep(ups,()=>"⬆️"),...rep(rights,()=>"➡️")],other=first?[...rep(ups,()=>"⬆️"),...rep(rights,()=>"➡️")]:[...rep(rights,()=>"➡️"),...rep(ups,()=>"⬆️")];
+  const path=[];let r=sr,c=sc;good.forEach(a=>{r+=DIRS[a][0];c+=DIRS[a][1];path.push(r+","+c)});let r2=sr,c2=sc;const opath=[];other.forEach(a=>{r2+=DIRS[a][0];c2+=DIRS[a][1];opath.push(r2+","+c2)});
+  const rocks=opath.filter(p=>!path.includes(p)&&p!==gr+","+gc).slice(0,1);
+  const wr=[other.join(""),[...good.slice(0,-1),good[good.length-1]==="⬆️"?"➡️":"⬆️"].join(""),[...good,"➡️"].join("")].filter(w=>w!==good.join(""));
+  const cells=[[sr,sc,"🤖"],[gr,gc,"⭐"],...rocks.map(p=>[...p.split(",").map(Number),"🪨"])];q.push(mcT("คำสั่งชุดใดถูกต้อง",good.join(""),rocks.length?wr:wr.slice(1),drGrid(n,cells),{big:0,say:"คำสั่งชุดใดพาบิตตี้ไปถึงดาว"}))}
+ for(let i=0;i<4;i++){const seq=rep(rnd(2,4),()=>pick(["➡️","⬆️"]));const [r,c]=walk(seq,3,0);const labs=shuf([[r,c],...shuf(rep(16,k=>[Math.floor(k/4),k%4]).filter(([a,b])=>!(a===r&&b===c)&&!(a===3&&b===0))).slice(0,3)]).map((p,k)=>[...p,"⬜","ABCD"[k]]);
+  const ans="ABCD"[labs.findIndex(p=>p[0]===r&&p[1]===c)];q.push(mcT(`บิตตี้ทำตามคำสั่ง ${seq.join(" ")} จะไปหยุดที่ช่องใด`,"ช่อง "+ans,["ช่อง A","ช่อง B","ช่อง C","ช่อง D"],drGrid(4,[[3,0,"🤖"],...labs])))}return q};
+G5.t10=FACT("นักทดลองตัวน้อย",["ถ้านำน้ำแข็งไปวางกลางแดด จะเกิดอะไรขึ้น|ละลายเป็นน้ำ|แข็งขึ้น,กลายเป็นหิน","ถ้านำน้ำใส่ช่องแช่แข็ง จะเกิดอะไรขึ้น|กลายเป็นน้ำแข็ง|ระเหยหายไป,กลายเป็นนม","ต้นไม้ที่อยู่ในที่มืดนานๆ จะเป็นอย่างไร|ใบเหลืองและอ่อนแอ|โตเร็วขึ้น,ออกผลมาก","ถ้าไม่รดน้ำต้นไม้หลายวัน ต้นไม้จะเป็นอย่างไร|เหี่ยว|สดชื่น,ออกดอกทันที","ถ้าเป่าลูกโป่งมากเกินไป จะเกิดอะไรขึ้น|แตก|เล็กลง,หนักขึ้น","เกลือใส่น้ำแล้วคนให้ทั่ว เกลือจะเป็นอย่างไร|ละลายในน้ำ|ลอยเป็นก้อน,กลายเป็นทราย","ทรายใส่น้ำแล้วคน ทรายจะเป็นอย่างไร|ไม่ละลาย จมก้นแก้ว|ละลายหมด,ลอยขึ้นฟ้า","ก่อนทดลองควรทำอะไร|คาดเดาผลและเตรียมอุปกรณ์|ทำเลยโดยไม่คิด,เล่นอุปกรณ์","หลังทดลองควรทำอะไร|บันทึกผลและเก็บของ|ทิ้งของไว้,ไม่ต้องบอกใคร","แม่เหล็กดูดสิ่งใดได้|ตะปูเหล็ก|ยางลบ,กระดาษ","แม่เหล็กดูดสิ่งใดไม่ได้|ไม้บรรทัดไม้|คลิปเหล็ก,ตะปู","เงาเกิดขึ้นเมื่อใด|มีสิ่งของบังแสง|ไม่มีแสงเลย,ฝนตก"]);
+G5.t11=FACT("วงจรชีวิต",["ลูกอ๊อดโตขึ้นเป็นอะไร|กบ|ปลา,เต่า","หนอนผีเสื้อเข้าดักแด้แล้วออกมาเป็นอะไร|ผีเสื้อ|ผึ้ง,แมลงวัน","ไข่ไก่ฟักออกมาเป็นอะไร|ลูกเจี๊ยบ|ลูกเป็ด,ลูกแมว","เมล็ดมะม่วงปลูกแล้วจะโตเป็นอะไร|ต้นมะม่วง|ต้นกล้วย,ต้นมะพร้าว","สัตว์ทุกชนิดเมื่อโตขึ้นจะเป็นอย่างไร|ตัวใหญ่ขึ้นและสืบพันธุ์ได้|ตัวเล็กลง,ไม่เปลี่ยนแปลง","ลูกแมวกินอะไรเมื่อเกิดใหม่|นมแม่|ปลาทอด,หญ้า","ยุงวางไข่ที่ใด|ในน้ำนิ่ง|บนก้อนเมฆ,ในทราย","ขั้นแรกในวงจรชีวิตของผีเสื้อคืออะไร|ไข่|ดักแด้,ผีเสื้อ"],
+ ORD([["เรียงวงจรชีวิตของกบ",["ไข่กบ","ลูกอ๊อด","ลูกกบมีหาง","กบ"]],["เรียงวงจรชีวิตของผีเสื้อ",["ไข่","หนอน","ดักแด้","ผีเสื้อ"]],["เรียงวงจรชีวิตของไก่",["ไข่","ลูกเจี๊ยบ","ไก่รุ่น","ไก่โต"]],["เรียงการเติบโตของต้นไม้",["เมล็ด","ต้นอ่อน","ต้นไม้เล็ก","ต้นไม้ใหญ่"]]]));
+G5.t12=FACT("ห้องควบคุมของบิตตี้",["คอมพิวเตอร์ใช้อุปกรณ์ใดพิมพ์ตัวอักษร|แป้นพิมพ์|ลำโพง,จอภาพ","อุปกรณ์ใดใช้ฟังเสียงจากคอมพิวเตอร์|ลำโพงหรือหูฟัง|เมาส์,แป้นพิมพ์","อุปกรณ์ใดใช้ชี้และคลิก|เมาส์|ลำโพง,กล้อง","อุปกรณ์ใดแสดงภาพ|จอภาพ|เมาส์,ไมโครโฟน","ถ้าบิตตี้ต้องเดินซ้ำๆ 3 ครั้ง ควรใช้คำสั่งแบบใด|คำสั่งวนซ้ำ|คำสั่งหยุด,ไม่ใช้คำสั่ง","ถ้าเจอหิน ให้เลี้ยว เป็นคำสั่งแบบใด|คำสั่งเงื่อนไข ถ้า...ให้...|คำสั่งร้องเพลง,คำสั่งนอน","ข้อมูลส่วนตัวที่ไม่ควรบอกคนแปลกหน้าออนไลน์|ที่อยู่บ้าน|สีที่ชอบ,ชื่อการ์ตูนที่ชอบ","ก่อนดาวน์โหลดเกม ควรทำอย่างไร|ขออนุญาตผู้ปกครอง|ดาวน์โหลดทันที,บอกเพื่อนให้กด","ถ้าเห็นข้อความหยาบคายออนไลน์ควรทำอย่างไร|บอกผู้ใหญ่ที่ไว้ใจ|ตอบกลับหยาบคาย,ส่งต่อให้เพื่อน","เวลาใช้แท็บเล็ตควรนั่งอย่างไร|นั่งหลังตรงและห่างจอพอดี|นอนคว่ำใกล้จอ,ใช้ในที่มืด"],
+ ORD([["เรียงคำสั่งให้บิตตี้รดน้ำต้นไม้",["หยิบบัวรดน้ำ","เติมน้ำ","เดินไปที่ต้นไม้","รดน้ำ"]],["เรียงขั้นตอนเปิดคอมพิวเตอร์ทำงาน",["กดปุ่มเปิดเครื่อง","รอเครื่องพร้อม","เปิดโปรแกรม","เริ่มทำงาน"]]]));
+/* ---------- Gaul zone 3: caravan road ---------- */
+const LMK=[["🏠","บ้าน"],["🌴","ต้นปาล์ม"],["🐫","อูฐ"],["⛺","กระโจม"],["💧","บ่อน้ำ"],["🏯","ปราสาท"],["💰","สมบัติ"],["🕌","วัด"]];
+G5.g8=()=>{const q=[H("แผนที่ล่าสมบัติ (ด้านบนของแผนที่คือทิศเหนือ)")];const W={"เหนือ":[-1,0],"ใต้":[1,0],"ตะวันออก":[0,1],"ตะวันตก":[0,-1]};
+ for(let i=0;i<7;i++){const n=4,used=sample(rep(16,k=>k),6).map(k=>[Math.floor(k/4),k%4]),items=sample(LMK,6).map((l,k)=>[...used[k],l[0],"",l[1]]);const st=items[0];
+  const opts=[];Object.keys(W).forEach(d1=>Object.keys(W).forEach(d2=>{for(let a=1;a<=3;a++)for(let b=0;b<=2;b++){const r=st[0]+W[d1][0]*a+W[d2][0]*b,c=st[1]+W[d1][1]*a+W[d2][1]*b;const hit=items.slice(1).find(x=>x[0]===r&&x[1]===c);if(hit&&d1!==d2)opts.push([d1,a,d2,b,hit])}}));
+  if(!opts.length){i--;continue}const [d1,a,d2,b,hit]=pick(opts);const txt=`เริ่มที่${st[4]} ${st[2]} เดินไปทางทิศ${d1} ${a} ช่อง${b?` แล้วไปทางทิศ${d2} ${b} ช่อง`:""} จะถึงอะไร`;
+  q.push(mcT(txt,hit[2]+" "+hit[4],items.slice(1).map(x=>x[2]+" "+x[4]),drGrid(n,items.map(x=>[x[0],x[1],x[2]]),{compass:1}),{say:txt}))}
+ q.push(mcT("ทิศที่อยู่ตรงข้ามทิศตะวันตกคือ","ทิศตะวันออก",["ทิศเหนือ","ทิศใต้"]));return q};
+G5.g9=()=>{const q=[H("ร้านค้าคาราวาน")];const GO=[["🍞","ขนมปัง"],["🧃","น้ำผลไม้"],["🍌","กล้วย"],["🖍️","สีเทียน"],["🎈","ลูกโป่ง"]];
+ for(let i=0;i<4;i++){const [e,n]=pick(GO),p=rnd(2,9),pay=pick([10,20]);q.push(N(`${e} ${n} ราคา ${p} บาท จ่ายเงินตามภาพ ได้เงินทอนกี่บาท`,pay-p,drMoney([pay])))}
+ for(let i=0;i<3;i++){const [e,n]=pick(GO),p=pick([2,5]),k=rnd(2,5);q.push(N(`${n}ราคาชิ้นละ ${p} บาท มีเงิน ${p*k} บาท ซื้อได้กี่ชิ้น`,k))}
+ for(let i=0;i<2;i++){const a=rnd(2,6),b=rnd(2,6),[e1,n1]=pick(GO),[e2,n2]=pick(GO.filter(x=>x[1]!==n1));q.push(N(`ซื้อ${n1} ${a} บาท และ${n2} ${b} บาท รวมกี่บาท`,a+b))}
+ q.push(mcT("ถ้าเงินไม่พอซื้อของที่อยากได้ ควรทำอย่างไร","ออมเงินไว้ก่อนแล้วค่อยซื้อ",["ขโมย","ร้องไห้ให้คนซื้อให้"]));return q};
+G5.g10=FACT("พิพิธภัณฑ์เหตุการณ์",["เหตุการณ์ใดเกิดก่อน|ตื่นนอน|กินข้าวเที่ยง,เข้านอน","เหตุการณ์ใดเกิดหลังสุดของวัน|เข้านอน|ตื่นนอน,ไปโรงเรียน","ตอนเป็นทารก เราทำอะไรไม่ได้|อ่านหนังสือเอง|ร้องไห้,ดื่มนม","ปีที่แล้วเป็นเรื่องของเวลาใด|อดีต|อนาคต,ปัจจุบัน","ปีหน้าเป็นเรื่องของเวลาใด|อนาคต|อดีต,ปัจจุบัน","สิ่งใดช่วยให้รู้เรื่องในอดีต|รูปถ่ายเก่าและคำเล่าของปู่ย่า|การเดา,ความฝัน","ของใช้สมัยก่อนที่ใช้ตักน้ำจากบ่อคือ|ถังและเชือก|โทรศัพท์,ตู้เย็น","สมัยก่อนคนเดินทางไกลในทะเลทรายด้วยอะไร|อูฐ|เครื่องบิน,รถไฟฟ้า"],
+ ORD([["เรียงการเติบโตของคน",["ทารก","เด็ก","ผู้ใหญ่","ผู้สูงอายุ"]],["เรียงกิจวัตรตอนเช้า",["ตื่นนอน","แปรงฟัน","อาบน้ำแต่งตัว","ไปโรงเรียน"]],["เรียงวันในสัปดาห์",["จันทร์","อังคาร","พุธ","พฤหัสบดี"]],["เรียงเดือนต้นปี",["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน"]]]));
+G5.g11=FACT("กฎของเมืองกำแพงหนา",["ไฟจราจรสีแดงหมายถึง|หยุด|ไปได้,เร่งความเร็ว","ไฟจราจรสีเขียวหมายถึง|ไปได้|หยุด,เตรียมหยุด","ข้ามถนนควรข้ามที่ใด|ทางม้าลายหรือสะพานลอย|กลางถนนที่รถเยอะ,หลังรถเมล์","นั่งรถยนต์ควรทำอะไร|คาดเข็มขัดนิรภัย|ยืนบนเบาะ,ยื่นหัวออกหน้าต่าง","ขี่จักรยานควรสวมอะไร|หมวกกันน็อก|แว่นกันแดดอย่างเดียว,รองเท้าแตะ","สิทธิของเด็กข้อใดถูกต้อง|ได้เรียนหนังสือ|ต้องทำงานหนัก,ไม่ได้เล่น","หน้าที่ของเด็กที่ดีคือ|เชื่อฟังพ่อแม่และครู|ทำตามใจตัวเอง,ทะเลาะกับเพื่อน","เมื่อเห็นคนทิ้งขยะไม่เป็นที่ ควรทำอย่างไร|บอกอย่างสุภาพให้ทิ้งลงถัง|ทิ้งตาม,หัวเราะ","กฎของห้องเรียนมีไว้เพื่ออะไร|ให้ทุกคนอยู่ร่วมกันอย่างมีความสุข|ให้ครูดุ,ให้เด็กกลัว","ถ้าเพื่อนทำผิดกฎ ควรทำอย่างไร|เตือนอย่างสุภาพหรือบอกครู|ทำผิดด้วย,ประจาน","การเลือกหัวหน้าห้องด้วยการยกมือ เรียกว่า|การลงคะแนนเสียง|การทะเลาะ,การเดา","เมื่อแพ้การเลือกตั้งหัวหน้าห้อง ควรทำอย่างไร|ยอมรับและช่วยเหลือห้อง|โกรธเพื่อน,ไม่ช่วยงาน"]);
+/* ---------- register ---------- */
+S2ZONE.k.push({th:"ป้อมการวัด",sub:"ยาว หนัก เวลา เงิน รูปทรง Bar Model"},{th:"หอกลยุทธ์โอลิมปิก",sub:"แบบรูป ตาชั่ง ซูโดกุ นับบล็อก ตรรกะ"});
+S2ZONE.t.push({th:"ห้องกลไกบิตตี้",sub:"เขาวงกตโค้ด ทดลอง วงจรชีวิต อุปกรณ์"});
+S2ZONE.g.push({th:"เส้นทางคาราวาน",sub:"แผนที่ ค้าขาย เหตุการณ์ กฎและหน้าที่"});
+[["k15","ทุ่งวัดความยาว","k",2,"b2"],["k16","ตาชั่งอัศวิน","k",2],["k17","หอนาฬิกา","k",2],["k18","คลังเหรียญ","k",2],["k19","ลานรูปทรง","k",2],["k20","Bar Model กองทัพ","k",2],
+ ["k21","แบบรูปลับ","k",3,"b3"],["k22","ตาชั่งสมดุล","k",3],["k23","ซูโดกุ 4×4","k",3],["k24","นับบล็อก 3 มิติ","k",3],["k25","หลักรังนกพิราบ","k",3],["k26","นับรูปที่ซ่อนอยู่","k",3],["k27","ตรรกะอัศวิน","k",3],["k28","ปิรามิดตัวเลข","k",3],
+ ["t9","เขาวงกตบิตตี้","t",2,"tb2"],["t10","นักทดลองตัวน้อย","t",2],["t11","วงจรชีวิต","t",2],["t12","ห้องควบคุมบิตตี้","t",2],
+ ["g8","แผนที่ล่าสมบัติ","g",2,"gb2"],["g9","ร้านค้าคาราวาน","g",2],["g10","พิพิธภัณฑ์เหตุการณ์","g",2],["g11","กฎของเมืองกำแพงหนา","g",2]
+].forEach(([id,t,k,z,gate])=>{const l={id,t,k,z};if(gate)l.gate=gate;S2LV.push(l);GEN[id]=G5[id];regPage(l)});
+Object.assign(S2BOSS,{
+ b3:{n:"อัศวินเงาจอมวัด",e:"🗡️",hp:120,atk:11,pool:["k15","k16","k17","k18","k19","k20"],after:"k20",k:"k",rew:{wood:6,stone:4,iron:3,crystal:2,egg:1},c:"#B8452F",say:"อัศวินเงาจอมวัดบิดตาชั่งและนาฬิกาทั้งเมือง!"},
+ b4:{n:"จอมกลยุทธ์หมอกเงา",e:"🧙",hp:140,atk:12,pool:["k21","k22","k23","k24","k25","k26","k27","k28"],after:"k28",k:"k",rew:{iron:4,crystal:4,egg:1},c:"#5A3FB8",say:"จอมกลยุทธ์หมอกเงาท้าประลองปัญญา!"},
+ tb3:{n:"หุ่นกลคลั่ง",e:"🤖",hp:125,atk:11,pool:["t9","t10","t11","t12"],after:"t12",k:"t",rew:{pearl:4,iron:3,crystal:3,egg:1},c:"#2E6BA6",say:"หุ่นกลถูกหมอกดำสลับคำสั่งจนคลั่ง!"},
+ gb3:{n:"ราชาพายุทราย",e:"🦂",hp:125,atk:11,pool:["g8","g9","g10","g11"],after:"g11",k:"g",rew:{sand:4,iron:3,crystal:3,egg:1},c:"#C08A2A",say:"ราชาพายุทรายกลบเส้นทางคาราวานทั้งหมด!"}});
+Object.assign(S2CHEST,{c5:"k17",c6:"k24",tc3:"t10",gc3:"g9"});
+
 /* ===== online save: player name + PIN, stored in Firebase Firestore (REST) ===== */
 const OL_APP="rainbow-dragon",OL_KEY=OL_APP+"-session",OL_CFG=window.FB_CONFIG||{};
 const olOn=()=>!!(OL_CFG.projectId&&OL_CFG.apiKey);
@@ -1980,7 +2126,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795200637";let OL_VCHK=0;
+const OL_VER="1795200993";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
