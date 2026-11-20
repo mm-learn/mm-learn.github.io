@@ -1428,8 +1428,8 @@ function s2locked(){const fin=s1done();
  ${fin?`<button class="go fire" id="s2un">⚔️ ปลดล็อก Season 2</button><p class="note">เก่งมาก! ผ่านครบทั้ง 8 ดินแดนของ Season 1 แล้ว</p>`:`<p class="note">ผ่านบอสให้ครบทั้ง 8 ดินแดนใน Season 1 เพื่อปลดล็อก</p>`}
  <button class="go ghost sm" id="s2par">👨‍👩‍👧 ผู้ปกครองเปิดให้</button></div></div>`;
  const un=$("#s2un");if(un)un.onclick=s2cinema;
- $("#s2par").onclick=()=>{const a=rnd(21,49),b=rnd(21,49);const m=modal(`<div style="text-align:center"><h3>สำหรับผู้ปกครอง</h3><p>ตอบเพื่อเปิด Season 2 ให้เด็ก</p><b style="font-size:26px">${a} + ${b} = ?</b><input id="pg" type="number" inputmode="numeric" style="margin-top:10px"><button class="go" id="pgo">ยืนยัน</button></div>`);
-  m.querySelector("#pgo").onclick=()=>{if(+m.querySelector("#pg").value===a+b){m.remove();s2cinema()}else toast("ยังไม่ถูกนะ ลองใหม่")}}}
+ $("#s2par").onclick=()=>{const a=rnd(13,19),b=rnd(6,9);const m=modal(`<div style="text-align:center"><h3>สำหรับผู้ปกครอง</h3><p>ตอบเพื่อเปิด Season 2 ให้เด็ก</p><b style="font-size:26px">${a} × ${b} = ?</b><input id="pg" type="number" inputmode="numeric" style="margin-top:10px"><button class="go" id="pgo">ยืนยัน</button></div>`);
+  m.querySelector("#pgo").onclick=()=>{if(+m.querySelector("#pg").value===a*b){m.remove();s2cinema()}else toast("ยังไม่ถูกนะ ลองใหม่")}}}
 /* ---- opening cinematic ---- */
 function s2cinema(){const lines=["นานมาแล้ว มี 3 อาณาจักรที่อยู่ห่างไกลกัน","อัศวินพบมังกร ชาวทะเลทรายพบช้างเผือก และชาวท่าเรือพบคราเคน","แต่จอมโกลาหลปล่อยหมอกดำ ทำให้ทั้งสามเมืองลืมกันและกัน","นักผจญภัยตัวน้อย เธอคือความหวัง ที่จะเชื่อมทั้ง 3 เมืองเข้าด้วยกัน!"];let i=0;
  const el=document.createElement("div");el.className="s2cin";document.body.appendChild(el);
@@ -1559,7 +1559,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795193980";let OL_VCHK=0;
+const OL_VER="1795194405";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
