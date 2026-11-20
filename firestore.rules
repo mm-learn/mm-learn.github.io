@@ -37,5 +37,27 @@ service cloud.firestore {
         && request.resource.data.updated is int;
       allow delete: if false;
     }
+    // เมืองบ้านเกิด Season 2: เก็บแค่ชื่อ บล็อกที่สร้าง แต้มทีม และจำนวน 👍 (ไม่มีเซฟ ไม่มี PIN)
+    function validCity() {
+      return request.resource.data.keys().hasOnly(['app', 'name', 'grid', 'home', 'wk', 'wp', 'pts', 'likes', 'updated'])
+        && request.resource.data.app == 'rainbow-dragon'
+        && request.resource.data.name is string && request.resource.data.name.size() <= 20
+        && request.resource.data.grid is string && request.resource.data.grid.size() <= 2400
+        && request.resource.data.home in ['k', 't', 'g']
+        && request.resource.data.wk is string && request.resource.data.wk.size() <= 10
+        && request.resource.data.wp is int && request.resource.data.wp >= 0 && request.resource.data.wp < 100000
+        && request.resource.data.pts is int && request.resource.data.pts >= 0 && request.resource.data.pts < 100000
+        && request.resource.data.likes is int && request.resource.data.updated is int;
+    }
+    match /city/{id} {
+      allow get, list: if true;
+      allow create: if id.size() == 64 && validCity() && request.resource.data.likes == 0;
+      allow update: if id.size() == 64 && validCity() && (
+        request.resource.data.likes == resource.data.likes
+        || (request.resource.data.likes == resource.data.likes + 1
+            && request.resource.data.grid == resource.data.grid
+            && request.resource.data.name == resource.data.name));
+      allow delete: if false;
+    }
   }
 }
