@@ -355,6 +355,8 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .cres{display:flex;gap:6px;overflow-x:auto;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--bg2);scrollbar-width:none}.cres::-webkit-scrollbar{display:none}
 .cres span{flex:0 0 auto;display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;background:#ffffff14;font-size:13px;font-weight:700;white-space:nowrap}.cres span svg,.cres span img{width:16px;height:16px}
 
+
+.rev{text-align:center}.revans{font-size:22px;padding:14px;border-radius:14px;background:#ffffff14;margin:6px 0}.revans b{color:#ffd166}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -873,12 +875,12 @@ function progress(){const done=L.pos||0,tot=L.queue.length;$("#lp").style.width=
 let ANS=null;
 function showQ(){const qi=L.queue[L.pos||0];if(qi===undefined)return summary();const q=L.qs[qi];L.cur=qi;ANS=null;progress();
  const ttl=q.ul?ulText(q):esc(q.q||"");
- let h=`${q.sec?`<div class="qsec">${esc(q.sec)}</div>`:""}<div class="qtext ${q.big&&!q.col?"big":""}"><span class="t">${ttl}</span><button class="spk" id="spk" aria-label="ฟังโจทย์">🔊</button></div>`;
+ let h=`${q.sec?`<div class="qsec">${esc(q.sec)}</div>`:""}<div class="qtext ${q.big&&!q.col?"big":""}"><span class="t">${ttl}</span>${q.pic?"":`<button class="spk" id="spk" aria-label="ฟังโจทย์">🔊</button>`}</div>`;
  if(q.im)h+=`<img class="qimg" id="qim" src="${IMG[q.im]}" alt="ภาพประกอบโจทย์">`;
  h+=`<div id="qa"></div><div class="tools">${(q.k==="mc"||q.k==="multi")&&!q.cut&&!L.u50&&q.o&&q.o.length>2?`<button class="tool" id="t50">✂️ ตัดตัวเลือกผิด 1 ข้อ (💡1 · ใช้ได้ 1 ครั้ง/ด่าน)</button>`:""}${L.usk?"":`<button class="tool" id="tskip">⏭️ ข้ามไปก่อน (💡1 · 1 ครั้ง/ด่าน)</button>`}${q.src&&q.src!==q.im?`<button class="tool" id="tsrc">📄 ดูโจทย์ในใบงาน</button>`:""}</div>`;
  $("#lb").innerHTML=h;$("#lb").scrollTop=0;$(".lesson").scrollTop=0;
  const sayq=()=>say(q.say||q.q||q.t||"",q.en&&!/[฀-๿]/.test(q.q)?"en":undefined);
- $("#spk").onclick=sayq;if(S.auto)setTimeout(sayq,250);
+ if($("#spk"))$("#spk").onclick=sayq;if(S.auto&&!q.pic)setTimeout(sayq,250);
  const qim=$("#qim");if(qim)qim.onclick=()=>zoom(qim.src);const tsrc=$("#tsrc");if(tsrc)tsrc.onclick=()=>zoom(IMG[q.src]);
  const t50=$("#t50");if(t50)t50.onclick=()=>useBulb(()=>{L.u50=1;cutOption(q);t50.remove()});
  const tsk=$("#tskip");if(tsk)tsk.onclick=()=>useBulb(()=>{L.usk=1;L.res[qi]={ok:false,skip:true};nextQ()});
@@ -913,6 +915,9 @@ const RENDER={
   el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{el.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");SND.tap();if(q.en&&!isImg(q.o[+b.dataset.i]))say(q.o[+b.dataset.i],"en");ready(+b.dataset.i)})},
  multi(q,el){const sel=new Set();el.innerHTML=`<p class="note">แตะเลือกได้หลายข้อ แล้วกดตรวจคำตอบ</p><div class="opts ${q.o.some(isImg)?"c3":q.o.length>4?"c2":""}">${q.o.map((o,i)=>`<button class="opt" data-i="${i}" aria-pressed="false">${optHTML(o)}</button>`).join("")}</div>`;
   el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;sel.has(i)?sel.delete(i):sel.add(i);b.classList.toggle("sel");b.setAttribute("aria-pressed",sel.has(i));SND.tap();ready([...sel])})},
+ rev(q,el){el.innerHTML=`<div class="rev"><p class="note">ตอบในใจหรือเขียนลงกระดาษก่อน แล้วกดดูเฉลย</p><button class="go teal" id="rvs">👀 ดูเฉลย</button></div>`;
+  el.querySelector("#rvs").onclick=()=>{SND.tap();el.innerHTML=`<div class="rev"><div class="revans">เฉลย: <b>${esc(q.a)}</b></div><p class="note">คำตอบของเราตรงกับเฉลยไหม?</p><div class="opts c2"><button class="opt" data-v="1">✅ ตรง</button><button class="opt" data-v="0">❌ ไม่ตรง</button></div></div>`;
+   el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{el.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");SND.tap();ready(b.dataset.v==="1")})}},
  num(q,el){let v="";el.innerHTML=`${q.col?`<div class="colbox">${q.col.map((n,i)=>`<div>${i?"+ ":""}${n}</div>`).join("")}<div class="ln"></div></div>`:""}<div class="numshow" id="ns" aria-live="polite">&nbsp;</div><div class="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-n="${n}">${n}</button>`).join("")}<button data-n="c" aria-label="ลบ">⌫</button><button data-n="0">0</button><button data-n="x" aria-label="ล้าง">✕</button></div>`;
   el.querySelectorAll(".pad button").forEach(b=>b.onclick=()=>{const n=b.dataset.n;SND.tap();if(n==="c")v=v.slice(0,-1);else if(n==="x")v="";else if(v.length<5)v+=n;$("#ns").innerHTML=v||"&nbsp;";ready(v===""?null:+v)})},
  ord(q,el){const items=q.it.map((t,i)=>({t,i}));let tiles=shuf(items);if(tiles.every((x,k)=>x.i===k)&&tiles.length>1)tiles.push(tiles.shift());const placed=[];
@@ -939,6 +944,7 @@ const RENDER={
  trace(q,el){traceUI(q,el)}};
 const GRADE={
  mc:(q,v)=>Array.isArray(q.a)?q.a.includes(v):v===q.a,
+ rev:(q,v)=>v===true,
  multi:(q,v)=>{const a=[...q.a].sort().join(),b=[...(v||[])].sort().join();return a===b},
  num:(q,v)=>(Array.isArray(q.a)?q.a:[q.a]).map(Number).includes(v),
  ord:(q,v)=>Array.isArray(v)&&v.length===q.it.length&&v.map(i=>q.it[i]).join("\u0001")===q.it.join("\u0001"),
@@ -4287,7 +4293,15 @@ WK("g56","แบบทดสอบรวมทักษะสังคมศึ�
  M|q|opt;opt;opt|ans|why|crop   T|stmt|1/0|why|crop   S|q|binA;binB[;binC]|item>bin,item>bin|why|crop
  O|q|first>second>third|why|crop   N|q|number|why|crop   U|q|opt;opt;opt|i,j|why|crop      leading * on q = format adapted for phone */
 const WSD={};const W=(id,title,items)=>{WSD[id]={title,items}};
-function WQ(id,s,i){const P=s.split("|"),T=P[0];let q=P[1];const ad=q[0]==="*";if(ad)q=q.slice(1);
+const PTL=["ก","ข","ค","ง","จ"];
+function WP(id,P,i){const T=P[0],crop=P[P.length-1],img="ws_"+id+"_"+(i+1);IMG[img]="ws/"+id+"/"+(i+1)+".jpg";
+ const q=`ข้อ ${i+1}`,x={say:"",src:img,pic:1};
+ if(T==="PL"){const n=+P[1],a=+P[2];x.why="คำตอบที่ถูก: "+PTL[a];return MC(q,PTL.slice(0,n),a,img,x)}
+ if(T==="PU"){const n=+P[1],a=P[2].split(",").map(Number);x.why="คำตอบที่ถูก: "+a.map(j=>PTL[j]).join(" และ ");return M(q,PTL.slice(0,n),a,img,x)}
+ if(T==="PT"){x.why="คำตอบที่ถูก: "+(P[1]==="1"?"✓ ถูก":"✗ ผิด");return MC(q,["✓ ถูก","✗ ผิด"],P[1]==="1"?0:1,img,x)}
+ if(T==="PN"){x.why="คำตอบที่ถูก: "+P[1];return N(q,+P[1],img,x)}
+ return Object.assign({k:"rev",q,a:P[1],im:img},x)}
+function WQ(id,s,i){const P=s.split("|"),T=P[0];if(T[0]==="P")return WP(id,P,i);let q=P[1];const ad=q[0]==="*";if(ad)q=q.slice(1);
  const crop=P[P.length-1],why=P[P.length-2]||"",inl=/\+$/.test(crop),img="ws_"+id+"_"+(i+1);
  IMG[img]="ws/"+id+"/"+(i+1)+".jpg";const x={say:q,why,src:img};const im=inl?img:null;
  if(T==="M"){let op=P[2].split(";"),a=+P[3];if(ad&&!/^[กขคง]\. /.test(op[0])){const c=op[a];op=shuf(op);a=op.indexOf(c)}return MC(q,op,a,im,x)}
@@ -4331,6 +4345,19 @@ W("g3","ศาสนสถานและบุคคลทางศาสนา
 "T|เราสามารถส่งเสียงดังรบกวนผู้อื่นในศาสนสถานได้|0|ไม่ควรส่งเสียงดังรบกวนผู้อื่นในศาสนสถาน|2,350,450",
 "T|เราควรแสดงความสุภาพต่อบุคคลทางศาสนา|1|ควรแสดงความสุภาพและให้เกียรติบุคคลทางศาสนา|2,560,660",
 "M|*ถ้านักเรียนไปศาสนสถาน นักเรียนจะปฏิบัติตนอย่างไร ยกตัวอย่าง 1 อย่าง|พูดสุภาพ ไม่ส่งเสียงดัง และทำตามกฎของสถานที่;วิ่งเล่นและส่งเสียงดัง;ทิ้งขยะไว้บนพื้น|0|ตัวอย่างคำตอบ: พูดสุภาพ แต่งกายเรียบร้อย ไม่ส่งเสียงดัง รักษาความสะอาด ทำตามกฎของสถานที่|2,890,1130"]);
+
+/* picture-only worksheet items (crop shown as the question; answer letters from the answer key) */
+W("g4","หลักคำสอนง่าย ๆ ในชีวิตประจำวัน",["PL|3|0|0,890,1010","PL|3|0|0,1035,1165","PL|3|0|0,1185,1315","PL|3|0|0,1335,1460",
+"PT|1|1,380,560","PT|0|1,600,780","PT|1|1,820,990",
+"PA|เก็บของเล่นเข้าที่ให้เรียบร้อยหลังจากเล่นเสร็จ|2,360,610","PA|ปลอบเพื่อนและช่วยเพื่อนหาดินสอ|2,650,900","PA|ยอมรับว่าเราทำสมุดของเพื่อนเปื้อน ขอโทษเพื่อน และช่วยแก้ไขตามที่ทำได้|2,940,1180"]);
+W("t28","วิเคราะห์สถานการณ์สิ่งมีชีวิตกับสภาพแวดล้อม",["PL|3|0|0,715,990","PL|3|0|0,1000,1190","PL|3|0|0,1210,1480",
+"PA|ก. ✓ ถูก · ข. ✗ ไม่ถูก · ค. ✗ ไม่ถูก|1,235,545","PA|1. ปลา → ข · 2. นก → ค · 3. ต้นถั่ว → ก|1,565,1160","PL|3|0|1,1180,1460",
+"PL|3|0|2,235,590","PA|จุดที่ 1 เพราะมีร่มเงาและมีน้ำสะอาด|2,600,915","PL|3|0|2,935,1160","PA|ที่ A เพราะ 1. มีน้ำสะอาด 2. มีพื้นที่ให้ปลาว่าย|2,1175,1465"]);
+W("k1","การนับ การอ่าน และการเขียนจำนวนนับ 0–100",["PN|11|0,755,920","PL|3|1|0,940,1055","PA|๒๓|0,1075,1175","PN|32|0,1195,1295","PL|3|0|0,1315,1425",
+"PA|ห้าสิบหก|1,260,425","PL|3|1|1,465,640","PN|98|1,690,910","PA|ตัวเลขไทย ๘๔ · ตัวหนังสือ แปดสิบสี่|1,940,1155","PL|3|0|1,1185,1420"]);
+W("t61","การลองผิดลองถูกเพื่อแก้ปัญหา",["PL|3|1|0,890,1150","PL|3|2|0,1170,1480","PL|3|0|1,175,560","PL|3|0|1,590,920",
+"PT|1|1,1125,1255","PT|0|1,1290,1440","PT|1|2,190,330",
+"PA|ค. = 1 · ก. = 2 · ข. = 3|2,445,750","PL|3|1|2,790,1160","PA|กดปุ่มด้านหน้า เพราะเป็นวิธีที่เคยทำให้กล่องแบบเดียวกันเปิดได้|2,1220,1470"]);
 
 W("t20","ลักษณะและหน้าที่ของส่วนต่าง ๆ ของพืช",[
 "M|ส่วนหนึ่งของต้นถั่วอยู่ในดิน แตกเป็นเส้นหลายเส้น ช่วยยึดต้นถั่วไว้กับดินและดูดน้ำจากดิน ส่วนนี้คือข้อใด|ก. ราก;ข. ใบ;ค. ดอก|0|รากอยู่ในดิน แตกเป็นเส้นหลายเส้น ช่วยยึดต้นถั่วไว้กับดินและดูดน้ำ|0,935,1150+",
@@ -4632,7 +4659,7 @@ W("t27","ผลของการเปลี่ยนแปลงสภาพ�
 
 (()=>{for(const id in WSD){const v=WSD[id],l=S2LV.find(x=>x.id===id);if(!l)continue;
  const ct=id[0]==="t"&&+id.slice(1)>60,no=id[0]==="t"&&ct?+id.slice(1)-60:+id.slice(1);
- l.t=`${ct?"ท"+no:no}. ${v.title}`;const lab=id[0]==="g"?"ใบงานสังคมศึกษา":ct?"ใบงานเทคโนโลยี":"ใบงานวิทยาศาสตร์";
+ l.t=`${ct?"ท"+no:no}. ${v.title}`;const lab=id[0]==="k"?"ใบงานคณิตศาสตร์":id[0]==="g"?"ใบงานสังคมศึกษา":ct?"ใบงานเทคโนโลยี":"ใบงานวิทยาศาสตร์";
  GEN[id]=()=>[H(`${lab}ที่ ${no}: ${v.title}`),...v.items.map((s,i)=>WQ(id,s,i))];regPage(l)}})();
 
 /* ===== Season 2 · phase 6: blocky art, merged menus, S1<->S2 links, kingdom eggs, pet skills, luck, myth cards, secret items ===== */
@@ -5099,7 +5126,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795254714";let OL_VCHK=0;
+const OL_VER="1795256039";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
