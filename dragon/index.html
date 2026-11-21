@@ -344,6 +344,13 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .winter{background:linear-gradient(135deg,#1d3b6e,#2a5d9a);border:2px solid #9fd3ff;text-align:center}.winter b{display:block;font-size:18px}.winter small{display:block;opacity:.85;margin:2px 0}
 .wdots{display:flex;gap:6px;justify-content:center;margin:8px 0}.wdot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#ffffff1f;font-size:14px;font-weight:700}.wdot.on{background:#bfe6ff;color:#123}
 .pcell .phow{display:block;font-size:10px;opacity:.75;line-height:1.2}
+
+.cut{position:fixed;inset:0;z-index:120;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;animation:cutin .3s ease}
+.cut.out{animation:cutout .35s ease forwards}.cut video,.cut img{width:100%;max-height:70vh;object-fit:cover;aspect-ratio:16/9}.cut img{animation:cutzoom 2.6s ease-out}
+.cutbar{position:absolute;left:0;right:0;top:0;height:12vh;background:#000}.cutbar.b{top:auto;bottom:0}
+.cutcap{position:absolute;bottom:15vh;left:0;right:0;text-align:center;color:#fff;font-size:22px;font-weight:800;text-shadow:0 2px 10px #000,0 0 18px #ffb020;animation:cutcap .6s .2s both}
+.cutskip{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom));right:16px;color:#fff9;font-size:12px}
+@keyframes cutin{from{opacity:0}to{opacity:1}}@keyframes cutout{to{opacity:0}}@keyframes cutzoom{from{transform:scale(1.25)}to{transform:scale(1)}}@keyframes cutcap{from{opacity:0;transform:translateY(20px) scale(.8)}to{opacity:1;transform:none}}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -1579,7 +1586,7 @@ function boss_attack(b,wrong){const rage=b.hp<=b.max*.4;let d=Math.max(2,(rage?b
  if(b.guard){b.guard=0;return "🛡️ กันการโจมตีของบอสได้!"}
  b.me=Math.max(0,b.me-d);SND.roar();return `${b.B.e} ${rage?"บ้าคลั่ง! ":""}โจมตี -${d}`}
 function s2bHit(ok){const b=S2B,fx=$("#s2e"),ps=$("#s2p");let log="";
- if(b.mode.slice(0,3)==="sk_"){log=s5skill(b,ok)}else if(b.mode==="combo"){b.cu=1;if(ok){const d=s5comboDmg(b);b.hp=Math.max(0,b.hp-d);log=`🌈 ท่าสามอาณาจักร! สัตว์คู่ใจทั้ง 3 เมืองรวมพลัง -${d} 💥`;SND.fire();setTimeout(SND.hit,250);if(fx)fx.classList.add("hit");if(ps)ps.classList.add("lunge");confetti(80)}else log="❌ รวมพลังไม่สำเร็จ"}
+ if(b.mode.slice(0,3)==="sk_"){log=s5skill(b,ok)}else if(b.mode==="combo"){b.cu=1;if(ok){const d=s5comboDmg(b);b.hp=Math.max(0,b.hp-d);log=`🌈 ท่าสามอาณาจักร! สัตว์คู่ใจทั้ง 3 เมืองรวมพลัง -${d} 💥`;if(typeof s5cut==="function")s5cut();SND.fire();setTimeout(SND.hit,250);if(fx)fx.classList.add("hit");if(ps)ps.classList.add("lunge");confetti(80)}else log="❌ รวมพลังไม่สำเร็จ"}
  else if(b.mode==="atk"){if(ok){b.streak++;let d=12+b.pl.bonus+rnd(0,4);const crit=b.streak%3===0;if(crit)d=Math.round(d*1.5);b.hp=Math.max(0,b.hp-d);log=`⚔️ โจมตีโดน -${d}${crit?" · สัตว์คู่ใจช่วยโจมตี! 💥":""}`;SND.fire();setTimeout(SND.hit,250);if(fx)fx.classList.add("hit");if(crit&&ps)ps.classList.add("lunge")}else{b.streak=0;log="❌ พลาด!"}}
  else{if(ok){b.guard=1;const h=Math.min(8,b.mmax-b.me);b.me+=h;log=`🛡️ ตั้งรับสำเร็จ${h?` · ฟื้น +${h}`:""}`;SND.gem()}else{b.streak=0;log="❌ ตั้งรับไม่ทัน"}}
  {const wq=L.qs[L.cur];if(!ok&&wq&&wq.why)log+=` · 💡 ${wq.why}`}
@@ -4798,7 +4805,7 @@ function cityTab(){const s=S.s2;let h=topBar()+`<div class="secttl">🏰 สร�
 /* ---------- Season 2 page dressing: opening banner, mascots, egg list ---------- */
 const MASCOT={k:["🐉","มังกรผู้พิทักษ์"],t:["🐙","คราเคนแห่งท้องทะเล"],g:["🐘","ช้างเผือกแห่งทะเลทราย"]};
 const MVID={k:1,g:1};
-function mascotHTML(k){const u=artURL("mascot_"+k),M=MASCOT[k];return `<div class="mascot" style="--kc:${S2KB[k].c}">${u?`<img src="${u}" alt="${M[1]}" loading="lazy">`:`<div class="mph"><span>${M[0]}</span></div>`}<b>${M[1]}</b>${MVID[k]?`<button class="mplay" data-mv="${k}" aria-label="เล่นคลิป">▶️ ดูคลิป</button>`:""}</div>`}
+function mascotHTML(k){const u=artURL("mascot_"+k),M=MASCOT[k];return `<div class="mascot" style="--kc:${S2KB[k].c}">${u?`<img src="${u}" alt="${M[1]}" loading="lazy">`:`<div class="mph"><span>${M[0]}</span></div>`}<b>${M[1]}</b></div>`}
 function mascotPlay(btn){const box=btn.closest(".mascot"),k=btn.dataset.mv;if(box.querySelector("video"))return;
  const v=document.createElement("video");v.src="s2/mvid_"+k+".mp4";v.poster="s2/mvid_"+k+".jpg";v.playsInline=true;v.setAttribute("playsinline","");v.controls=false;
  box.classList.add("playing");box.prepend(v);const end=()=>{v.remove();box.classList.remove("playing")};v.onended=end;v.onerror=()=>{end();toast("เล่นคลิปไม่ได้ ลองต่อเน็ตแล้วลองใหม่")};
@@ -4912,6 +4919,13 @@ function winterCard(){const s=s2(),d=today();if(!s.on)return "";const n=(s.wd||[
  const dots=[1,2,3,4,5,6,7].map(i=>`<span class="wdot ${i<=n?"on":""}">${i===4?"🐧":i===7?"🐆":i<=n?"❄️":i}</span>`).join("");
  return `<div class="card winter"><b>❄️ อีเวนต์ฤดูหนาว</b><small>${on?`ถึง 31 ม.ค. · ผ่านด่านอย่างน้อย 1 ด่านต่อวัน นับเป็น 1 วัน`:`เริ่ม 1 ธ.ค. นี้!`}</small><div class="wdots">${dots}</div><small>${on?`ฝึกแล้ว ${Math.min(n,7)}/7 วัน${(s.wd||[]).includes(d)?" · วันนี้นับแล้ว ✅":" · วันนี้ยังไม่นับ"}`:"ฝึกครบ 4 วัน ได้เพนกวินหิมะ · ครบ 7 วัน ได้เสือดาวหิมะ"}</small></div>`}
 {const _dr=s5dress;s5dress=function(){_dr.apply(this,arguments);try{winterTick();petxCheck();const w=app.querySelector(".wrap"),tabs=w&&w.querySelector(".s2tabs");const h=winterCard();if(tabs&&h&&!w.querySelector(".winter"))tabs.insertAdjacentHTML("beforebegin",h)}catch(e){}}}
+
+/* ---------- ultimate cut scene: home kingdom guardian comes to help ---------- */
+function s5cut(){const s=s2(),k=s.home||"k",M=MASCOT[k],u=artURL("mascot_"+k);const z=document.createElement("div");z.className="cut";
+ z.innerHTML=`<div class="cutbar"></div>${MVID[k]?`<video src="s2/mvid_${k}.mp4" playsinline></video>`:`<img src="${u||""}" alt="">`}<div class="cutcap">✨ ${M[1]} มาช่วยแล้ว! ✨</div><div class="cutbar b"></div><small class="cutskip">แตะเพื่อข้าม</small>`;
+ document.body.appendChild(z);let done=false;const end=()=>{if(done)return;done=true;z.classList.add("out");setTimeout(()=>z.remove(),350)};z.onclick=end;
+ const v=z.querySelector("video");if(v){v.setAttribute("playsinline","");v.onended=end;v.onerror=end;v.play().catch(()=>{v.muted=true;v.play().catch(end)});setTimeout(end,9000)}
+ else{if(!u){z.querySelector("img").remove()}SND.roar&&SND.roar();setTimeout(end,2600)}}
 
 /* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
 const ADM_H="f1cb8fd26529fd7ed75789960c9194e25b03db19db9e1556ae0d91c3a80e7874";
@@ -5060,7 +5074,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795245126";let OL_VCHK=0;
+const OL_VER="1795245212";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
