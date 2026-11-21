@@ -328,6 +328,13 @@ svg.px,svg.cube{image-rendering:pixelated;vertical-align:middle}
 .newpic{display:grid;place-items:center;margin:8px 0}.newpic img{max-width:200px;border-radius:16px}
 .cityart{display:flex;justify-content:center;gap:4px;margin:6px 0}
 .cube.bi{display:inline-block;vertical-align:-0.2em}
+
+.pview{display:grid}.pvbox{text-align:center;color:#fff;max-width:520px;width:100%}.pvbox img{max-height:62vh;max-width:100%;border-radius:14px;background:#111}
+.pvbox b{display:block;font-size:20px;margin:8px 0}.pvtab{display:flex;gap:6px;justify-content:center;margin:6px 0}
+.pvtab button{flex:1;border:0;border-radius:12px;padding:10px 4px;font:inherit;font-weight:700;background:#ffffff22;color:#fff}.pvtab button.on{background:#ffb020;color:#222}.pvtab button:disabled{opacity:.45}
+.pvbox small{opacity:.8}.zoom.pview.big{display:block}.zoom.pview.big .pvbox img{max-height:none;width:200%;max-width:none}
+img.petI,img.mythI,.mascot img{cursor:zoom-in}
+.pview{padding:12px 16px}.pvbox{box-sizing:border-box}.pvtab button{min-width:0;font-size:14px;white-space:nowrap}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -4636,7 +4643,7 @@ function s2hero(size){const s=s2(),home=s.home||"k",q=id=>s.eq[id]?GEAR.find(g=>
 /* ---------- pets: art when available, kingdom eggs ---------- */
 function petArt(id,f){return artURL(`pet_${id}_${f}`)}
 function petHTML(id,big){const s=s2pets(),p=PETB[id],xp=s.pc[id]||0,f=petForm(xp),u=petArt(id,f),sz=(big||30)+f*6;
- return u?`<img class="petI f${f}" src="${u}" alt="${p.n}" style="width:${sz*1.35}px;height:${sz*1.35}px" loading="lazy">`:`<span class="petE f${f}" style="font-size:${sz}px">${p.e}</span>`}
+ return u?`<img class="petI f${f}" data-pid="${id}" src="${u}" alt="${p.n}" style="width:${sz*1.35}px;height:${sz*1.35}px" loading="lazy">`:`<span class="petE f${f}" style="font-size:${sz}px">${p.e}</span>`}
 function eggSync(k){const s=s2();s.eggq=s.eggq||[];const n=s.blk.egg||0;while(s.eggq.length<n)s.eggq.push(k&&k!=="x"?k:pick(["k","t","g"]));if(s.eggq.length>n)s.eggq.length=n}
 function eggList(){const s=s2();eggSync(s.home);const c={k:0,t:0,g:0};s.eggq.forEach(k=>c[k]=(c[k]||0)+1);return S2K.filter(k=>c[k.id]).map(k=>`${k.e} ${k.th} ×${c[k.id]}`).join(" · ")}
 function hatchEgg(){const s=s2pets();if(!(s.blk.egg>0))return toast("ยังไม่มีไข่");eggSync(s.home);const kk=s.eggq.shift()||s.home||"k";s.blk.egg--;
@@ -4703,7 +4710,7 @@ function s5check(){if(typeof s2!=="function")return;const s=s2();if(!s.on)return
  if(!news.length)return;save();const show=i=>{if(i>=news.length)return;const [t,n,pic,fx]=news[i];SND.win();confetti(90);
   const m=modal(`<div style="text-align:center"><p class="note">✨ ได้${t}ใหม่!</p><div class="newpic">${pic}</div><h2>${n}</h2>${fx?`<p>${fx}</p>`:""}<button class="go" id="nk">เยี่ยม!</button></div>`);m.querySelector("#nk").onclick=()=>{m.remove();show(i+1)}};setTimeout(()=>show(0),300)}
 function mythPic(m,size){const k=m.leg!==undefined||!m.k?"":m.k,u=artURL("myth_"+m.id);
- return u?`<img src="${u}" alt="${m.th}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:12px" loading="lazy">`:`<span class="mythE" style="font-size:${size*.6}px">${m.e}</span>`}
+ return u?`<img class="mythI" src="${u}" alt="${m.th}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:12px" loading="lazy">`:`<span class="mythE" style="font-size:${size*.6}px">${m.e}</span>`}
 function cardsView(){const s=s2();const s1=MYTH.map(m=>({...m,has:S.myth.includes(m.id),src:"Season 1",how:"ชนะบอสดินแดนใน Season 1"})),
  s2c=MYTH2.map(m=>({...m,has:s.on&&(s.myth2||[]).includes(m.id),src:"Season 2"})),all=[...s1,...s2c];
  return `<div class="secttl">🃏 การ์ดสัตว์ในตำนาน (${all.filter(x=>x.has).length}/${all.length})</div><div class="mcards">${all.map(m=>`<button class="mcard ${m.leg?"leg":""} ${m.has?"":"lockc"}" data-mc="${m.id}" style="color:inherit;font:inherit">${m.has?mythPic(m,72):`<span class="mythE" style="font-size:44px;filter:brightness(0) opacity(.45)">${m.e}</span>`}<b>${m.has?m.th:"???"}</b><small>${m.has?m.d:m.how}</small><i>${m.src}</i></button>`).join("")}</div>
@@ -4836,6 +4843,21 @@ function blkIcon(p){return cubeSVG(p[0],p[1],p[2],1).replace(/width="1" height="
 BLK.wood[0]=blkIcon(PAL.wood);BLK.stone[0]=blkIcon(PAL.stone);BLK.pearl[0]=blkIcon(PAL.pearl);
 if(typeof CICON!=="undefined"){CICON.W=BLK.wood[0];CICON.S=BLK.stone[0];CICON.P=BLK.pearl[0]}
 XCH.forEach(x=>{const k=Object.keys(x.to)[0];x.th=x.th.replace(/[🪵🪨🦪]/u,BLK[k][0])});
+
+/* ---------- tap pet / card art → big viewer (pets: browse younger forms) ---------- */
+function petView(id){const s=s2pets(),p=PETB[id],xp=s.pc[id]||0,cur=petForm(xp);let f=cur;
+ const z=document.createElement("div");z.className="zoom pview";
+ const lab=["วัยเด็ก","วัยรุ่น","ร่างตำนาน"],need=[0,15,45];
+ const draw=()=>{const u=petArt(id,f);z.innerHTML=`<button class="zx" aria-label="ปิด">✕</button><div class="pvbox"><img src="${u}" alt="${petName(p,f)}"><b>${petName(p,f)}</b>
+  <div class="pvtab">${[1,2,3].map(i=>`<button data-f="${i}" class="${i===f?"on":""}" ${i>cur?"disabled":""}>${i>cur?"🔒 ":""}${lab[i-1]}</button>`).join("")}</div>
+  <small>${cur<3?`พลัง ${xp}/${need[cur]} ถึง${lab[cur]}`:"โตเต็มที่แล้ว! ✨"} · แตะรูปเพื่อขยาย</small></div>`;
+  const im=z.querySelector("img");im.onclick=e=>{e.stopPropagation();z.classList.toggle("big")};
+  z.querySelectorAll(".pvtab button").forEach(b=>b.onclick=e=>{e.stopPropagation();f=+b.dataset.f;z.classList.remove("big");draw()});
+  z.querySelector(".zx").onclick=()=>z.remove()};
+ draw();z.onclick=e=>{if(e.target===z)z.remove()};document.body.appendChild(z)}
+document.addEventListener("click",e=>{const t=e.target;if(!(t instanceof HTMLImageElement)||t.closest(".zoom"))return;
+ if(t.classList.contains("petI")&&t.dataset.pid&&!t.closest(".b2,.s2b,.battle")){e.preventDefault();e.stopPropagation();petView(t.dataset.pid);return}
+ if(t.classList.contains("mythI")||t.closest(".mascot")||/\/(veh|myth|mascot)_/.test(t.getAttribute("src")||"")&&t.closest(".mcard,.mascot,.vgrid,.veh")){e.preventDefault();e.stopPropagation();zoom(t.src)}},true);
 
 /* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
 const ADM_H="f1cb8fd26529fd7ed75789960c9194e25b03db19db9e1556ae0d91c3a80e7874";
@@ -4971,7 +4993,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795242888";let OL_VCHK=0;
+const OL_VER="1795243323";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
