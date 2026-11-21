@@ -355,8 +355,6 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .cres{display:flex;gap:6px;overflow-x:auto;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--bg2);scrollbar-width:none}.cres::-webkit-scrollbar{display:none}
 .cres span{flex:0 0 auto;display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;background:#ffffff14;font-size:13px;font-weight:700;white-space:nowrap}.cres span svg,.cres span img{width:16px;height:16px}
 
-#rabox{position:fixed;left:10px;right:10px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:95;background:#fffbe8;color:#222;border:2px solid #ffb020;border-radius:14px;padding:10px 12px;font-size:18px;line-height:1.4;box-shadow:0 8px 24px #0006;display:none;-webkit-user-select:text;user-select:text}
-#rabox.on{display:block}#rabox small{display:block;font-size:12px;color:#7a5a00;margin-top:4px;-webkit-user-select:none;user-select:none}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -4933,13 +4931,15 @@ function s5cut(){const s=s2(),k=s.home||"k",M=MASCOT[k],u=artURL("mascot_"+k);co
  const v=z.querySelector("video");if(v){v.setAttribute("playsinline","");v.onended=end;v.onerror=end;v.play().catch(()=>{v.muted=true;v.play().catch(end)});setTimeout(end,9000)}
  else{if(!u){z.querySelector("img").remove()}SND.roar&&SND.roar();setTimeout(end,2600)}}
 
-/* ---------- no-TTS devices (e.g. car browser): show + select text so the Read Aloud extension can read it ---------- */
+/* ---------- voice: device TTS first; pre-recorded clip only when the device has no usable voice ---------- */
 function noVoice(){try{return !("speechSynthesis" in window)||!speechSynthesis.getVoices().length}catch(e){return true}}
-ghostText=function(t){let g=document.getElementById("rabox");if(!g){g=document.createElement("div");g.id="rabox";document.body.appendChild(g)}
- g.innerHTML=`<span class="ratx"></span><small>📢 กดปุ่ม <b>Read Aloud</b> ในเมนูเบราว์เซอร์เพื่อฟัง</small>`;g.querySelector(".ratx").textContent=t;g.classList.add("on");
- try{const r=document.createRange();r.selectNodeContents(g.querySelector(".ratx"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r)}catch(e){}
- clearTimeout(ghostText.t);ghostText.t=setTimeout(()=>{g.classList.remove("on");try{getSelection().removeAllRanges()}catch(e){}},20000)};
-{const _sp=speakTTS;speakTTS=function(ct,en,hint){if(noVoice()||(!en&&!VOX.th&&(loadVoices(),!VOX.th)))return ghostText(ct);return _sp.apply(this,arguments)}}
+function hasVoice(en){if(noVoice())return false;if(en)return true;if(!VOX.th)loadVoices();return !!VOX.th}
+function recPlay(key,en){try{if(en&&typeof AUD!=="undefined"&&AUD[key]){playClip(key).catch(()=>{});return true}
+ if(typeof window.AUDF==="object"&&window.AUDF[key]){playURL("a/"+window.AUDF[key]+".mp3").catch(()=>{});return true}}catch(e){}return false}
+let NOV_MSG=0;
+ghostText=function(t){const k=clean(t).trim().toLowerCase();if(recPlay(k,!/[฀-๿]/.test(t)))return;if(!NOV_MSG){NOV_MSG=1;toast("🔇 เครื่องนี้ยังไม่มีเสียงอ่านสำหรับข้อนี้")}};
+say=function(text,lang){audUnlock();const ct=clean(text).trim(),key=ct.toLowerCase(),en=lang==="en"||(!lang&&!/[฀-๿]/.test(text));
+ if(hasVoice(en))return speakTTS(ct,en,true);try{speechSynthesis.cancel()}catch(e){}if(!recPlay(key,en))ghostText(ct)};
 
 /* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
 const ADM_H="f1cb8fd26529fd7ed75789960c9194e25b03db19db9e1556ae0d91c3a80e7874";
@@ -5088,7 +5088,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795253483";let OL_VCHK=0;
+const OL_VER="1795253955";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
