@@ -1,0 +1,72 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Firestore Rules</title>
+<style>body{font-family:-apple-system,sans-serif;margin:0;padding:16px;background:#f4f5f8;color:#222}h1{font-size:20px}ol{padding-left:20px;line-height:1.6}
+button{width:100%;font-size:18px;padding:14px;border:0;border-radius:12px;background:#ff7a1a;color:#fff;font-weight:700;margin:8px 0}
+textarea{width:100%;box-sizing:border-box;height:45vh;font:12px/1.4 ui-monospace,monospace;border-radius:10px;border:1px solid #ccc;padding:8px}</style></head><body>
+<h1>กฎ Firestore สำหรับระบบเยี่ยมเมือง</h1>
+<button id="b">📋 คัดลอกกฎทั้งหมด</button>
+<ol><li>กดปุ่มด้านบนเพื่อคัดลอก</li><li>เปิด <a href="https://console.firebase.google.com/project/mm-games-b8f37/firestore/rules">Firebase Console → Firestore → Rules</a></li><li>ลบของเดิมทั้งหมด วางของใหม่ แล้วกด <b>Publish</b></li></ol>
+<textarea id="t" readonly>rules_version = &#x27;2&#x27;;
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function validSave() {
+      return request.resource.data.keys().hasOnly([&#x27;app&#x27;, &#x27;name&#x27;, &#x27;data&#x27;, &#x27;updated&#x27;, &#x27;ver&#x27;, &#x27;score&#x27;])
+        &amp;&amp; request.resource.data.app in [&#x27;math-garden&#x27;, &#x27;rainbow-dragon&#x27;]
+        &amp;&amp; request.resource.data.name is string &amp;&amp; request.resource.data.name.size() &lt;= 20
+        &amp;&amp; request.resource.data.data is string &amp;&amp; request.resource.data.data.size() &lt; 300000
+        &amp;&amp; request.resource.data.updated is int
+        &amp;&amp; request.resource.data.ver is int &amp;&amp; request.resource.data.ver &gt;= 2
+        &amp;&amp; request.resource.data.score is int &amp;&amp; request.resource.data.score &gt;= 0;
+    }
+    // เซฟเกม: 1 เอกสารต่อ (แอป + ชื่อผู้เล่น + PIN) เข้ารหัสเป็น SHA-256
+    // เซฟเกม: ต้องมาจากเวอร์ชันใหม่ (ver 2) และแอพมังกรห้ามเซฟที่คืบหน้าน้อยกว่าบน cloud ทับ
+    match /saves/{id} {
+      allow get: if id.size() == 64;
+      allow create: if id.size() == 64 &amp;&amp; validSave();
+      allow update: if id.size() == 64 &amp;&amp; validSave()
+        &amp;&amp; (request.resource.data.app != &#x27;rainbow-dragon&#x27; || request.resource.data.score &gt;= resource.data.get(&#x27;score&#x27;, 0));
+      allow list, delete: if false;
+    }
+    // ตารางอันดับ: เก็บแค่ชื่อและจำนวน (ไม่มีเซฟ ไม่มี PIN) ทุกคนดูได้
+    match /board/{id} {
+      allow get, list: if true;
+      allow create, update: if id.size() == 64
+        &amp;&amp; request.resource.data.keys().hasOnly([&#x27;app&#x27;, &#x27;name&#x27;, &#x27;score&#x27;, &#x27;dragons&#x27;, &#x27;veh&#x27;, &#x27;heroes&#x27;, &#x27;lessons&#x27;, &#x27;ds&#x27;, &#x27;hs&#x27;, &#x27;vs&#x27;, &#x27;updated&#x27;])
+        &amp;&amp; request.resource.data.app in [&#x27;math-garden&#x27;, &#x27;rainbow-dragon&#x27;]
+        &amp;&amp; request.resource.data.name is string &amp;&amp; request.resource.data.name.size() &lt;= 20
+        &amp;&amp; request.resource.data.score is int &amp;&amp; request.resource.data.score &gt;= 0 &amp;&amp; request.resource.data.score &lt; 100000
+        &amp;&amp; request.resource.data.dragons is int &amp;&amp; request.resource.data.dragons &lt;= 8
+        &amp;&amp; request.resource.data.veh is int &amp;&amp; request.resource.data.veh &lt;= 10
+        &amp;&amp; request.resource.data.heroes is int &amp;&amp; request.resource.data.heroes &lt;= 6
+        &amp;&amp; request.resource.data.lessons is int
+        &amp;&amp; request.resource.data.ds is string &amp;&amp; request.resource.data.ds.size() &lt;= 12
+        &amp;&amp; request.resource.data.hs is string &amp;&amp; request.resource.data.hs.size() &lt;= 80
+        &amp;&amp; request.resource.data.vs is string &amp;&amp; request.resource.data.vs.size() &lt;= 80
+        &amp;&amp; request.resource.data.updated is int;
+      allow delete: if false;
+    }
+    // เมืองบ้านเกิด Season 2: เก็บแค่ชื่อ บล็อกที่สร้าง แต้มทีม และจำนวน 👍 (ไม่มีเซฟ ไม่มี PIN)
+    function validCity() {
+      return request.resource.data.keys().hasOnly([&#x27;app&#x27;, &#x27;name&#x27;, &#x27;grid&#x27;, &#x27;home&#x27;, &#x27;wk&#x27;, &#x27;wp&#x27;, &#x27;pts&#x27;, &#x27;likes&#x27;, &#x27;updated&#x27;])
+        &amp;&amp; request.resource.data.app == &#x27;rainbow-dragon&#x27;
+        &amp;&amp; request.resource.data.name is string &amp;&amp; request.resource.data.name.size() &lt;= 20
+        &amp;&amp; request.resource.data.grid is string &amp;&amp; request.resource.data.grid.size() &lt;= 2400
+        &amp;&amp; request.resource.data.home in [&#x27;k&#x27;, &#x27;t&#x27;, &#x27;g&#x27;]
+        &amp;&amp; request.resource.data.wk is string &amp;&amp; request.resource.data.wk.size() &lt;= 10
+        &amp;&amp; request.resource.data.wp is int &amp;&amp; request.resource.data.wp &gt;= 0 &amp;&amp; request.resource.data.wp &lt; 100000
+        &amp;&amp; request.resource.data.pts is int &amp;&amp; request.resource.data.pts &gt;= 0 &amp;&amp; request.resource.data.pts &lt; 100000
+        &amp;&amp; request.resource.data.likes is int &amp;&amp; request.resource.data.updated is int;
+    }
+    match /city/{id} {
+      allow get, list: if true;
+      allow create: if id.size() == 64 &amp;&amp; validCity() &amp;&amp; request.resource.data.likes == 0;
+      allow update: if id.size() == 64 &amp;&amp; validCity() &amp;&amp; (
+        request.resource.data.likes == resource.data.likes
+        || (request.resource.data.likes == resource.data.likes + 1
+            &amp;&amp; request.resource.data.grid == resource.data.grid
+            &amp;&amp; request.resource.data.name == resource.data.name));
+      allow delete: if false;
+    }
+  }
+}
+</textarea>
+<script>b.onclick=async()=>{try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand("copy")}b.textContent="✅ คัดลอกแล้ว"}</script></body></html>
