@@ -335,6 +335,8 @@ svg.px,svg.cube{image-rendering:pixelated;vertical-align:middle}
 .pvbox small{opacity:.8}.zoom.pview.big{display:block}.zoom.pview.big .pvbox img{max-height:none;width:200%;max-width:none}
 img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .pview{padding:12px 16px}.pvbox{box-sizing:border-box}.pvtab button{min-width:0;font-size:14px;white-space:nowrap}
+
+.rknm .rkt{display:block;opacity:.7;font-size:11px}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -807,7 +809,7 @@ function topBar(){const di=curDragon();let ava,line,sub,pct;
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{SND.tap();TAB=b.dataset.t;if(TAB!=="map")scrollTo(0,0);route()});
 function route(){if(!S.name){$("#tabs").hidden=true;return setup()}
  $("#tabs").hidden=false;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===TAB));
- const rt=document.querySelector('.tab[data-t="rank"]');if(rt)rt.hidden=!(typeof olBoardList==="function"&&olOn());if(TAB==="rank"&&rt&&rt.hidden)TAB="map";
+ const rt=document.querySelector('.tab[data-t="rank"]');if(rt)rt.hidden=!(typeof olBoardList==="function"&&(olOn()||ADM));if(TAB==="rank"&&rt&&rt.hidden)TAB="map";
  (TABPG[TAB]||map)();daily()}
 const TABPG={};
 function setup(){app.innerHTML=`<div class="wrap"><div class="setup"><div style="max-width:220px;margin:0 auto">${rainbowPic()}</div>
@@ -1166,20 +1168,23 @@ function rkAva(p,sz){const f=rkFace(p);return f?`<img class="rkava" style="width
 async function rkLoad(force){if(RK.loading)return;if(!force&&RK.list&&Date.now()-RK.at<30000)return;RK.loading=true;RK.err="";
  try{RK.me=await olBid();await olBoardPush();RK.list=await olBoardList();RK.at=Date.now()}catch(e){RK.err=e&&e.status===403?"rules":"net"}
  RK.loading=false;if(TAB==="rank"&&!document.querySelector(".lesson"))rank()}
+function rkWhen(t){if(!t)return "-";const d=new Date(+t),n=new Date(),day=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate()),dd=Math.round((day(n)-day(d))/864e5),hm=d.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+ return dd<=0?"วันนี้ "+hm:dd===1?"เมื่อวาน "+hm:dd<7?dd+" วันก่อน":d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})}
 function rkRows(){const mine=Object.assign({id:RK.me,name:(OL.sess&&OL.sess.name)||S.name,me:1},boardStats());
- const L=(RK.list||[]).filter(p=>p.id!==RK.me).concat([mine]);const k=RK.by;
+ const L=(RK.list||[]).filter(p=>p.id!==RK.me).concat(ADM?[]:[mine]);const k=RK.by;
  L.sort((a,b)=>(b[k]||0)-(a[k]||0)||(b.score||0)-(a.score||0)||String(a.name).localeCompare(String(b.name)));
  let r=0,prev=null;L.forEach((p,i)=>{const v=(p[k]||0)+"|"+(p.score||0);if(v!==prev){r=i+1;prev=v}p.rank=r});return L}
-function rank(){if(!(typeof olBoardList==="function"&&olOn())){app.innerHTML=topBar()+`<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:48px">🏆</div><p>ตารางอันดับเพื่อนใช้ได้ในเว็บออนไลน์</p></div></div>`;return}
+function rank(){if(!(typeof olBoardList==="function"&&(olOn()||ADM))){app.innerHTML=topBar()+`<div class="wrap"><div class="card" style="text-align:center"><div style="font-size:48px">🏆</div><p>ตารางอันดับเพื่อนใช้ได้ในเว็บออนไลน์</p></div></div>`;return}
  const k=RK.by,meta=RKBY.find(x=>x[0]===k);let h=topBar()+`<div class="secttl">🏆 อันดับนักล่ามังกร</div>
  <div class="rkseg" role="tablist">${RKBY.map(([id,e,t])=>`<button role="tab" aria-selected="${id===k}" class="${id===k?"on":""}" data-by="${id}"><span>${e}</span>${t}</button>`).join("")}</div>`;
  if(!RK.list&&!RK.err){h+=`<div class="card rkmsg">⏳ กำลังโหลดรายชื่อเพื่อน…</div>`;app.innerHTML=h;wireRank();rkLoad();return}
  if(RK.err&&!RK.list){h+=`<div class="card rkmsg">${RK.err==="rules"?"🔧 ระบบอันดับยังไม่เปิด<br><small>ผู้ปกครองต้องอัพเดทการตั้งค่า Firebase ก่อน</small>":"📴 ต่อเน็ตไม่ได้ ลองใหม่อีกครั้ง"}<br><button class="go" id="rkre" style="margin-top:12px">🔄 ลองใหม่</button></div>`;app.innerHTML=h;wireRank();return}
  const L=rkRows(),me=L.find(p=>p.me);
- h+=`<div class="rkme card"><div>${rkAva(me,56)}</div><div style="flex:1;min-width:0"><b>อันดับของฉัน: ${me.rank===1?"🥇 ที่ 1":"ที่ "+me.rank} <small>จาก ${L.length} คน</small></b><div class="rkchips">⭐${me.score} 🐉${me.dragons} 🚗${me.veh} 🦸${me.heroes}</div>
- ${me.rank>1?(()=>{const ahead=L.filter(p=>p.rank<me.rank).pop();const gap=(ahead[k]||0)-(me[k]||0);return gap>0?`<small class="note">อีก ${gap} ${meta[1]} จะแซง ${esc(ahead.name)}!</small>`:""})():`<small class="note">เก่งที่สุดเลย! รักษาอันดับไว้นะ 🔥</small>`}</div></div>
- <ol class="rklist">${L.map(p=>`<li><button class="rkrow ${p.me?"me":""} ${p.rank<=3?"top":""}" data-id="${esc(p.id||"")}"><span class="rkn">${["🥇","🥈","🥉"][p.rank-1]||p.rank}</span>${rkAva(p,44)}
-  <span class="rknm">${esc(p.name||"?")}${p.me?" <em>(ฉัน)</em>":""}<small>⭐${p.score||0} · 🐉${p.dragons||0} · 🚗${p.veh||0} · 🦸${p.heroes||0}</small></span><span class="rkv">${p[k]||0}<small>${meta[1]}</small></span></button></li>`).join("")}</ol>
+ if(ADM)h+=`<div class="card rkmsg">🔧 โหมดแอดมิน: ดูอย่างเดียว (แอดมินไม่ถูกนับในอันดับ)</div>`;
+ if(me)h+=`<div class="rkme card"><div>${rkAva(me,56)}</div><div style="flex:1;min-width:0"><b>อันดับของฉัน: ${me.rank===1?"🥇 ที่ 1":"ที่ "+me.rank} <small>จาก ${L.length} คน</small></b><div class="rkchips">⭐${me.score} 🐉${me.dragons} 🚗${me.veh} 🦸${me.heroes}</div>
+ ${me.rank>1?(()=>{const ahead=L.filter(p=>p.rank<me.rank).pop();const gap=(ahead[k]||0)-(me[k]||0);return gap>0?`<small class="note">อีก ${gap} ${meta[1]} จะแซง ${esc(ahead.name)}!</small>`:""})():`<small class="note">เก่งที่สุดเลย! รักษาอันดับไว้นะ 🔥</small>`}</div></div>`;
+ h+=`<ol class="rklist">${L.map(p=>`<li><button class="rkrow ${p.me?"me":""} ${p.rank<=3?"top":""}" data-id="${esc(p.id||"")}"><span class="rkn">${["🥇","🥈","🥉"][p.rank-1]||p.rank}</span>${rkAva(p,44)}
+  <span class="rknm">${esc(p.name||"?")}${p.me?" <em>(ฉัน)</em>":""}<small>⭐${p.score||0} · 🐉${p.dragons||0} · 🚗${p.veh||0} · 🦸${p.heroes||0}</small><small class="rkt">🕒 เข้าเล่นล่าสุด: ${p.me?"ตอนนี้":rkWhen(p.updated)}</small></span><span class="rkv">${p[k]||0}<small>${meta[1]}</small></span></button></li>`).join("")}</ol>
  <p class="note" style="text-align:center">⭐ คะแนน: ผ่านบท +10 · ชนะบอส +30 · ชนะสนามประลอง +20 และ +10 ต่อดาว · มังกรโตขึ้นขั้นละ +10 · ฮีโร่ +20 · ยาน +20 · จิ๊กซอ +5 · การ์ดตำนาน +10</p>
  <p class="note" style="text-align:center"><button class="olsw" id="rkre" style="display:inline-block">🔄 รีเฟรชอันดับ</button></p>`;
  app.innerHTML=h;wireRank();rkLoad()}
@@ -5019,7 +5024,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795243739";let OL_VCHK=0;
+const OL_VER="1795244048";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
