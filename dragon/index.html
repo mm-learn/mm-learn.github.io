@@ -351,6 +351,9 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .cutcap{position:absolute;bottom:15vh;left:0;right:0;text-align:center;color:#fff;font-size:22px;font-weight:800;text-shadow:0 2px 10px #000,0 0 18px #ffb020;animation:cutcap .6s .2s both}
 .cutskip{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom));right:16px;color:#fff9;font-size:12px}
 @keyframes cutin{from{opacity:0}to{opacity:1}}@keyframes cutout{to{opacity:0}}@keyframes cutzoom{from{transform:scale(1.25)}to{transform:scale(1)}}@keyframes cutcap{from{opacity:0;transform:translateY(20px) scale(.8)}to{opacity:1;transform:none}}
+
+.cres{display:flex;gap:6px;overflow-x:auto;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--bg2);scrollbar-width:none}.cres::-webkit-scrollbar{display:none}
+.cres span{flex:0 0 auto;display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:999px;background:#ffffff14;font-size:13px;font-weight:700;white-space:nowrap}.cres span svg,.cres span img{width:16px;height:16px}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -1883,12 +1886,12 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
  try{await loadThree()}catch(e){el.innerHTML=`<div class="cload">เครื่องนี้โหลดโหมด 3 มิติไม่ได้ ลองเชื่อมอินเทอร์เน็ตแล้วเปิดใหม่<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
  CN=citySize(s.city);let map=cityDecode(s.city),mode="put",brush="W",bp=null;const home=s.home||"k";
  el.innerHTML=`<div class="chead"><button class="x" id="cx" aria-label="ปิด">✕</button><div><b>🏰 เมืองของ ${esc(S.name)}</b><small id="cpt"></small></div><button class="go ghost sm" id="cvis" style="width:auto;margin:0">👀 เยี่ยมเพื่อน</button></div>
-  <canvas id="ccv"></canvas><div class="ctool"><div class="cmode"><button data-m="put">➕ วาง</button><button data-m="dig">⛏️ ทุบ</button><button data-m="bp">📐 แบบแปลน</button><button id="cexp">🗺️ ขยาย</button><button data-z="-">🔍−</button><button data-z="+">🔍+</button></div><div class="cpal2" id="cpal"></div><p class="note" id="chint"></p></div>`;
+  <div class="cres" id="cres"></div><canvas id="ccv"></canvas><div class="ctool"><div class="cmode"><button data-m="put">➕ วาง</button><button data-m="dig">⛏️ ทุบ</button><button data-m="bp">📐 แบบแปลน</button><button id="cexp">🗺️ ขยาย</button><button data-z="-">🔍−</button><button data-z="+">🔍+</button></div><div class="cpal2" id="cpal"></div><p class="note" id="chint"></p></div>`;
  const cv=el.querySelector("#ccv");const S3=cityScene(cv,home,()=>map);if(!S3){el.innerHTML=`<div class="cload">เครื่องนี้เปิดภาพ 3 มิติไม่ได้ (WebGL ปิดอยู่)<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
  const have=m=>m==="coins"?S.coins:m==="gems"?S.gems:(s.blk[m]||0);
  const pay=c=>{if(!Object.keys(c).every(m=>have(m)>=c[m]))return false;Object.keys(c).forEach(m=>{if(m==="coins")S.coins-=c[m];else if(m==="gems")S.gems-=c[m];else s.blk[m]-=c[m]});return true};
  const commit=()=>{s.city=cityEncode(map,CN);s.cpts=cityPts(map);save();S3.rebuild();ui();cityPushSoon()};
- const ui=()=>{el.querySelector("#cpt").textContent=` · พื้นที่ ${CN}×${CN} · ${map.size} บล็อก · ⭐ ${cityPts(map)} คะแนนเมือง`;
+ const ui=()=>{el.querySelector("#cres").innerHTML=`<span>💰 ${S.coins}</span>`+["wood","stone","pearl","sand","iron","crystal"].map(k=>`<span>${(BLK[k]||["🧱"])[0]} ${s.blk[k]||0}</span>`).join("")+`<span>💎 ${S.gems}</span>`;el.querySelector("#cpt").textContent=` · พื้นที่ ${CN}×${CN} · ${map.size} บล็อก · ⭐ ${cityPts(map)} คะแนนเมือง`;
   el.querySelectorAll("[data-m]").forEach(b=>b.classList.toggle("on",b.dataset.m===mode));
   const pal=el.querySelector("#cpal");
   if(mode==="bp")pal.innerHTML=Object.keys(BPRINT).map(k=>{const B=BPRINT[k],c=bpCost(B),ok=Object.keys(c).every(m=>have(m)>=c[m]);return `<button class="cb ${bp===k?"sel":""} ${ok?"":"poor"}" data-bp="${k}"><span>${B.e}</span><b>${B.n}</b><small>${Object.keys(c).map(m=>`${m==="coins"?"💰":BLK[m][0]}${c[m]}`).join(" ")}</small></button>`}).join("");
@@ -5074,7 +5077,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795245212";let OL_VCHK=0;
+const OL_VER="1795246151";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
