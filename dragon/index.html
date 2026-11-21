@@ -337,6 +337,9 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .pview{padding:12px 16px}.pvbox{box-sizing:border-box}.pvtab button{min-width:0;font-size:14px;white-space:nowrap}
 
 .rknm .rkt{display:block;opacity:.7;font-size:11px}
+
+.mascot video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}.mascot.playing img,.mascot.playing .mph,.mascot.playing .mplay{display:none}
+.mplay{position:absolute;right:10px;bottom:8px;border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;background:#000a;color:#fff;backdrop-filter:blur(4px)}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -4790,7 +4793,13 @@ function cityTab(){const s=S.s2;let h=topBar()+`<div class="secttl">🏰 สร�
 
 /* ---------- Season 2 page dressing: opening banner, mascots, egg list ---------- */
 const MASCOT={k:["🐉","มังกรผู้พิทักษ์"],t:["🐙","คราเคนแห่งท้องทะเล"],g:["🐘","ช้างเผือกแห่งทะเลทราย"]};
-function mascotHTML(k){const u=artURL("mascot_"+k),M=MASCOT[k];return `<div class="mascot" style="--kc:${S2KB[k].c}">${u?`<img src="${u}" alt="${M[1]}" loading="lazy">`:`<div class="mph"><span>${M[0]}</span></div>`}<b>${M[1]}</b></div>`}
+const MVID={k:1,g:1};
+function mascotHTML(k){const u=artURL("mascot_"+k),M=MASCOT[k];return `<div class="mascot" style="--kc:${S2KB[k].c}">${u?`<img src="${u}" alt="${M[1]}" loading="lazy">`:`<div class="mph"><span>${M[0]}</span></div>`}<b>${M[1]}</b>${MVID[k]?`<button class="mplay" data-mv="${k}" aria-label="เล่นคลิป">▶️ ดูคลิป</button>`:""}</div>`}
+function mascotPlay(btn){const box=btn.closest(".mascot"),k=btn.dataset.mv;if(box.querySelector("video"))return;
+ const v=document.createElement("video");v.src="s2/mvid_"+k+".mp4";v.poster="s2/mvid_"+k+".jpg";v.playsInline=true;v.setAttribute("playsinline","");v.controls=false;
+ box.classList.add("playing");box.prepend(v);const end=()=>{v.remove();box.classList.remove("playing")};v.onended=end;v.onerror=()=>{end();toast("เล่นคลิปไม่ได้ ลองต่อเน็ตแล้วลองใหม่")};
+ v.onclick=e=>{e.stopPropagation();end()};v.play().catch(()=>{v.muted=true;v.play().catch(end)})}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".mplay");if(b){e.preventDefault();e.stopPropagation();mascotPlay(b)}},true);
 function s5dress(){const s=s2();if(!s.on)return;const w=app.querySelector(".wrap");if(!w)return;
  const top=w.querySelector(".s2top");if(top&&!w.querySelector(".s2ban"))top.insertAdjacentHTML("afterend",`<div class="s2ban"><video src="s2/emblem.mp4" poster="s2/emblem_end.jpg" autoplay muted playsinline loop></video><button class="go ghost sm" id="s2rep">🎬 ดูฉากเปิดอีกครั้ง</button></div>`);
  const rp=$("#s2rep");if(rp)rp.onclick=s2cinema;
@@ -5024,7 +5033,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795244048";let OL_VCHK=0;
+const OL_VER="1795244978";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
