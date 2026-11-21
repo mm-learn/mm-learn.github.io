@@ -2763,8 +2763,8 @@ games=function(){_petGames();const w=document.querySelector("#app .wrap");if(!w)
  $("#gg3").onclick=()=>g4quiz("🧠 เชาว์และรู้รอบตัว ป.4",kq4,10,2);$("#gg4").onclick=g4fall;$("#gg5").onclick=g4mem;$("#gg6").onclick=g4book;$("#gg7").onclick=g4jig};
 
 /* ===== online save: player name + PIN, stored in Firebase Firestore (REST) ===== */
-const OL_APP="math-garden",OL_KEY=OL_APP+"-session",OL_CFG=window.FB_CONFIG||{};
-const olOn=()=>!!(OL_CFG.projectId&&OL_CFG.apiKey);
+const OL_ADM=typeof ADM!=="undefined"&&ADM;const OL_APP="math-garden",OL_KEY=OL_APP+"-session"+(OL_ADM?"-admin":""),OL_CFG=window.FB_CONFIG||{};
+const olOn=()=>!OL_ADM&&!!(OL_CFG.projectId&&OL_CFG.apiKey);
 let OL={sess:null,timer:0,busy:false,dirty:false,last:0};
 try{OL.sess=JSON.parse(localStorage.getItem(OL_KEY)||"null")}catch(e){}
 const olUrl=id=>`https://firestore.googleapis.com/v1/projects/${OL_CFG.projectId}/databases/(default)/documents/saves/${id}?key=${OL_CFG.apiKey}`;
@@ -2812,14 +2812,14 @@ async function olSync(){if(!OL.sess||!olOn())return;try{const d=await olGet(OL.s
   else if(lu>d.updated+1000){ if(cs>ls)await olTakeCloud(d);else olPush() }
   else await olTakeCloud(d)}catch(e){olBadge("📴 ออฟไลน์ เล่นต่อได้ เซฟไว้ในเครื่องก่อน");clearTimeout(OL.rt);OL.rt=setTimeout(olSync,15000)}}
 function olSet(s){OL.sess=s;OL_BLAST="";OL.synced=false;try{s?localStorage.setItem(OL_KEY,JSON.stringify(s)):localStorage.removeItem(OL_KEY)}catch(e){}}
-function olLogin(force){if(!olOn())return;if(OL.sess&&!force)return olSync();document.querySelectorAll(".ollog").forEach(x=>x.remove());
+function olLogin(force){if(!olOn())return;if(OL.sess&&!force)return olSync();document.querySelectorAll(".ollog:not(.admlog)").forEach(x=>x.remove());
  const el=document.createElement("div");el.className="ollog";
  el.innerHTML=`<div class="olcard"><div class="olemo">🐱</div><h1>สวนคณิตน้องปุยฝ้าย</h1><p>ใส่ชื่อผู้เล่นและรหัส PIN 4 ตัว<br>เล่นต่อได้ทุกเครื่อง เซฟให้อัตโนมัติ<br><small>ชื่อพิมพ์ตัวเล็กหรือตัวใหญ่ก็ได้</small></p>
  <label for="oln">ชื่อผู้เล่น</label><input id="oln" maxlength="20" autocomplete="username" placeholder="เช่น น้ำหวาน">
  <label for="olp">PIN 4 ตัว (จำไว้นะ)</label><input id="olp" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="current-password" placeholder="••••" type="password">
  <p class="olmsg" id="olm" role="alert"></p><button class="olgo" id="olok">▶️ เข้าเล่น</button>
- <details class="olold"><summary>มีรหัสเซฟจากแอปเดิมบน Claude?</summary><p>ใส่ชื่อและ PIN ด้านบนก่อน แล้ววางรหัสเซฟเก่าที่นี่ ความคืบหน้าเดิมจะถูกย้ายมา</p><textarea id="olc" rows="3" placeholder="วางรหัสที่ขึ้นต้นด้วย MATHCAT-"></textarea><button class="olgo sec" id="olimp">📥 ย้ายเซฟเก่ามาที่ชื่อนี้</button></details></div>`;
- document.body.appendChild(el);const msg=t=>{el.querySelector("#olm").textContent=t};
+ <details class="olold"><summary>มีรหัสเซฟจากแอปเดิมบน Claude?</summary><p>ใส่ชื่อและ PIN ด้านบนก่อน แล้ววางรหัสเซฟเก่าที่นี่ ความคืบหน้าเดิมจะถูกย้ายมา</p><textarea id="olc" rows="3" placeholder="วางรหัสที่ขึ้นต้นด้วย MATHCAT-"></textarea><button class="olgo sec" id="olimp">📥 ย้ายเซฟเก่ามาที่ชื่อนี้</button></details>${typeof admLogin==="function"?`<button type="button" class="olgo sec" id="oladm" style="margin-top:10px;font-size:13px;opacity:.75">🔧 ผู้ดูแลระบบ</button>`:""}</div>`;
+ document.body.appendChild(el);const msg=t=>{el.querySelector("#olm").textContent=t};const _ad=el.querySelector("#oladm");if(_ad)_ad.onclick=()=>admLogin();
  const read=async()=>{const n=el.querySelector("#oln").value.trim(),p=el.querySelector("#olp").value.trim();if(n.length<2){msg("ใส่ชื่อผู้เล่นอย่างน้อย 2 ตัวอักษร");return null}if(!/^\d{4}$/.test(p)){msg("PIN ต้องเป็นตัวเลข 4 ตัว");return null}return {name:n,id:await olId(n,p)}};
  el.querySelector("#olok").onclick=async()=>{const s=await read();if(!s)return;msg("กำลังเปิดเซฟ…");
   let d;try{d=await olGet(s.id)}catch(e){msg("ต่อเน็ตไม่ได้ ลองใหม่อีกครั้ง");return}
@@ -2865,7 +2865,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795220758";let OL_VCHK=0;
+const OL_VER="1795221891";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}

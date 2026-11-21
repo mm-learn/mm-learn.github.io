@@ -307,6 +307,8 @@ textarea{width:100%;border-radius:12px;border:2px solid var(--line);background:v
 .vrow{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;margin-top:6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:left}.vrow span{font-size:24px}.vrow b{flex:1}.vrow small{color:var(--soft)}
 .s2top{flex-wrap:wrap;row-gap:6px}.s2top>div:first-child{flex:1 1 auto;min-width:160px}.s2top>div:last-child{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:4px}.s2top .chip{font-size:13px;padding:2px 8px}
 .foot .why{font-size:14px;line-height:1.45;background:rgba(255,200,61,.14);border:1px solid rgba(255,200,61,.5);border-radius:12px;padding:8px 12px;margin:6px 0 8px;text-align:left}
+#admb{position:fixed;left:8px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:60;border:0;border-radius:999px;padding:8px 12px;font:600 13px Kanit,sans-serif;background:#ffd23f;color:#3a2a00;box-shadow:0 3px 10px #0006}
+.ollog.admlog{z-index:260}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -689,7 +691,8 @@ const MYTH=[{id:"naga",e:"🐍",th:"พญานาค",d:"เจ้าแห่
  {id:"kirin",e:"🦌",th:"กิเลน",d:"สัตว์มงคล นำโชคดีมาให้"},{id:"hydra",e:"🐲",th:"ไฮดรา",d:"มังกรหลายหัว ตำนาน!",leg:1}];
 
 /* ---------- state ---------- */
-const KEY="rainbowdragon-s1";
+const ADM=(()=>{try{return localStorage.getItem("rd-admin")==="1"}catch(e){return false}})();
+const KEY=ADM?"rainbowdragon-admin":"rainbowdragon-s1";
 const fresh=()=>({v:1,name:"",coins:0,gems:0,bulbs:5,prog:{},boss:{},dxp:{},rb:0,heroes:{},food:{},myth:[],extraVeh:[],daily:{},auto:1,tp:0,dlv:{},hw:{},arena:{},wk:{},wms:[],updated:0});
 let S;try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=fresh()}
 let REF=null,dirty=false,timer=0,chain=Promise.resolve(),cloudState="local";
@@ -793,8 +796,8 @@ function daily(){const d=today();if(S.daily.d===d)return;S.daily={d,gift:0,g:{}}
 
 /* ---------- map ---------- */
 const pageDone=p=>!!(S.prog[p]&&S.prog[p].done);
-function isOpen(idx){if(idx===0)return true;const prev=ORDER[idx-1];if(!pageDone(prev))return false;const w=Math.floor(idx/6);if(idx%6===0&&w>0&&!(S.boss[w-1]&&S.arena[w-1]))return false;return true}
-const bossOpen=w=>ORDER.slice(w*6,w*6+6).every(pageDone);
+function isOpen(idx){if(idx===0||ADM)return true;const prev=ORDER[idx-1];if(!pageDone(prev))return false;const w=Math.floor(idx/6);if(idx%6===0&&w>0&&!(S.boss[w-1]&&S.arena[w-1]))return false;return true}
+const bossOpen=w=>ADM||ORDER.slice(w*6,w*6+6).every(pageDone);
 function map(){const di=curDragon();let h=topBar();
  if(di<7){const C=COLORS[di],xp=S.dxp[C.id]||0;h+=`<div class="card" style="margin-top:14px;display:flex;gap:12px;align-items:center"><div style="width:96px;flex:0 0 auto">${dragonPic(di,xp)}</div>
   <div><b>${C.th}</b> <small class="note">${C.el}</small><div class="note">${xp===0?"ทำบทเรียนให้ผ่านเพื่อฟักไข่!":xp<ADULT?`อีก ${ADULT-xp} บท จะโตเต็มวัย`:"โตเต็มวัยแล้ว!"}</div><div class="bar"><i style="width:${xp/ADULT*100}%"></i></div><div class="note" style="margin-top:4px">มังกรตัวที่ ${di+1} จาก 7 สี</div></div></div>`}
@@ -803,7 +806,7 @@ function map(){const di=curDragon();let h=topBar();
   h+=`<section class="world" style="background:${W.bg}"><h3><span>ดินแดน ${w+1} · ${W.th}</span><small>${dn}/6 ${S.boss[w]?"· 🏆":""}</small></h3><div class="path">`;
   pages.forEach((p,k)=>{const idx=w*6+k,open=isOpen(idx),done=pageDone(p),st=S.prog[p]?S.prog[p].stars||0:0,off=[0,40,60,20,-30,-55][k];
    h+=`<div class="nodewrap" style="transform:translateX(${off}px)"><button class="node ${done?"done":open?"open":""}" data-p="${p}" ${open?"":"disabled"} aria-label="หน้า ${p} ${PAGES[p].t}">${done?"✓":open?"▶":"🔒"}<span class="pg">น.${p}</span>${done?`<span class="st">${"⭐".repeat(st)}</span>`:""}</button><div class="lbl">${PAGES[p].t}</div></div>`});
-  const bo=bossOpen(w);h+=`<div class="nodewrap"><button class="node boss ${S.boss[w]?"done":bo?"open":""}" data-b="${w}" ${bo?"":"disabled"} aria-label="บอส ${W.bn}">${S.boss[w]?"🏆":W.bimg?"🐉":W.boss}</button><div class="lbl">บอส: ${W.bn}</div></div><div class="nodewrap"><button class="node boss arenan ${S.arena[w]?"done":S.boss[w]?"open":""}" data-a="${w}" ${S.boss[w]?"":"disabled"} aria-label="สนามประลอง ${W.bn}">⚔️</button><div class="lbl">สนามประลอง ${S.arena[w]?"⭐".repeat(S.arena[w].stars):"(ต้องชนะก่อนไปต่อ)"}</div></div></div></section>`});
+  const bo=bossOpen(w);h+=`<div class="nodewrap"><button class="node boss ${S.boss[w]?"done":bo?"open":""}" data-b="${w}" ${bo?"":"disabled"} aria-label="บอส ${W.bn}">${S.boss[w]?"🏆":W.bimg?"🐉":W.boss}</button><div class="lbl">บอส: ${W.bn}</div></div><div class="nodewrap"><button class="node boss arenan ${S.arena[w]?"done":S.boss[w]?"open":""}" data-a="${w}" ${S.boss[w]||ADM?"":"disabled"} aria-label="สนามประลอง ${W.bn}">⚔️</button><div class="lbl">สนามประลอง ${S.arena[w]?"⭐".repeat(S.arena[w].stars):"(ต้องชนะก่อนไปต่อ)"}</div></div></div></section>`});
  app.innerHTML=`<div class="wrap">${h}</div>`;
  app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>startLesson(+b.dataset.p));
  app.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>startBoss(+b.dataset.b));app.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>startArena(+b.dataset.a));
@@ -1444,7 +1447,7 @@ S2LV.find(l=>l.id==="k7").gate="b1";
 function regPage(l){PAGES[l.id]={t:l.t,s2:1};Object.defineProperty(PAGES[l.id],"qs",{get:()=>GEN[l.id](),enumerable:true})}
 S2LV.forEach(regPage);
 const s2cleared=()=>S2LV.filter(l=>pageDone(l.id)).length;
-const s2open=l=>{const A=S2LV.filter(x=>x.k===l.k),ix=A.indexOf(l);return (ix<=0||pageDone(A[ix-1].id))&&(!l.gate||[].concat(l.gate).every(g=>!!s2().bs[g]))};
+const s2open=l=>{if(ADM)return true;const A=S2LV.filter(x=>x.k===l.k),ix=A.indexOf(l);return (ix<=0||pageDone(A[ix-1].id))&&(!l.gate||[].concat(l.gate).every(g=>!!s2().bs[g]))};
 const s2stage=()=>{const c=s2cleared();return c>=20?3:c>=10?2:1};
 /* ---- ghost text when the device has no voice ---- */
 function ghostText(t){let g=document.getElementById("ghost");if(!g){g=document.createElement("div");g.id="ghost";g.setAttribute("aria-hidden","true");document.body.appendChild(g)}g.textContent=t;g.classList.add("on");clearTimeout(ghostText.t);ghostText.t=setTimeout(()=>g.classList.remove("on"),9000)}
@@ -1467,8 +1470,8 @@ function s2page(){const s=s2();
  zones.forEach((Z,zi)=>{h+=`<div class="s2zone"><b>${Z.th}</b><small>${Z.sub}</small></div><div class="path">`;
   lv.forEach((l,i)=>{if(l.z!==zi)return;const open=s2open(l),done=pageDone(l.id),stars=S.prog[l.id]?S.prog[l.id].stars||0:0,off=[0,40,60,20,-30,-55][i%6];
    h+=`<div class="nodewrap" style="transform:translateX(${off}px)"><button class="node ${done?"done":open?"open":""}" data-k2="${l.id}" ${open?"":"disabled"} aria-label="${l.t}">${done?"✓":open?"▶":"🔒"}<span class="pg">${i+1}</span>${done?`<span class="st">${"⭐".repeat(stars)}</span>`:""}</button><div class="lbl">${l.t}</div></div>`;
-   const ck=Object.keys(S2CHEST).find(c=>S2CHEST[c]===l.id);if(ck&&done)h+=`<div class="nodewrap" style="transform:translateX(${-off+30}px)"><button class="s2chest ${s.ch[ck]?"done":""}" data-ch="${ck}" aria-label="หีบสมบัติ">${s.ch[ck]?"📭":"🎁"}</button></div>`;
-   const bk=Object.keys(S2BOSS).find(c=>S2BOSS[c].after===l.id);if(bk){const B=S2BOSS[bk];h+=`<div class="nodewrap"><button class="node boss ${s.bs[bk]?"done":done?"open":""}" data-bs="${bk}" ${done?"":"disabled"} aria-label="บอส ${B.n}">${s.bs[bk]?"🏆":B.e}</button><div class="lbl">บอส: ${B.n}</div></div>`}});
+   const ck=Object.keys(S2CHEST).find(c=>S2CHEST[c]===l.id);if(ck&&(done||ADM))h+=`<div class="nodewrap" style="transform:translateX(${-off+30}px)"><button class="s2chest ${s.ch[ck]?"done":""}" data-ch="${ck}" aria-label="หีบสมบัติ">${s.ch[ck]?"📭":"🎁"}</button></div>`;
+   const bk=Object.keys(S2BOSS).find(c=>S2BOSS[c].after===l.id);if(bk){const B=S2BOSS[bk];h+=`<div class="nodewrap"><button class="node boss ${s.bs[bk]?"done":done?"open":""}" data-bs="${bk}" ${done||ADM?"":"disabled"} aria-label="บอส ${B.n}">${s.bs[bk]?"🏆":B.e}</button><div class="lbl">บอส: ${B.n}</div></div>`}});
   h+=`</div>`});
   h+=`</section>`}
  app.innerHTML=`<div class="wrap">${h}</div>`;
@@ -1478,7 +1481,7 @@ function s2page(){const s=s2();
  const cur=app.querySelector(".node.open");if(cur){const go=()=>{if(TAB==="s2"&&document.body.contains(cur)&&!document.querySelector(".lesson"))cur.scrollIntoView({block:"center"})};setTimeout(go,30);setTimeout(go,350)}}
 let S2VIEW="";
 function s1done(){return [0,1,2,3,4,5,6,7].every(w=>S.boss[w])}
-function s2locked(){const fin=s1done();
+function s2locked(){const fin=s1done()||ADM;
  app.innerHTML=`<div class="wrap"><div class="s2lock"><img src="s2/banner.jpg" alt="The Three Chaos Kingdoms"><h2>Season 2 · The Three Chaos Kingdoms</h2>
  <p>3 อาณาจักรที่อยู่ห่างไกล มังกร ช้างเผือก และคราเคน รอให้นักผจญภัยไปค้นหาและเชื่อมไมตรีกัน</p>
  ${fin?`<button class="go fire" id="s2un">⚔️ ปลดล็อก Season 2</button><p class="note">เก่งมาก! ผ่านครบทั้ง 8 ดินแดนของ Season 1 แล้ว</p>`:`<p class="note">ผ่านบอสให้ครบทั้ง 8 ดินแดนใน Season 1 เพื่อปลดล็อก</p>`}
@@ -1768,9 +1771,9 @@ function s2bridgeView(){const s=s2();
  <p class="note" style="margin:0 6px 10px">ชนะบอสตัวแรกของ 2 เมือง เพื่อเริ่มสร้างสะพานระหว่างเมืองนั้น · แต่ละแผ่นไม้มีโจทย์ผสม 2 วิชา</p>`;
  S2BR.forEach(br=>{const ok=br.need.every(b=>s.bs[b]),parts=[1,2,3].map(i=>S2LV.find(l=>l.id===br.id+i));
   h+=`<div class="brcard ${pageDone(br.id+"3")?"built":""}"><div class="brh"><span>${S2KB[br.a].e}</span><b>${br.n}</b><span>${S2KB[br.b].e}</span></div><small class="note">${br.d}${ok?"":` · ต้องชนะ ${br.need.map(b=>S2BOSS[b].n).join(" และ ")}`}</small>
-  <div class="planks">${parts.map((l,i)=>{const done=pageDone(l.id),open=ok&&s2open(l);return `<button class="plank ${done?"done":open?"open":""}" data-k2="${l.id}" ${open?"":"disabled"}>${done?"✓":open?"▶":"🔒"}<small>แผ่น ${i+1}</small></button>`}).join("")}</div></div>`});
+  <div class="planks">${parts.map((l,i)=>{const done=pageDone(l.id),open=ADM||ok&&s2open(l);return `<button class="plank ${done?"done":open?"open":""}" data-k2="${l.id}" ${open?"":"disabled"}>${done?"✓":open?"▶":"🔒"}<small>แผ่น ${i+1}</small></button>`}).join("")}</div></div>`});
  const ready=clReady(),won=s.bs.cl;
- h+=`<div class="clnode"><button class="node boss ${won?"done":ready?"open":""}" data-bs="cl" ${ready?"":"disabled"} aria-label="บอสสุดท้าย จอมโกลาหล">${won?"🏆":"🌑"}</button><div class="lbl">บอสสุดท้าย: จอมโกลาหล</div>
+ h+=`<div class="clnode"><button class="node boss ${won?"done":ready?"open":""}" data-bs="cl" ${ready||ADM?"":"disabled"} aria-label="บอสสุดท้าย จอมโกลาหล">${won?"🏆":"🌑"}</button><div class="lbl">บอสสุดท้าย: จอมโกลาหล</div>
  <small class="note">${ready?(won?"เธอเชื่อมสามอาณาจักรสำเร็จแล้ว!":"พร้อมแล้ว! รวมพลังทั้งสามเมือง"):`ต้องชนะบอสใหญ่ทั้ง 3 เมือง (${["b2","tb2","gb2"].filter(b=>s.bs[b]).length}/3) และสร้างสะพานครบ 3 เส้น (${s2bridges()}/3)`}</small>
  ${won?`<button class="go ghost sm" id="endr" style="width:auto">🎬 ดูฉากจบอีกครั้ง</button>`:""}</div></section>`;
  return h}
@@ -2617,9 +2620,40 @@ S2BOSS.b5={n:"จอมกลยุทธ์หมอกเงา",e:"🦹",hp:1
 Object.assign(S2BOSS.b2,{pool:kr(35,42),after:"k42",hp:130,atk:11});
 Object.assign(S2CHEST,{c1:"k3",c2:"k8",c3:"k14",c4:"k22",c5:"k30",c6:"k38"});
 
+/* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
+const ADM_H="f1cb8fd26529fd7ed75789960c9194e25b03db19db9e1556ae0d91c3a80e7874";
+async function admHash(u,p){const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("rd-admin:"+u.trim().toLowerCase()+":"+p));return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}
+function admLogin(){document.querySelectorAll(".admlog").forEach(x=>x.remove());const el=document.createElement("div");el.className="ollog admlog";
+ el.innerHTML=`<div class="olcard"><div class="olemo">🔧</div><h1>ผู้ดูแลระบบ</h1><p>โหมดทดสอบ: เปิดได้ทุกด่าน<br><small>ใช้เซฟแยกในเครื่อง ไม่กระทบเซฟของเด็ก</small></p>
+ <label for="admu">Username</label><input id="admu" autocomplete="off" autocapitalize="none">
+ <label for="admp">Password</label><input id="admp" type="password" autocomplete="off">
+ <p class="olmsg" id="admm" role="alert"></p><button class="olgo" id="admok">🔓 เข้าโหมดแอดมิน</button><button class="olgo sec" id="admx">↩️ ยกเลิก</button></div>`;
+ document.body.appendChild(el);
+ el.querySelector("#admx").onclick=()=>{el.remove();if(location.hash==="#admin")history.replaceState(null,"",location.pathname)};
+ el.querySelector("#admok").onclick=async()=>{const h=await admHash(el.querySelector("#admu").value,el.querySelector("#admp").value);
+  if(h!==ADM_H){el.querySelector("#admm").textContent="Username หรือ Password ไม่ถูกต้อง";return}
+  try{if(typeof OL==="object"&&OL&&OL.timer){clearTimeout(OL.timer);olPush()}}catch(e){}
+  try{localStorage.setItem("rd-admin","1")}catch(e){}setTimeout(()=>location.replace(location.pathname),400)}}
+function admExit(){try{localStorage.removeItem("rd-admin")}catch(e){}location.replace(location.pathname)}
+function admPanel(){const m=modal(`<div style="text-align:center"><h2>🔧 โหมดแอดมิน</h2><p class="note">ทุกด่านเปิดให้กดเข้าได้ · เซฟแยกจากเด็ก · ไม่ส่งข้อมูลขึ้นออนไลน์</p>
+ <button class="go teal" id="admfill">🎁 เติมของเต็ม (เหรียญ เพชร บล็อก ไข่)</button>
+ <button class="go ghost" id="adms2">⚔️ เปิด Season 2 ทันที</button>
+ <button class="go ghost" id="admrs">🧹 ล้างเซฟแอดมิน (เริ่มใหม่)</button>
+ <button class="go fire" id="admout">🚪 ออกจากโหมดแอดมิน</button>
+ <button class="go ghost sm" id="admcl">ปิด</button></div>`);
+ m.querySelector("#admcl").onclick=()=>m.remove();
+ m.querySelector("#admfill").onclick=()=>{S.coins=Math.max(S.coins,9999);S.gems=Math.max(S.gems,999);S.bulbs=Math.max(S.bulbs,99);S.tp=Math.max(S.tp||0,999);
+  if(typeof s2==="function"){const s=s2();Object.keys(BLK).forEach(k=>s.blk[k]=Math.max(s.blk[k]||0,99));s.blk.egg=Math.max(s.blk.egg||0,10)}save();m.remove();route();toast("เติมของแล้ว")};
+ m.querySelector("#adms2").onclick=()=>{m.remove();TAB="s2";const s=s2();if(s.on){route();return}s2cinema()};
+ m.querySelector("#admrs").onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.replace(location.pathname)};
+ m.querySelector("#admout").onclick=admExit}
+if(ADM){if(!S.name){S.name="แอดมิน";S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+ const b=document.createElement("button");b.id="admb";b.textContent="🔧 ADMIN";b.onclick=admPanel;document.body.appendChild(b);document.body.classList.add("isadm")}
+if(location.hash==="#admin"&&!ADM)setTimeout(admLogin,300);
+
 /* ===== online save: player name + PIN, stored in Firebase Firestore (REST) ===== */
-const OL_APP="rainbow-dragon",OL_KEY=OL_APP+"-session",OL_CFG=window.FB_CONFIG||{};
-const olOn=()=>!!(OL_CFG.projectId&&OL_CFG.apiKey);
+const OL_ADM=typeof ADM!=="undefined"&&ADM;const OL_APP="rainbow-dragon",OL_KEY=OL_APP+"-session"+(OL_ADM?"-admin":""),OL_CFG=window.FB_CONFIG||{};
+const olOn=()=>!OL_ADM&&!!(OL_CFG.projectId&&OL_CFG.apiKey);
 let OL={sess:null,timer:0,busy:false,dirty:false,last:0};
 try{OL.sess=JSON.parse(localStorage.getItem(OL_KEY)||"null")}catch(e){}
 const olUrl=id=>`https://firestore.googleapis.com/v1/projects/${OL_CFG.projectId}/databases/(default)/documents/saves/${id}?key=${OL_CFG.apiKey}`;
@@ -2667,14 +2701,14 @@ async function olSync(){if(!OL.sess||!olOn())return;try{const d=await olGet(OL.s
   else if(lu>d.updated+1000){ if(cs>ls)await olTakeCloud(d);else olPush() }
   else await olTakeCloud(d)}catch(e){olBadge("📴 ออฟไลน์ เล่นต่อได้ เซฟไว้ในเครื่องก่อน");clearTimeout(OL.rt);OL.rt=setTimeout(olSync,15000)}}
 function olSet(s){OL.sess=s;OL_BLAST="";OL.synced=false;try{s?localStorage.setItem(OL_KEY,JSON.stringify(s)):localStorage.removeItem(OL_KEY)}catch(e){}}
-function olLogin(force){if(!olOn())return;if(OL.sess&&!force)return olSync();document.querySelectorAll(".ollog").forEach(x=>x.remove());
+function olLogin(force){if(!olOn())return;if(OL.sess&&!force)return olSync();document.querySelectorAll(".ollog:not(.admlog)").forEach(x=>x.remove());
  const el=document.createElement("div");el.className="ollog";
  el.innerHTML=`<div class="olcard"><div class="olemo">🐉</div><h1>The Rainbow Dragon</h1><p>ใส่ชื่อผู้เล่นและรหัส PIN 4 ตัว<br>เล่นต่อได้ทุกเครื่อง เซฟให้อัตโนมัติ<br><small>ชื่อพิมพ์ตัวเล็กหรือตัวใหญ่ก็ได้</small></p>
  <label for="oln">ชื่อผู้เล่น</label><input id="oln" maxlength="20" autocomplete="username" placeholder="เช่น น้ำหวาน">
  <label for="olp">PIN 4 ตัว (จำไว้นะ)</label><input id="olp" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="current-password" placeholder="••••" type="password">
  <p class="olmsg" id="olm" role="alert"></p><button class="olgo" id="olok">▶️ เข้าเล่น</button>
- <details class="olold"><summary>มีรหัสเซฟจากแอปเดิมบน Claude?</summary><p>ใส่ชื่อและ PIN ด้านบนก่อน แล้ววางรหัสเซฟเก่าที่นี่ ความคืบหน้าเดิมจะถูกย้ายมา</p><textarea id="olc" rows="3" placeholder="วางรหัสที่ขึ้นต้นด้วย DRAGON-"></textarea><button class="olgo sec" id="olimp">📥 ย้ายเซฟเก่ามาที่ชื่อนี้</button></details></div>`;
- document.body.appendChild(el);const msg=t=>{el.querySelector("#olm").textContent=t};
+ <details class="olold"><summary>มีรหัสเซฟจากแอปเดิมบน Claude?</summary><p>ใส่ชื่อและ PIN ด้านบนก่อน แล้ววางรหัสเซฟเก่าที่นี่ ความคืบหน้าเดิมจะถูกย้ายมา</p><textarea id="olc" rows="3" placeholder="วางรหัสที่ขึ้นต้นด้วย DRAGON-"></textarea><button class="olgo sec" id="olimp">📥 ย้ายเซฟเก่ามาที่ชื่อนี้</button></details>${typeof admLogin==="function"?`<button type="button" class="olgo sec" id="oladm" style="margin-top:10px;font-size:13px;opacity:.75">🔧 ผู้ดูแลระบบ</button>`:""}</div>`;
+ document.body.appendChild(el);const msg=t=>{el.querySelector("#olm").textContent=t};const _ad=el.querySelector("#oladm");if(_ad)_ad.onclick=()=>admLogin();
  const read=async()=>{const n=el.querySelector("#oln").value.trim(),p=el.querySelector("#olp").value.trim();if(n.length<2){msg("ใส่ชื่อผู้เล่นอย่างน้อย 2 ตัวอักษร");return null}if(!/^\d{4}$/.test(p)){msg("PIN ต้องเป็นตัวเลข 4 ตัว");return null}return {name:n,id:await olId(n,p)}};
  el.querySelector("#olok").onclick=async()=>{const s=await read();if(!s)return;msg("กำลังเปิดเซฟ…");
   let d;try{d=await olGet(s.id)}catch(e){msg("ต่อเน็ตไม่ได้ ลองใหม่อีกครั้ง");return}
@@ -2720,7 +2754,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795220758";let OL_VCHK=0;
+const OL_VER="1795221891";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
