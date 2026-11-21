@@ -1813,7 +1813,7 @@ function s2ending(){const lines=["หมอกดำสลายไปแล้�
   el.querySelector("#cn").onclick=()=>{SND.tap();if(i<lines.length-1){i++;show()}else{el.remove();route()}}};show()}
 
 /* ===== Season 2: 3D home-city builder (Three.js, loaded on demand) + friend visits ===== */
-const CN=12,CH=8,B36="0123456789abcdefghijklmnopqrstuvwxyz";
+let CN=12;const CH=8,CSZ=[12,16,24,32],CEXP={16:{coins:300,wood:10,stone:10},24:{coins:800,iron:8,gems:10},32:{coins:1500,crystal:8,gems:25}},B36="0123456789abcdefghijklmnopqrstuvwxyz";
 const CBLK={W:{m:"wood",c:0xa0703f,n:"ไม้"},L:{m:"wood",c:0x4caf50,n:"ใบไม้"},S:{m:"stone",c:0x8f9098,n:"หิน"},P:{m:"pearl",c:0xf6e3ef,n:"ไข่มุก"},D:{m:"sand",c:0xe8c66a,n:"ทราย"},I:{m:"iron",c:0xcfd6de,n:"เหล็ก"},C:{m:"crystal",c:0x5fd8f7,op:.72,n:"คริสตัล"},R:{m:"coins",cost:3,c:0xd2483a,n:"อิฐแดง"},B:{m:"coins",cost:3,c:0x3b6fd8,n:"อิฐฟ้า"},Y:{m:"coins",cost:3,c:0xf2c94c,n:"อิฐทอง"},A:{m:"coins",cost:2,c:0x3fa9f5,op:.6,n:"น้ำ"}};
 const CICON={W:"🪵",L:"🍃",S:"🪨",P:"🦪",D:"🏜️",I:"⚙️",C:"🔷",R:"🟥",B:"🟦",Y:"🟨",A:"💧"};
 const BPRINT={
@@ -1825,47 +1825,51 @@ const BPRINT={
  dock:{e:"⚓",n:"ท่าเรือ",v:[[0,0,0,"W"],[1,0,0,"W"],[2,0,0,"W"],[3,0,0,"W"],[0,0,1,"W"],[1,0,1,"W"],[2,0,1,"W"],[3,0,1,"W"],[0,0,2,"A"],[1,0,2,"A"],[2,0,2,"A"],[3,0,2,"A"]]},
  tent:{e:"⛺",n:"กระโจม",v:[[0,0,0,"D"],[2,0,0,"D"],[0,0,2,"D"],[2,0,2,"D"],[0,1,0,"P"],[1,1,0,"P"],[2,1,0,"P"],[0,1,1,"P"],[2,1,1,"P"],[0,1,2,"P"],[1,1,2,"P"],[2,1,2,"P"],[1,2,1,"Y"]]}};
 const bpCost=bp=>{const c={};bp.v.forEach(v=>{const B=CBLK[v[3]],m=B.m;c[m]=(c[m]||0)+(B.cost||1)});return c};
-const cityDecode=str=>{const m=new Map();for(let i=0;i+3<(str||"").length;i+=4){const x=B36.indexOf(str[i]),y=B36.indexOf(str[i+1]),z=B36.indexOf(str[i+2]),t=str[i+3];if(x>=0&&y>=0&&z>=0&&CBLK[t])m.set(x+","+y+","+z,t)}return m};
-const cityEncode=m=>[...m].map(([k,t])=>{const [x,y,z]=k.split(",").map(Number);return B36[x]+B36[y]+B36[z]+t}).join("");
+const citySize=str=>str&&str[0]==="@"?Math.max(12,B36.indexOf(str[1])):12;
+const cityDecode=str=>{const m=new Map();for(let i=str&&str[0]==="@"?2:0;i+3<(str||"").length;i+=4){const x=B36.indexOf(str[i]),y=B36.indexOf(str[i+1]),z=B36.indexOf(str[i+2]),t=str[i+3];if(x>=0&&y>=0&&z>=0&&CBLK[t])m.set(x+","+y+","+z,t)}return m};
+const cityEncode=(m,n)=>(n&&n>12?"@"+B36[n]:"")+[...m].map(([k,t])=>{const [x,y,z]=k.split(",").map(Number);return B36[x]+B36[y]+B36[z]+t}).join("");
 function cityPts(m){let h=0;const ty=new Set();m.forEach((t,k)=>{ty.add(t);h=Math.max(h,+k.split(",")[1]+1)});return m.size+ty.size*5+h*3}
 function loadThree(){return new Promise((res,rej)=>{if(window.THREE)return res(THREE);const sc=document.createElement("script");sc.src="s2/three.min.js";sc.onload=()=>window.THREE?res(THREE):rej(new Error("no three"));sc.onerror=()=>rej(new Error("load"));document.head.appendChild(sc)})}
 /* ---- renderer shared by edit + visit ---- */
 function cityScene(cv,home,getMap){const T=THREE;let R;try{R=new T.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true})}catch(e){return null}
  R.setPixelRatio(Math.min(2,window.devicePixelRatio||1));const sc=new T.Scene();sc.background=new T.Color(home==="t"?0x9fd8ff:home==="g"?0xffe0a8:0xbfe3ff);
  sc.add(new T.HemisphereLight(0xffffff,0x667788,.85));const dl=new T.DirectionalLight(0xffffff,.75);dl.position.set(8,14,6);sc.add(dl);
- const cam=new T.PerspectiveCamera(45,1,.1,200);const st={th:.8,ph:.95,r:22};const ctr=new T.Vector3(CN/2-.5,0,CN/2-.5);
+ const cam=new T.PerspectiveCamera(45,1,.1,200);const st={th:.8,ph:.95,r:Math.round(CN*1.8)};const ctr=new T.Vector3(CN/2-.5,0,CN/2-.5);
  const place=()=>{cam.position.set(ctr.x+st.r*Math.sin(st.ph)*Math.cos(st.th),ctr.y+st.r*Math.cos(st.ph),ctr.z+st.r*Math.sin(st.ph)*Math.sin(st.th));cam.lookAt(ctr)};
  const geo=new T.BoxGeometry(1,1,1),mats={};Object.keys(CBLK).forEach(k=>{const B=CBLK[k];mats[k]=new T.MeshLambertMaterial({color:B.c,transparent:!!B.op,opacity:B.op||1})});
  const gc=home==="t"?[0x7ccf6b,0xe9d9a0]:home==="g"?[0xe0b866,0xd2a650]:[0x6cc36a,0x5fb35d];const ground=[];
- for(let x=0;x<CN;x++)for(let z=0;z<CN;z++){const g=new T.Mesh(geo,new T.MeshLambertMaterial({color:gc[(x+z)%2]}));g.position.set(x,-1,z);g.userData={g:1,x,y:-1,z};sc.add(g);ground.push(g)}
+ {const N=CN,cvs=document.createElement("canvas");cvs.width=cvs.height=N*8;const cx=cvs.getContext("2d");const hx=c=>"#"+c.toString(16).padStart(6,"0");
+  for(let x=0;x<N;x++)for(let z=0;z<N;z++){cx.fillStyle=hx(gc[(x+z)%2]);cx.fillRect(x*8,z*8,8,8)}const tx=new T.CanvasTexture(cvs);tx.magFilter=T.NearestFilter;tx.minFilter=T.NearestFilter;
+  const side=new T.MeshLambertMaterial({color:gc[0]}),top=new T.MeshLambertMaterial({map:tx});
+  const g=new T.Mesh(new T.BoxGeometry(N,1,N),[side,side,top,side,side,side]);g.position.set(N/2-.5,-1,N/2-.5);g.userData={g:1,y:-1};sc.add(g);ground.push(g)}
  const eg=new T.EdgesGeometry(geo),em=new T.LineBasicMaterial({color:0x000000,transparent:true,opacity:.18});
  let vox=[];const rebuild=()=>{vox.forEach(v=>sc.remove(v));vox=[];getMap().forEach((t,k)=>{const [x,y,z]=k.split(",").map(Number);const m=new T.Mesh(geo,mats[t]);m.position.set(x,y,z);m.userData={x,y,z,t};m.add(new T.LineSegments(eg,em));sc.add(m);vox.push(m)})};
  const ghost=new T.Mesh(geo,new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35}));ghost.visible=false;sc.add(ghost);
  const size=()=>{const w=cv.clientWidth,h=cv.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()};
  let alive=true,spin=0;const loop=()=>{if(!alive)return;if(spin){st.th+=spin}place();R.render(sc,cam);requestAnimationFrame(loop)};
  const ray=new T.Raycaster(),v2=new T.Vector2();
- const hit=(cx,cy)=>{const r=cv.getBoundingClientRect();v2.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);ray.setFromCamera(v2,cam);const h=ray.intersectObjects([...vox,...ground],false)[0];return h?{o:h.object.userData,n:h.face.normal}:null};
+ const hit=(cx,cy)=>{const r=cv.getBoundingClientRect();v2.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);ray.setFromCamera(v2,cam);const h=ray.intersectObjects([...vox,...ground],false)[0];if(!h)return null;const o=h.object.userData;return o.g?{o:{g:1,x:Math.round(h.point.x),y:-1,z:Math.round(h.point.z)},n:h.face.normal}:{o,n:h.face.normal}};
  size();rebuild();loop();window.addEventListener("resize",size);
  return {st,rebuild,hit,ghost,size,setSpin:v=>spin=v,shot:()=>cv.toDataURL("image/jpeg",.8),stop:()=>{alive=false;window.removeEventListener("resize",size);try{R.dispose()}catch(e){}}}}
 function cityOrbit(cv,S3,onTap){let p0=null,moved=0,pin=null;const pts=new Map();
  cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);p0=[e.clientX,e.clientY];moved=0;if(pts.size===2){const [a,b]=[...pts.values()];pin=Math.hypot(a[0]-b[0],a[1]-b[1])}});
  cv.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;const last=pts.get(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);
-  if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pin){S3.st.r=Math.max(8,Math.min(36,S3.st.r*pin/d))}pin=d;moved=99;return}
+  if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pin){S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r*pin/d))}pin=d;moved=99;return}
   const dx=e.clientX-last[0],dy=e.clientY-last[1];moved+=Math.abs(dx)+Math.abs(dy);if(moved>8){S3.st.th+=dx*.01;S3.st.ph=Math.max(.25,Math.min(1.45,S3.st.ph-dy*.01))}});
  const up=e=>{const had=pts.has(e.pointerId);pts.delete(e.pointerId);if(pts.size<2)pin=null;if(had&&moved<=8&&p0&&onTap)onTap(e.clientX,e.clientY);if(!pts.size)p0=null};
  cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",e=>{pts.delete(e.pointerId)});
- cv.addEventListener("wheel",e=>{e.preventDefault();S3.st.r=Math.max(8,Math.min(36,S3.st.r+(e.deltaY>0?1.5:-1.5)))},{passive:false})}
+ cv.addEventListener("wheel",e=>{e.preventDefault();S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r+(e.deltaY>0?1.5:-1.5)))},{passive:false})}
 /* ---- editor ---- */
 async function cityOpen(){const s=s2();const el=document.createElement("div");el.className="city";el.innerHTML=`<div class="cload">กำลังสร้างเมือง… 🏗️</div>`;document.body.appendChild(el);
  try{await loadThree()}catch(e){el.innerHTML=`<div class="cload">เครื่องนี้โหลดโหมด 3 มิติไม่ได้ ลองเชื่อมอินเทอร์เน็ตแล้วเปิดใหม่<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
- let map=cityDecode(s.city),mode="put",brush="W",bp=null;const home=s.home||"k";
+ CN=citySize(s.city);let map=cityDecode(s.city),mode="put",brush="W",bp=null;const home=s.home||"k";
  el.innerHTML=`<div class="chead"><button class="x" id="cx" aria-label="ปิด">✕</button><div><b>🏰 เมืองของ ${esc(S.name)}</b><small id="cpt"></small></div><button class="go ghost sm" id="cvis" style="width:auto;margin:0">👀 เยี่ยมเพื่อน</button></div>
-  <canvas id="ccv"></canvas><div class="ctool"><div class="cmode"><button data-m="put">➕ วาง</button><button data-m="dig">⛏️ ทุบ</button><button data-m="bp">📐 แบบแปลน</button><button data-z="-">🔍−</button><button data-z="+">🔍+</button></div><div class="cpal2" id="cpal"></div><p class="note" id="chint"></p></div>`;
+  <canvas id="ccv"></canvas><div class="ctool"><div class="cmode"><button data-m="put">➕ วาง</button><button data-m="dig">⛏️ ทุบ</button><button data-m="bp">📐 แบบแปลน</button><button id="cexp">🗺️ ขยาย</button><button data-z="-">🔍−</button><button data-z="+">🔍+</button></div><div class="cpal2" id="cpal"></div><p class="note" id="chint"></p></div>`;
  const cv=el.querySelector("#ccv");const S3=cityScene(cv,home,()=>map);if(!S3){el.innerHTML=`<div class="cload">เครื่องนี้เปิดภาพ 3 มิติไม่ได้ (WebGL ปิดอยู่)<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
- const have=m=>m==="coins"?S.coins:(s.blk[m]||0);
- const pay=c=>{if(!Object.keys(c).every(m=>have(m)>=c[m]))return false;Object.keys(c).forEach(m=>{if(m==="coins")S.coins-=c[m];else s.blk[m]-=c[m]});return true};
- const commit=()=>{s.city=cityEncode(map);s.cpts=cityPts(map);save();S3.rebuild();ui();cityPushSoon()};
- const ui=()=>{el.querySelector("#cpt").textContent=` · ${map.size} บล็อก · ⭐ ${cityPts(map)} คะแนนเมือง`;
+ const have=m=>m==="coins"?S.coins:m==="gems"?S.gems:(s.blk[m]||0);
+ const pay=c=>{if(!Object.keys(c).every(m=>have(m)>=c[m]))return false;Object.keys(c).forEach(m=>{if(m==="coins")S.coins-=c[m];else if(m==="gems")S.gems-=c[m];else s.blk[m]-=c[m]});return true};
+ const commit=()=>{s.city=cityEncode(map,CN);s.cpts=cityPts(map);save();S3.rebuild();ui();cityPushSoon()};
+ const ui=()=>{el.querySelector("#cpt").textContent=` · พื้นที่ ${CN}×${CN} · ${map.size} บล็อก · ⭐ ${cityPts(map)} คะแนนเมือง`;
   el.querySelectorAll("[data-m]").forEach(b=>b.classList.toggle("on",b.dataset.m===mode));
   const pal=el.querySelector("#cpal");
   if(mode==="bp")pal.innerHTML=Object.keys(BPRINT).map(k=>{const B=BPRINT[k],c=bpCost(B),ok=Object.keys(c).every(m=>have(m)>=c[m]);return `<button class="cb ${bp===k?"sel":""} ${ok?"":"poor"}" data-bp="${k}"><span>${B.e}</span><b>${B.n}</b><small>${Object.keys(c).map(m=>`${m==="coins"?"💰":BLK[m][0]}${c[m]}`).join(" ")}</small></button>`}).join("");
@@ -1874,7 +1878,7 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
   pal.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{bp=b.dataset.bp;SND.tap();ui()});
   el.querySelector("#chint").textContent=mode==="put"?"แตะพื้นหรือด้านข้างบล็อกเพื่อวาง · ลากเพื่อหมุนเมือง":mode==="dig"?"แตะบล็อกเพื่อทุบ ได้บล็อกคืน (อิฐใช้เหรียญ ไม่คืนเหรียญ)":"เลือกแบบแปลน แล้วแตะพื้นเพื่อสร้างทั้งหลังในครั้งเดียว"};
  el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mode=b.dataset.m;SND.tap();ui()});
- el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{S3.st.r=Math.max(8,Math.min(36,S3.st.r+(b.dataset.z==="+"?-3:3)))});
+ el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r+(b.dataset.z==="+"?-3:3)))});
  cityOrbit(cv,S3,(cx,cy)=>{const h=S3.hit(cx,cy);if(!h)return;const o=h.o;
   if(mode==="dig"){if(o.g)return;const k=o.x+","+o.y+","+o.z,t=map.get(k);map.delete(k);const B=CBLK[t];if(B.m!=="coins")s.blk[B.m]=(s.blk[B.m]||0)+1;SND.hit();commit();return}
   if(mode==="bp"){if(!bp)return toast("เลือกแบบแปลนก่อน");const B=BPRINT[bp];const x0=o.x+(o.g?0:Math.round(h.n.x)),y0=o.g?0:o.y+Math.round(h.n.y),z0=o.z+(o.g?0:Math.round(h.n.z));
@@ -1884,13 +1888,22 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
   const x=o.x+Math.round(h.n.x),y=o.y+Math.round(h.n.y),z=o.z+Math.round(h.n.z);if(x<0||x>=CN||z<0||z>=CN||y<0||y>=CH)return toast(y>=CH?"สูงสุดแค่ "+CH+" ชั้น":"นอกเขตเมือง");
   const B=CBLK[brush];if(!pay({[B.m]:B.cost||1}))return toast(`${B.n}ไม่พอ${B.m==="coins"?" (ใช้เหรียญ)":" ผ่านด่านเพื่อเก็บเพิ่ม"}`);map.set(x+","+y+","+z,brush);SND.tap();commit()});
  el.querySelector("#cx").onclick=()=>{S3.stop();el.remove();route()};
- el.querySelector("#cvis").onclick=()=>cityVisitList();ui();if(!map.size)setTimeout(()=>{toast("เริ่มด้วยแบบแปลน 📐 บ้านหรือต้นไม้ก็ได้!");say("มาสร้างเมืองบ้านเกิดกันเถอะ","th")},400)}
+ el.querySelector("#cvis").onclick=()=>cityVisitList();
+ el.querySelector("#cexp").onclick=()=>{const nx=CSZ[CSZ.indexOf(CN)+1];const ic=m=>m==="coins"?"💰":m==="gems"?"💎":(BLK[m]||["🧱"])[0];
+  if(!nx)return modal(`<div style="text-align:center"><h2>🗺️ ขยายพื้นที่</h2><p>เมืองของคุณกว้างที่สุดแล้ว (${CN}×${CN}) 🎉</p><button class="go ghost" onclick="this.closest('.modal').remove()">ปิด</button></div>`);
+  const c=CEXP[nx],ok=Object.keys(c).every(m=>have(m)>=c[m]);
+  const m=modal(`<div style="text-align:center"><h2>🗺️ ขยายพื้นที่เมือง</h2><p>จาก <b>${CN}×${CN}</b> เป็น <b>${nx}×${nx}</b><br><small>ขยายออกรอบด้าน สิ่งที่สร้างไว้จะอยู่ตรงกลางเหมือนเดิม</small></p>
+   <div class="card">${Object.keys(c).map(k=>`<div style="display:flex;justify-content:space-between;padding:4px 0"><span>${ic(k)} ใช้ ${c[k]}</span><b style="color:${have(k)>=c[k]?"#3c9":"#e55"}">มี ${have(k)}</b></div>`).join("")}</div>
+   <button class="go fire" id="cxok" ${ok?"":"disabled"}>${ok?"ขยายเลย!":"ของยังไม่พอ"}</button><button class="go ghost" id="cxno">ยกเลิก</button></div>`);
+  m.querySelector("#cxno").onclick=()=>m.remove();
+  m.querySelector("#cxok").onclick=()=>{if(!pay(c))return;const d=(nx-CN)/2,m2=new Map();map.forEach((t,k)=>{const [x,y,z]=k.split(",").map(Number);m2.set((x+d)+","+y+","+(z+d),t)});
+   map=m2;CN=nx;m.remove();s.city=cityEncode(map,CN);s.cpts=cityPts(map);save();S3.stop();el.remove();SND.gem();confetti(60);toast(`ขยายเมืองเป็น ${CN}×${CN} แล้ว!`);cityOpen()}};ui();if(!map.size)setTimeout(()=>{toast("เริ่มด้วยแบบแปลน 📐 บ้านหรือต้นไม้ก็ได้!");say("มาสร้างเมืองบ้านเกิดกันเถอะ","th")},400)}
 /* ---- online: publish my city, list + visit friends ---- */
 const olCUrl=(id,q)=>`https://firestore.googleapis.com/v1/projects/${OL_CFG.projectId}/databases/(default)/documents/city${id?"/"+id:""}?key=${OL_CFG.apiKey}${q||""}`;
 let CITYT=0;function cityPushSoon(){clearTimeout(CITYT);CITYT=setTimeout(cityPush,4000)}
 async function cityPush(){try{if(!OL.sess||!olOn()||typeof olBid!=="function")return;const s=s2();if(!s.city)return;const id=await olBid();if(!id)return;
  let likes=0;const r0=await fetch(olCUrl(id));if(r0.ok){const j=await r0.json();likes=+((j.fields||{}).likes||{}).integerValue||0}
- const f={app:{stringValue:"rainbow-dragon"},name:{stringValue:String(S.name).slice(0,20)},grid:{stringValue:s.city.slice(0,2400)},home:{stringValue:s.home||"k"},wk:{stringValue:wkKey()},wp:{integerValue:String(wkPts())},pts:{integerValue:String(s.cpts||0)},likes:{integerValue:String(likes)},updated:{integerValue:String(Date.now())}};
+ const f={app:{stringValue:"rainbow-dragon"},name:{stringValue:String(S.name).slice(0,20)},grid:{stringValue:s.city.slice(0,12000)},home:{stringValue:s.home||"k"},wk:{stringValue:wkKey()},wp:{integerValue:String(wkPts())},pts:{integerValue:String(s.cpts||0)},likes:{integerValue:String(likes)},updated:{integerValue:String(Date.now())}};
  await fetch(olCUrl(id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})})}catch(e){}}
 async function cityList(){const r=await fetch(olCUrl("","&pageSize=100"));if(!r.ok)throw new Error(r.status);const j=await r.json();
  return (j.documents||[]).map(d=>{const f=d.fields||{},v=k=>f[k]?(f[k].stringValue!==undefined?f[k].stringValue:+f[k].integerValue):undefined;return{id:d.name.split("/").pop(),name:v("name"),grid:v("grid"),home:v("home"),wk:v("wk"),wp:v("wp")||0,pts:v("pts")||0,likes:v("likes")||0}}).filter(c=>c.name)}
@@ -1902,10 +1915,10 @@ async function cityVisitList(){const m=modal(`<div style="text-align:center"><h2
   ${L2.sort((a,b)=>b.pts-a.pts).map(c=>`<button class="vrow" data-v="${c.id}"><span>${(S2KB[c.home]||S2K[0]).e}</span><b>${esc(c.name)}${c.id===mine?" (ฉัน)":""}</b><small>⭐${c.pts} · 👍${c.likes}</small></button>`).join("")||`<p class="note">ยังไม่มีใครสร้างเมือง เป็นคนแรกเลย!</p>`}<button class="go ghost" id="vx">ปิด</button></div>`;
  m.querySelector("#vx").onclick=()=>m.remove();m.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{m.remove();cityVisit(L2.find(c=>c.id===b.dataset.v))})}
 async function cityVisit(c){try{await loadThree()}catch(e){return toast("โหลดภาพ 3 มิติไม่ได้")}
- const s=s2();s.liked=s.liked||{};const map=cityDecode(c.grid);const el=document.createElement("div");el.className="city";
+ const s=s2();s.liked=s.liked||{};const CN0=CN;CN=citySize(c.grid);const map=cityDecode(c.grid);const el=document.createElement("div");el.className="city";
  el.innerHTML=`<div class="chead"><button class="x" id="cx" aria-label="ปิด">✕</button><div><b>${(S2KB[c.home]||S2K[0]).e} เมืองของ ${esc(c.name)}</b><small> · ⭐ ${c.pts} · 👍 <span id="lk">${c.likes}</span></small></div><button class="go fire sm" id="like" style="width:auto;margin:0" ${s.liked[c.id]?"disabled":""}>👍 ชอบ</button></div><canvas id="ccv"></canvas><p class="note" style="text-align:center">ลากเพื่อหมุน · ดูอย่างเดียว</p>`;
  document.body.appendChild(el);const S3=cityScene(el.querySelector("#ccv"),c.home,()=>map);if(!S3){el.remove();return toast("เครื่องนี้เปิดภาพ 3 มิติไม่ได้")}S3.setSpin(.003);cityOrbit(el.querySelector("#ccv"),S3,()=>S3.setSpin(0));
- el.querySelector("#cx").onclick=()=>{S3.stop();el.remove()};
+ el.querySelector("#cx").onclick=()=>{S3.stop();el.remove();CN=CN0};
  el.querySelector("#like").onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{const r=await fetch(olCUrl(c.id,"&updateMask.fieldPaths=likes"),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{likes:{integerValue:String(c.likes+1)}}})});
   if(!r.ok)throw 0;c.likes++;el.querySelector("#lk").textContent=c.likes;s.liked[c.id]=true;save();SND.gem();confetti(40)}catch(err){b.disabled=false;toast("ส่ง 👍 ไม่สำเร็จ ลองใหม่")}}}
 
@@ -4993,7 +5006,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795243323";let OL_VCHK=0;
+const OL_VER="1795243460";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}

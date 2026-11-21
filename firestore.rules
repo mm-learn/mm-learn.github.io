@@ -42,7 +42,7 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly(['app', 'name', 'grid', 'home', 'wk', 'wp', 'pts', 'likes', 'updated'])
         && request.resource.data.app == 'rainbow-dragon'
         && request.resource.data.name is string && request.resource.data.name.size() <= 20
-        && request.resource.data.grid is string && request.resource.data.grid.size() <= 2400
+        && request.resource.data.grid is string && request.resource.data.grid.size() <= 12000
         && request.resource.data.home in ['k', 't', 'g']
         && request.resource.data.wk is string && request.resource.data.wk.size() <= 10
         && request.resource.data.wp is int && request.resource.data.wp >= 0 && request.resource.data.wp < 100000
