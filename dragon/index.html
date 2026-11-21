@@ -4889,6 +4889,7 @@ function admLogin(){document.querySelectorAll(".admlog").forEach(x=>x.remove());
 function admExit(){try{localStorage.removeItem("rd-admin")}catch(e){}location.replace(location.pathname)}
 function admPanel(){const m=modal(`<div style="text-align:center"><h2>🔧 โหมดแอดมิน</h2><p class="note">ทุกด่านเปิดให้กดเข้าได้ · เซฟแยกจากเด็ก · ไม่ส่งข้อมูลขึ้นออนไลน์</p>
  <button class="go teal" id="admfill">🎁 เติมของเต็ม (เหรียญ เพชร บล็อก ไข่)</button>
+ <button class="go teal" id="admall">🌟 ปลดล็อกครบทุกอย่าง (การ์ด สัตว์ ของคราฟต์)</button>
  <button class="go ghost" id="adms2">⚔️ เปิด Season 2 ทันที</button>
  <button class="go ghost" id="admrs">🧹 ล้างเซฟแอดมิน (เริ่มใหม่)</button>
  <button class="go fire" id="admout">🚪 ออกจากโหมดแอดมิน</button>
@@ -4896,6 +4897,16 @@ function admPanel(){const m=modal(`<div style="text-align:center"><h2>🔧 โ�
  m.querySelector("#admcl").onclick=()=>m.remove();
  m.querySelector("#admfill").onclick=()=>{S.coins=Math.max(S.coins,9999);S.gems=Math.max(S.gems,999);S.bulbs=Math.max(S.bulbs,99);S.tp=Math.max(S.tp||0,999);
   if(typeof s2==="function"){const s=s2();Object.keys(BLK).forEach(k=>s.blk[k]=Math.max(s.blk[k]||0,99));s.blk.egg=Math.max(s.blk.egg||0,10)}save();m.remove();route();toast("เติมของแล้ว")};
+ m.querySelector("#admall").onclick=()=>{try{
+  S.myth=MYTH.map(x=>x.id);HEROES.forEach(H=>{if(!S.heroes[H.id])recruit(H.id);const h=S.heroes[H.id];["pow","spd","def","smt","fly"].forEach(k=>h[k]=Math.max(h[k]||0,60))});
+  S.coins=Math.max(S.coins,9999);S.gems=Math.max(S.gems,999);
+  const s=s2();if(!s.on){s.on=1;s.home=s.home||"k"}s.pc=s.pc||{};PETS.forEach(p=>s.pc[p.id]=Math.max(s.pc[p.id]||0,50));
+  s.team=[...new Set([...s2team(),HOMEPET.k,HOMEPET.t,HOMEPET.g])].slice(0,3).join(",");
+  s.myth2=MYTH2.map(x=>x.id);s.sec=SECRET.map(x=>x.id);s.gear=s.gear||{};GEAR.forEach(g=>s.gear[g.id]=1);
+  s.eq=s.eq||{};["w","s","h","f"].forEach(sl=>{const best=GEAR.filter(g=>g.slot===sl).pop();if(best)s.eq[sl]=best.id});
+  s.bs=s.bs||{};Object.keys(S2BOSS).forEach(k=>s.bs[k]=1);S.extraVeh=S.extraVeh||[];S2VEH.forEach(v=>{if(!S.extraVeh.includes(v.id))S.extraVeh.push(v.id)});
+  Object.keys(BLK).forEach(k=>s.blk[k]=Math.max(s.blk[k]||0,99));
+  save();m.remove();TAB="team";route();toast("ปลดล็อกครบทุกอย่างแล้ว 🌟")}catch(e){toast("ปลดล็อกไม่สำเร็จ: "+e.message)}};
  m.querySelector("#adms2").onclick=()=>{m.remove();TAB="s2";const s=s2();if(s.on){route();return}s2cinema()};
  m.querySelector("#admrs").onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}location.replace(location.pathname)};
  m.querySelector("#admout").onclick=admExit}
@@ -5006,7 +5017,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795243495";let OL_VCHK=0;
+const OL_VER="1795243578";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
