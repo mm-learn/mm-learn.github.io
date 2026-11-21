@@ -327,6 +327,7 @@ svg.px,svg.cube{image-rendering:pixelated;vertical-align:middle}
 .petI{border-radius:50%;object-fit:cover;vertical-align:middle;border:2px solid #ffffff55}.petI.f3{border-color:#ffd84d;box-shadow:0 0 10px #ffd84d}
 .newpic{display:grid;place-items:center;margin:8px 0}.newpic img{max-width:200px;border-radius:16px}
 .cityart{display:flex;justify-content:center;gap:4px;margin:6px 0}
+.cube.bi{display:inline-block;vertical-align:-0.2em}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -4830,6 +4831,11 @@ function s2rehome(){const a=rnd(13,19),b=rnd(6,9);const m=modal(`<div style="tex
    s.pc[np]=Math.max(s.pc[np]||0,oxp);if(oxp<15)delete s.pc[op];
    s.team=s2team().map(id=>id===op&&s.pc[op]===undefined?np:id).filter((v,i,arr)=>arr.indexOf(v)===i).join(",");
    S2VIEW="";save();SND.roar();confetti(80);toast(`ย้ายบ้านไปเมือง ${S2KB[nk].th} แล้ว!`);route()})}}
+/* own block icons (older Android lacks 🪵 🪨 🦪 emoji) */
+function blkIcon(p){return cubeSVG(p[0],p[1],p[2],1).replace(/width="1" height="[^"]*"/,'width="1.15em" height="1.2em"').replace('class="cube"','class="cube bi"')}
+BLK.wood[0]=blkIcon(PAL.wood);BLK.stone[0]=blkIcon(PAL.stone);BLK.pearl[0]=blkIcon(PAL.pearl);
+if(typeof CICON!=="undefined"){CICON.W=BLK.wood[0];CICON.S=BLK.stone[0];CICON.P=BLK.pearl[0]}
+XCH.forEach(x=>{const k=Object.keys(x.to)[0];x.th=x.th.replace(/[🪵🪨🦪]/u,BLK[k][0])});
 
 /* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
 const ADM_H="f1cb8fd26529fd7ed75789960c9194e25b03db19db9e1556ae0d91c3a80e7874";
@@ -4965,7 +4971,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795238612";let OL_VCHK=0;
+const OL_VER="1795238808";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
