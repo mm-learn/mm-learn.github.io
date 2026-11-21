@@ -4990,6 +4990,15 @@ ghostText=function(t){const k=clean(t).trim().toLowerCase();if(recPlay(k,!/[฀-
 say=function(text,lang){audUnlock();const ct=clean(text).trim(),key=ct.toLowerCase(),en=lang==="en"||(!lang&&!/[฀-๿]/.test(text));
  if(hasVoice(en))return speakTTS(ct,en,true);try{speechSynthesis.cancel()}catch(e){}if(!recPlay(key,en))ghostText(ct)};
 
+/* ---------- remember last tab / kingdom / level, reopen there ---------- */
+const UIK="rd-ui-"+(typeof ADM!=="undefined"&&ADM?"adm":"kid");
+(()=>{try{const u=JSON.parse(localStorage.getItem(UIK)||"{}");if(u.tab&&TABPG[u.tab])TAB=u.tab;if(u.s2v!==undefined)S2VIEW=u.s2v;if(u.tv)TEAMV=u.tv;if(u.sv)SHOPV=u.sv;window.LASTP=u.lp||""}catch(e){}})();
+function uiSave(){try{localStorage.setItem(UIK,JSON.stringify({tab:TAB,s2v:S2VIEW,tv:TEAMV,sv:SHOPV,lp:window.LASTP||""}))}catch(e){}}
+{const _r=route;route=function(){const r=_r.apply(this,arguments);uiSave();
+  try{const lp=window.LASTP;if(lp&&(TAB==="map"||TAB==="s2")){const n=document.querySelector(`[data-p="${lp}"],[data-k2="${lp}"]`);if(n)setTimeout(()=>n.scrollIntoView({block:"center"}),60)}}catch(e){}return r}}
+{const _sl=startLesson;startLesson=function(p){if(typeof p==="string"){window.LASTP=p;uiSave()}return _sl.apply(this,arguments)}}
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-vk]"))setTimeout(uiSave,50)},true);
+
 /* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
 const ADM_H="f1cb8fd26529fd7ed75789960c9194e25b03db19db9e1556ae0d91c3a80e7874";
 async function admHash(u,p){const h=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("rd-admin:"+u.trim().toLowerCase()+":"+p));return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}
@@ -5137,7 +5146,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795256403";let OL_VCHK=0;
+const OL_VER="1795257315";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
