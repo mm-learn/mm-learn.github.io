@@ -763,6 +763,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--lilac);outline-
 .lvtag{position:absolute;top:2px;right:3px;font-style:normal;font-size:9px;font-weight:800;color:#8a6a5a}.lvfull .lvtag{color:#1f9a63}.lvpart .lvtag{color:#c98a00}
 .lvleg{font-size:12px;line-height:1.8}.lg{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;border:2px solid #ccc}.lg.lvfull{border-color:#2fae7a;background:#e3f8ee}.lg.lvpart{border-color:#f2b33d}.lg.lvnew{border-style:dashed;border-color:#b9a39a}
 .qdone,.qnew{display:inline-block;font-style:normal;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:6px}.qdone{background:#e3f8ee;color:#1f9a63}.qnew{background:#fff1c7;color:#b07a00}
+.petpop small{white-space:pre-line}.petpop b{font-size:17px}
 :root{--olbg:linear-gradient(160deg,#FFE3EE,#E9DDFF);--olcard:#FFFFFF;--olink:#4A3355;--olbtn:#FF7EAD}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -2933,7 +2934,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795334255";let OL_VCHK=0;
+const OL_VER="1795334387";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3460,7 +3461,8 @@ function voxHero(T,spec){const [,home,w,sh,hm,fl]=String(spec||"@h.k").split("."
   B(cl,.2,3.4,4.6,0,0,-2.4,fsp[0]==="tflag"?0xffd84d:shirt);B(cl,.25,1.2,1.2,0,0,-2.4,C[0]);G.userData.cloth=cl}
  G.userData.hero=1;G.userData.limbs={legL,legR,armL,armR,head};return G}
 function heroAnim(g,ph,moving){const L=g.userData.limbs;if(!L)return;const a=moving?Math.sin(ph)*.7:0;L.legL.rotation.x=a;L.legR.rotation.x=-a;L.armL.rotation.x=-a*.8;L.armR.rotation.x=moving?a*.5:Math.sin(ph*.25)*.08;L.head.rotation.y=moving?0:Math.sin(ph*.13)*.25;if(g.userData.cloth)g.userData.cloth.rotation.y=Math.sin(ph*.5)*.25}
-{const _cpi=typeof cityPetInfo==="function"?cityPetInfo:null;cityPetInfo=function(type,stage){if(String(type)[0]==="@")return {sub:"นักผจญภัยจากแอพมังกร",pic:`<span style="font-size:70px">🧒</span>`};return _cpi?_cpi(type,stage):{}}}
+function heroSpecInfo(type,from){const p=String(type).split("."),nm={k:"🧮 คณิต",t:"🔬 วิทย์",g:"🌏 สังคม"},st=p.slice(6).filter(x=>nm[x[0]]).map(x=>`${nm[x[0]]} ${x.slice(1)}`).join(" · ");return {sub:(from||"นักผจญภัย")+(st?"\n"+st:""),pic:`<span style="font-size:70px">🧒</span>`}}
+{const _cpi=typeof cityPetInfo==="function"?cityPetInfo:null;cityPetInfo=function(type,stage){if(String(type)[0]==="@")return heroSpecInfo(type,"นักผจญภัยจากแอพมังกร");return _cpi?_cpi(type,stage):{}}}
 
 route();initCloud();
 
