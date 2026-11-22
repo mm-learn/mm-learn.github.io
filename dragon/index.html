@@ -367,6 +367,9 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .hvbox canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}.hvload{position:absolute;inset:0;display:grid;place-items:center;color:#cfd8ff;font-size:14px}
 .hvg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:10px}.hvg span{background:#ffffff14;border-radius:999px;padding:4px 10px;font-size:13px}
 .s2me .s2hero{cursor:pointer}.s2me .s2hero::after{content:"3D";position:absolute;right:-2px;bottom:-2px;font:700 10px/1 sans-serif;background:#7c5cff;color:#fff;border-radius:6px;padding:3px 4px}
+.hvbox{height:min(40vh,300px)}.hst{text-align:left;margin:4px 0 10px;display:grid;gap:8px}.hsttop{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.hsttop span{background:#ffffff14;border-radius:999px;padding:4px 10px;font-size:13px}.hsttop b{color:#ffd84d}
+.hsr{display:flex;gap:10px;align-items:center;background:#ffffff0d;border-radius:14px;padding:8px 10px}.hse{font-size:26px}.hsm{flex:1;min-width:0}.hsl{display:flex;align-items:baseline;gap:6px}.hsl small{opacity:.75;font-size:12px}.hsp{margin-left:auto;font-size:18px}
+.hsb{height:9px;border-radius:9px;background:#ffffff1a;overflow:hidden;margin:4px 0 2px}.hsb i{display:block;height:100%;border-radius:9px}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -5219,9 +5222,15 @@ function voxHero(T,spec){const [,home,w,sh,hm,fl]=String(spec||"@h.k").split("."
  G.userData.hero=1;G.userData.limbs={legL,legR,armL,armR,head};return G}
 /* walk / idle animation (called by city + viewer) */
 function heroAnim(g,ph,moving){const L=g.userData.limbs;if(!L)return;const a=moving?Math.sin(ph)*.7:0;L.legL.rotation.x=a;L.legR.rotation.x=-a;L.armL.rotation.x=-a*.8;L.armR.rotation.x=moving?a*.5:Math.sin(ph*.25)*.08;L.head.rotation.y=moving?0:Math.sin(ph*.13)*.25;if(g.userData.cloth)g.userData.cloth.rotation.y=Math.sin(ph*.5)*.25}
+function heroStats(){const s=s2(),bs=s.bs||{};return [["k","🧮","คณิตศาสตร์","#ff7a59"],["t","🔬","วิทยาศาสตร์","#4aa8ff"],["g","🌏","สังคมศึกษา","#f2b33d"]].map(([k,e,n,c])=>{const L=S2LV.filter(l=>l.k===k),st=L.reduce((a,l)=>a+((S.prog[l.id]||{}).stars||0),0),cl=L.filter(l=>pageDone(l.id)).length,
+  B=Object.keys(S2BOSS).filter(b=>S2BOSS[b].k===k),bw=B.filter(b=>bs[b]).length,pw=st*10+bw*50,mx=L.length*30+B.length*50,pc=mx?pw/mx:0;
+  return {k,e,n,c,pw,mx,pc,cl,tot:L.length,st,bw,bt:B.length,rank:["ฝึกหัด","นักสู้","ชำนาญ","ยอดฝีมือ","ปรมาจารย์","ตำนาน"][pc>=1?5:Math.floor(pc*5)]}})}
+function heroStatHTML(){const H=heroStats(),P=s2bPlayer(),tot=H.reduce((a,x)=>a+x.pw,0);
+ return `<div class="hst"><div class="hsttop"><span>⚔️ พลังรวม <b>${tot}</b></span><span>🗡️ โจมตี +${P.bonus}</span><span>🛡️ ป้องกัน +${P.def}</span></div>${H.map(x=>`<div class="hsr"><span class="hse">${x.e}</span><div class="hsm"><div class="hsl"><b>${x.n}</b><small>${x.rank}</small><b class="hsp" style="color:${x.c}">${x.pw}</b></div>
+  <div class="hsb"><i style="width:${Math.max(2,x.pc*100).toFixed(1)}%;background:${x.c}"></i></div><small class="note">ผ่าน ${x.cl}/${x.tot} ด่าน · ⭐ ${x.st}/${x.tot*3} · บอส ${x.bw}/${x.bt}</small></div></div>`).join("")}</div>`}
 function heroView(){const s=s2(),home=s.home||"k",eq=s.eq||{},gl=["w","s","h","f"].map(k=>eq[k]?GEAR.find(g=>g.id===eq[k]):null).filter(Boolean);
  const m=modal(`<div class="hv"><h2>${esc(S.name||"นักผจญภัย")}</h2><p class="note">นักผจญภัยแห่ง ${(S2KB[home]||S2K[0]).nm} · ลากเพื่อหมุน · แตะเพื่อโบกมือ</p>
-  <div class="hvbox"><canvas id="hvc"></canvas><div class="hvload">กำลังโหลด 3D…</div></div>
+  <div class="hvbox"><canvas id="hvc"></canvas><div class="hvload">กำลังโหลด 3D…</div></div>${heroStatHTML()}
   <div class="hvg">${gl.length?gl.map(g=>`<span>${g.e} ${g.th}</span>`).join(""):`<span class="note">ยังไม่ได้สวมอุปกรณ์ · ไปคราฟต์ที่โต๊ะคราฟต์ได้</span>`}</div>
   <button class="go ghost" id="hvx">ปิด</button></div>`,"hvm");
  let alive=true;const close=()=>{alive=false;m.remove()};m.querySelector("#hvx").onclick=close;
@@ -5242,7 +5251,7 @@ function heroView(){const s=s2(),home=s.home||"k",eq=s.eq||{},gl=["w","s","h","f
    R.render(sc,cam);requestAnimationFrame(loop)};loop()}).catch(()=>{const l=m.querySelector(".hvload");if(l)l.textContent="โหลด 3D ไม่สำเร็จ ลองใหม่อีกครั้ง"})}
 document.addEventListener("click",e=>{const h=e.target.closest&&e.target.closest(".s2me .s2hero");if(h){e.stopPropagation();heroView()}},true);
 /* hero joins the walkers in own city */
-{const _cpl=cityPetList;cityPetList=function(){const L=_cpl();try{return [{type:heroSpec(),stage:0,name:S.name||"ฉัน",sub:"นักผจญภัย (ตัวเรา)",pic:s2hero(110)}].concat(L)}catch(e){return L}}}
+{const _cpl=cityPetList;cityPetList=function(){const L=_cpl();try{return [{type:heroSpec(),stage:0,name:S.name||"ฉัน",sub:(()=>{try{return heroStats().map(x=>x.e+" "+x.pw).join(" · ")}catch(e){return "นักผจญภัย (ตัวเรา)"}})(),pic:s2hero(110)}].concat(L)}catch(e){return L}}}
 {const _cpi=cityPetInfo;cityPetInfo=function(type,stage){if(String(type)[0]==="@")return {sub:"นักผจญภัย",pic:`<span style="font-size:70px">🧒</span>`};return _cpi(type,stage)}}
 
 /* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
@@ -5392,7 +5401,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795321434";let OL_VCHK=0;
+const OL_VER="1795321626";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
