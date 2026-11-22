@@ -1971,7 +1971,7 @@ function cityScene(cv,home,getMap){const T=THREE;let R;try{R=new T.WebGLRenderer
  const hit=(cx,cy)=>{const r=cv.getBoundingClientRect();v2.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);ray.setFromCamera(v2,cam);const h=ray.intersectObjects([...vox,...ground],false)[0];if(!h)return null;const o=h.object.userData;return o.g?{o:{g:1,x:Math.round(h.point.x),y:-1,z:Math.round(h.point.z)},n:h.face.normal}:{o,n:h.face.normal}};
  size();rebuild();loop();window.addEventListener("resize",size);
  const rb0=rebuild;
- const petHit=(cx,cy)=>{const r=cv.getBoundingClientRect();v2.set((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);ray.setFromCamera(v2,cam);const h=ray.intersectObjects(PET.objs(),true)[0];if(!h)return null;const a=PET.list[h.object.userData.pet];const w=a.g.position.clone();w.y+=a.sz*1.2;w.project(cam);return {p:a.p,x:r.left+(w.x+1)/2*r.width,y:r.top+(1-w.y)/2*r.height}};
+ const petHit=(cx,cy)=>{const r=cv.getBoundingClientRect();let a=null,bd=1e9;PET.list.forEach(q=>{const w=q.g.position.clone();w.y+=q.sz*.4;w.project(cam);const sx=r.left+(w.x+1)/2*r.width,sy=r.top+(1-w.y)/2*r.height,d=Math.hypot(sx-cx,sy-cy),lim=Math.max(28,60*q.sz*12/Math.max(6,st.r));if(d<lim&&d<bd){bd=d;a=q}});if(!a)return null;const w=a.g.position.clone();w.y+=a.sz*1.2;w.project(cam);return {p:a.p,x:r.left+(w.x+1)/2*r.width,y:r.top+(1-w.y)/2*r.height}};
  return {st,rebuild,hit,petHit,ghost,size,setSpin:v=>spin=v,shot:()=>cv.toDataURL("image/jpeg",.8),stop:()=>{alive=false;window.removeEventListener("resize",size);try{R.dispose()}catch(e){}}}}
 function cityOrbit(cv,S3,onTap){let p0=null,moved=0,pin=null;const pts=new Map();
  cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);p0=[e.clientX,e.clientY];moved=0;if(pts.size===2){const [a,b]=[...pts.values()];pin=Math.hypot(a[0]-b[0],a[1]-b[1])}});
@@ -1984,7 +1984,7 @@ function cityOrbit(cv,S3,onTap){let p0=null,moved=0,pin=null;const pts=new Map()
 /* ---- editor ---- */
 async function cityOpen(){const s=s2();const el=document.createElement("div");el.className="city";el.innerHTML=`<div class="cload">กำลังสร้างเมือง… 🏗️</div>`;document.body.appendChild(el);
  try{await loadThree()}catch(e){el.innerHTML=`<div class="cload">เครื่องนี้โหลดโหมด 3 มิติไม่ได้ ลองเชื่อมอินเทอร์เน็ตแล้วเปิดใหม่<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
- CN=citySize(s.city);let map=cityDecode(s.city),mode="put",brush="W",bp=null;const home=s.home||"k";
+ CN=citySize(s.city);let map=cityDecode(s.city),mode="put",brush=null,bp=null;const home=s.home||"k";
  el.innerHTML=`<div class="chead"><button class="x" id="cx" aria-label="ปิด">✕</button><div><b>🏰 เมืองของ ${esc(S.name)}</b><small id="cpt"></small></div><button class="go ghost sm" id="cvis" style="width:auto;margin:0">👀 เยี่ยมเพื่อน</button></div>
   <div class="cres" id="cres"></div><canvas id="ccv"></canvas><div class="ctool"><div class="cmode"><button data-m="put">➕ วาง</button><button data-m="dig">⛏️ ทุบ</button><button data-m="bp">📐 แบบแปลน</button><button id="cexp">🗺️ ขยาย</button><button data-z="-">🔍−</button><button data-z="+">🔍+</button></div><div class="cpal2" id="cpal"></div><p class="note" id="chint"></p></div>`;
  const cv=el.querySelector("#ccv");const S3=cityScene(cv,home,()=>map);if(!S3){el.innerHTML=`<div class="cload">เครื่องนี้เปิดภาพ 3 มิติไม่ได้ (WebGL ปิดอยู่)<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
@@ -1996,9 +1996,9 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
   const pal=el.querySelector("#cpal");
   if(mode==="bp")pal.innerHTML=Object.keys(BPRINT).map(k=>{const B=BPRINT[k],c=bpCost(B),ok=Object.keys(c).every(m=>have(m)>=c[m]);return `<button class="cb ${bp===k?"sel":""} ${ok?"":"poor"}" data-bp="${k}"><span>${B.e}</span><b>${B.n}</b><small>${Object.keys(c).map(m=>`${m==="coins"?"💰":BLK[m][0]}${c[m]}`).join(" ")}</small></button>`}).join("");
   else pal.innerHTML=Object.keys(CBLK).map(k=>{const B=CBLK[k];return `<button class="cb ${brush===k&&mode==="put"?"sel":""}" data-b="${k}"><span>${CICON[k]}</span><b>${B.n}</b><small>${B.m==="coins"?`💰${B.cost}`:`มี ${have(B.m)}`}</small></button>`}).join("");
-  pal.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{brush=b.dataset.b;mode="put";SND.tap();ui()});
+  pal.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{brush=brush===b.dataset.b&&mode==="put"?null:b.dataset.b;mode="put";SND.tap();ui()});
   pal.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{bp=b.dataset.bp;SND.tap();ui()});
-  el.querySelector("#chint").textContent=mode==="put"?"แตะพื้นหรือด้านข้างบล็อกเพื่อวาง · ลากเพื่อหมุนเมือง":mode==="dig"?"แตะบล็อกเพื่อทุบ ได้บล็อกคืน (อิฐใช้เหรียญ ไม่คืนเหรียญ)":"เลือกแบบแปลน แล้วแตะพื้นเพื่อสร้างทั้งหลังในครั้งเดียว"};
+  el.querySelector("#chint").textContent=mode==="put"?(brush?"แตะพื้นหรือด้านข้างบล็อกเพื่อวาง · แตะบล็อกที่เลือกอีกครั้งเพื่อยกเลิก":"เลือกบล็อกด้านล่างก่อน · ลากเพื่อหมุนเมือง · แตะสัตว์เพื่อดูชื่อ"):mode==="dig"?"แตะบล็อกเพื่อทุบ ได้บล็อกคืน (อิฐใช้เหรียญ ไม่คืนเหรียญ)":"เลือกแบบแปลน แล้วแตะพื้นเพื่อสร้างทั้งหลังในครั้งเดียว"};
  el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mode=b.dataset.m;SND.tap();ui()});
  el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r+(b.dataset.z==="+"?-3:3)))});
  cityOrbit(cv,S3,(cx,cy)=>{const ph=S3.petHit&&S3.petHit(cx,cy);if(ph)return petPop(ph);const h=S3.hit(cx,cy);if(!h)return;const o=h.o;
@@ -2008,7 +2008,7 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
    if(cells.some(c=>map.has(c[0]+","+c[1]+","+c[2])))return toast("มีบล็อกขวางอยู่ ลองที่ว่างอื่น");
    if(!pay(bpCost(B)))return toast("บล็อกไม่พอ ผ่านด่านเพื่อเก็บเพิ่ม");cells.forEach(c=>map.set(c[0]+","+c[1]+","+c[2],c[3]));SND.gem();confetti(40);commit();return}
   const x=o.x+Math.round(h.n.x),y=o.y+Math.round(h.n.y),z=o.z+Math.round(h.n.z);if(x<0||x>=CN||z<0||z>=CN||y<0||y>=CH)return toast(y>=CH?"สูงสุดแค่ "+CH+" ชั้น":"นอกเขตเมือง");
-  const B=CBLK[brush];if(!pay({[B.m]:B.cost||1}))return toast(`${B.n}ไม่พอ${B.m==="coins"?" (ใช้เหรียญ)":" ผ่านด่านเพื่อเก็บเพิ่ม"}`);map.set(x+","+y+","+z,brush);SND.tap();commit()});
+  if(!brush)return toast("เลือกบล็อกด้านล่างก่อน แล้วค่อยแตะเพื่อวาง");const B=CBLK[brush];if(!pay({[B.m]:B.cost||1}))return toast(`${B.n}ไม่พอ${B.m==="coins"?" (ใช้เหรียญ)":" ผ่านด่านเพื่อเก็บเพิ่ม"}`);map.set(x+","+y+","+z,brush);SND.tap();commit()});
  el.querySelector("#cx").onclick=()=>{S3.stop();el.remove();route()};
  el.querySelector("#cvis").onclick=()=>cityVisitList();
  el.querySelector("#cexp").onclick=()=>{const nx=CSZ[CSZ.indexOf(CN)+1];const ic=m=>m==="coins"?"💰":m==="gems"?"💎":(BLK[m]||["🧱"])[0];
@@ -5310,7 +5310,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795318672";let OL_VCHK=0;
+const OL_VER="1795318753";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
