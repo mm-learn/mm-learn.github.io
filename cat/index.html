@@ -2904,7 +2904,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795318012";let OL_VCHK=0;
+const OL_VER="1795318672";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3135,38 +3135,42 @@ function catCityTab(){const s=s2(),w=document.createElement("div");w.className="
  w.innerHTML=`<h2 style="margin:6px 0">🏙️ เมืองของฉัน</h2>${ctRes()}
  <div class="ctcard" style="text-align:center"><p class="note">ทำโจทย์วิทย์ ตอบถูกได้บล็อกทันที · ตอบถูกติดกันยิ่งได้มาก 🔥 (ตอนนี้ ${s.streak||0} ข้อ · สูงสุด ${s.best||0})</p>
  <button class="go pink" id="cgo">🏗️ เข้าเมืองของฉัน</button><button class="go ghost" id="cpe">🐾 เลือกสัตว์ในเมือง</button><button class="go ghost" id="cvi">👀 เยี่ยมเมืองเพื่อน</button></div>
- <h3 style="margin:14px 0 6px">🔬 วิทยาศาสตร์ ป.4 · 20 ด่าน ด่านละ 5 ข้อ</h3><p class="note" style="margin:0 0 8px">ใต้เลขด่าน = บล็อกที่ได้เมื่อตอบถูก · 🪵 สิ่งมีชีวิต · 🏜️ วัสดุและสสาร · ⚙️ แรงและพลังงาน · 🪨 โลกและอวกาศ · 🔷 ข้อท้าทาย</p>
+ ${Object.keys(s.wrong||{}).length?`<button class="go" id="crv" style="margin-top:10px">🔁 ทบทวนข้อที่เคยผิด (${Object.keys(s.wrong).length} ข้อ)</button>`:""}<h3 style="margin:14px 0 6px">🔬 วิทยาศาสตร์ ป.4 · 20 ด่าน ด่านละ 5 ข้อ</h3><p class="note" style="margin:0 0 8px">ใต้เลขด่าน = บล็อกที่ได้เมื่อตอบถูก · 🪵 สิ่งมีชีวิต · 🏜️ วัสดุและสสาร · ⚙️ แรงและพลังงาน · 🪨 โลกและอวกาศ · 🔷 ข้อท้าทาย</p>
  <div class="ctlv">${SCI.levels.map((L,i)=>`<button data-lv="${i}"><b>${i+1}</b><small>${lvRes(L)}</small><i>${stars(i)||"&nbsp;"}</i></button>`).join("")}</div>
  <h3 style="margin:14px 0 6px">🔁 แลกบล็อกด้วยเหรียญ</h3><div class="ctcard"><p class="note">💰 20 แลกได้ 2 ก้อน · วันละไม่เกิน 20 ก้อน (วันนี้แลกแล้ว ${(s.xc&&s.xc.d===new Date().toDateString()?s.xc.n:0)*2}/20 ก้อน)</p>
  <div class="ctx">${["wood","stone","sand","iron"].map(k=>`<button data-x="${k}">${BLK[k][0]} ${BLK[k][1]}</button>`).join("")}</div></div>`;
  app.innerHTML="";app.appendChild(w);
  w.querySelector("#cgo").onclick=()=>cityOpen();w.querySelector("#cvi").onclick=()=>cityVisitList();w.querySelector("#cpe").onclick=petPicker;
- w.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>sciPlay(+b.dataset.lv));
+ if(w.querySelector("#crv"))w.querySelector("#crv").onclick=sciReview;w.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>sciPlay(+b.dataset.lv));
  w.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{const d=new Date().toDateString();if(!s.xc||s.xc.d!==d)s.xc={d,n:0};
   if(s.xc.n>=10)return toast("วันนี้แลกครบ 20 ก้อนแล้ว");if(S.coins<20)return toast("เหรียญไม่พอ (ต้องใช้ 20)");
   S.coins-=20;s.blk[b.dataset.x]=(s.blk[b.dataset.x]||0)+2;s.xc.n++;save();toast(`ได้ ${BLK[b.dataset.x][0]} +2`);route()})}
-function sciPlay(lv){const s=s2(),ids=SCI.levels[lv];let i=0,score=0,got={};const L=["ก","ข","ค","ง"];
+function sciPlay(lv,custom){const s=s2(),ids=custom||SCI.levels[lv];let tried=0,i=0,score=0,got={};const L=["ก","ข","ค","ง"];
  const m=modal("","nolose ctq");const sh=m.querySelector(".sheet");
- const show=()=>{const it=SCI.items[ids[i]],T=SCITOP[it.t];const ord=[0,1,2,3].sort(()=>Math.random()-.5),keys=Object.keys(it.o);
-  sh.innerHTML=`<div class="ctqh"><button class="x" id="qx">✕</button><b>ด่าน ${lv+1} · ข้อ ${i+1}/5</b><span>🔥 ${s.streak||0}</span></div>
+ const show=()=>{tried=0;const it=SCI.items[ids[i]],T=SCITOP[it.t];const ord=[0,1,2,3].sort(()=>Math.random()-.5),keys=Object.keys(it.o);
+  sh.innerHTML=`<div class="ctqh"><button class="x" id="qx">✕</button><b>${custom?"ทบทวน":"ด่าน "+(lv+1)} · ข้อ ${i+1}/${ids.length}</b><span>🔥 ${s.streak||0}</span></div>
   <div class="ctchip">${T[0]} ${T[1]}${it.hard?" · ⭐ ท้าทาย":""}</div><p class="ctqq">${esc(it.q)}</p>
   <div class="ctopts">${ord.map((k,j)=>`<button data-k="${k}"><b>${L[j]}.</b> ${esc(it.o[keys[k]])}</button>`).join("")}</div><div id="qfb"></div>`;
   sh.querySelector("#qx").onclick=()=>{m.remove();route()};
   sh.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{if(sh.querySelector(".ctopts.done"))return;sh.querySelector(".ctopts").classList.add("done");
    const ok=+b.dataset.k===it.a,qid="s"+ids[i];sh.querySelector(`[data-k="${it.a}"]`).classList.add("ok");let fb="";
-   if(ok){score++;s.streak=(s.streak||0)+1;s.best=Math.max(s.best||0,s.streak);let n=STREAK(s.streak);if(s.qd[qid])n=Math.ceil(n/2);s.qd[qid]=1;
+   if(ok&&tried){fb=`<div class="ctok">✅ ถูกแล้ว! (ตอบครั้งที่ 2 ไม่ได้บล็อก)</div>`}
+   else if(ok){score++;if(s.wrong)delete s.wrong[qid];s.streak=(s.streak||0)+1;s.best=Math.max(s.best||0,s.streak);let n=STREAK(s.streak);if(s.qd[qid])n=Math.ceil(n/2);s.qd[qid]=1;
     const mat=T[2];s.blk[mat]=(s.blk[mat]||0)+n;got[mat]=(got[mat]||0)+n;let ex="";
     if(it.hard){s.blk.crystal=(s.blk.crystal||0)+1;got.crystal=(got.crystal||0)+1;ex+=" +1 🔷"}
     if(s.streak%5===0){s.blk.pearl=(s.blk.pearl||0)+1;got.pearl=(got.pearl||0)+1;ex+=" +1 🦪"}
     fb=`<div class="ctok">✅ ถูกต้อง! <b>+${n} ${BLK[mat][0]}</b>${ex}${s.streak>=3?` · 🔥 ถูกติดกัน ${s.streak} ข้อ`:""}</div>`;try{SND.ok&&SND.ok()}catch(e){}}
-   else{b.classList.add("bad");s.streak=0;fb=`<div class="ctbad">❌ คำตอบที่ถูก: <b>${esc(it.o[keys[it.a]])}</b><p>${esc(it.why)}</p></div>`;try{SND.bad&&SND.bad()}catch(e){}}
-   save();sh.querySelector("#qfb").innerHTML=fb+`<button class="go pink" id="qn">${i<4?"ข้อต่อไป ➜":"ดูผล"}</button>`;
-   sh.querySelector("#qn").onclick=()=>{i++;i<5?show():end()}})};
- const end=()=>{s.sci[lv]=Math.max(s.sci[lv]||0,score);save();if(score>=4)confetti(80);
-  sh.innerHTML=`<div style="text-align:center"><h2>ด่าน ${lv+1} จบแล้ว!</h2><p style="font-size:22px">ถูก ${score}/5 ${score>=5?"⭐⭐⭐":score>=4?"⭐⭐":score>=3?"⭐":""}</p>
+   else if(!tried){tried=1;b.classList.add("bad");b.disabled=true;s.streak=0;sh.querySelector(".ctopts").classList.remove("done");sh.querySelector(`[data-k="${it.a}"]`).classList.remove("ok");
+    s.wrong=s.wrong||{};s.wrong[qid]=1;save();const hint=(it.why.split(/•|การวิเคราะห์|ทำไม|ข้อเท็จจริง/)[0]||"").trim().slice(0,160);
+    sh.querySelector("#qfb").innerHTML=`<div class="ctbad">❌ ยังไม่ถูก ลองอีกครั้ง!<p>💡 คำใบ้: ${esc(hint)}</p><p style="opacity:.7">ข้อนี้ไม่ได้บล็อกแล้ว แต่ตอบให้ถูกเพื่อเรียนรู้นะ</p></div>`;try{SND.bad&&SND.bad()}catch(e){}return}
+   else{b.classList.add("bad");fb=`<div class="ctbad">❌ คำตอบที่ถูก: <b>${esc(it.o[keys[it.a]])}</b><p>${esc(it.why)}</p><p style="opacity:.7">ข้อนี้จะกลับมาให้ทำใหม่ในด่านทบทวน</p></div>`;try{SND.bad&&SND.bad()}catch(e){}}
+   save();sh.querySelector("#qfb").innerHTML=fb+`<button class="go pink" id="qn">${i<ids.length-1?"ข้อต่อไป ➜":"ดูผล"}</button>`;
+   sh.querySelector("#qn").onclick=()=>{i++;i<ids.length?show():end()}})};
+ const end=()=>{if(!custom)s.sci[lv]=Math.max(s.sci[lv]||0,score);save();if(score>=4)confetti(80);
+  sh.innerHTML=`<div style="text-align:center"><h2>${custom?"ทบทวน":"ด่าน "+(lv+1)} จบแล้ว!</h2><p style="font-size:22px">ถูก ${score}/${ids.length} ${custom?"":score>=5?"⭐⭐⭐":score>=4?"⭐⭐":score>=3?"⭐":""}</p>
   <div class="ctres" style="justify-content:center">${Object.keys(got).map(k=>`<span>${BLK[k][0]} +${got[k]}</span>`).join("")||"<span>ยังไม่ได้บล็อก ลองใหม่นะ</span>"}</div>
-  <button class="go pink" id="qa">🔁 เล่นอีกครั้ง</button>${lv<19?`<button class="go" id="qnx">ด่านต่อไป ➜</button>`:""}<button class="go ghost" id="qc">กลับ</button></div>`;
-  sh.querySelector("#qa").onclick=()=>{m.remove();sciPlay(lv)};if(sh.querySelector("#qnx"))sh.querySelector("#qnx").onclick=()=>{m.remove();sciPlay(lv+1)};sh.querySelector("#qc").onclick=()=>{m.remove();route()}};
+  <button class="go pink" id="qa">🔁 เล่นอีกครั้ง</button>${!custom&&lv<19?`<button class="go" id="qnx">ด่านต่อไป ➜</button>`:""}<button class="go ghost" id="qc">กลับ</button></div>`;
+  sh.querySelector("#qa").onclick=()=>{m.remove();custom?sciReview():sciPlay(lv)};if(!custom&&sh.querySelector("#qnx"))sh.querySelector("#qnx").onclick=()=>{m.remove();sciPlay(lv+1)};sh.querySelector("#qc").onclick=()=>{m.remove();route()}};
  show()}
 
 function petSrc(ci){const c=S.cats[ci];if(!c)return null;const st=stageOf(c);if(PETS[c.b].id==="unicorn")return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(unicornSVG(st));
@@ -3176,6 +3180,8 @@ function petPicker(){const s=s2();let sel=(s.pets&&s.pets.length?s.pets:S.cats.m
  const m=modal(`<h2 style="text-align:center">🐾 สัตว์ที่อยู่ในเมือง</h2><p class="note" style="text-align:center">เลือกได้ไม่เกิน 4 ตัว · ตัวยิ่งโตยิ่งตัวใหญ่ · แตะสัตว์ในเมืองเพื่อดูรูปและชื่อ</p><div class="ctpets">${S.cats.map((c,i)=>`<button data-p="${i}" class="${sel.includes(i)?"on":""}">${petPic(c.b,stageOf(c))}<b>${esc(c.name||PETS[c.b].th)}</b><small>${STAGES[stageOf(c)]||""}</small></button>`).join("")}</div><button class="go pink" id="pok">บันทึก</button>`);
  m.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{const i=+b.dataset.p;if(sel.includes(i))sel=sel.filter(x=>x!==i);else{if(sel.length>=4)return toast("เลือกได้ไม่เกิน 4 ตัว");sel.push(i)}b.classList.toggle("on",sel.includes(i))});
  m.querySelector("#pok").onclick=()=>{s.pets=sel;save();m.remove();toast("บันทึกแล้ว เข้าเมืองเพื่อดูสัตว์เดินเล่น 🐾")}}
+
+function sciReview(){const s=s2(),q=Object.keys(s.wrong||{}).map(k=>k.slice(1)).filter(n=>SCI.items[n]).sort(()=>Math.random()-.5).slice(0,5);if(!q.length)return toast("ไม่มีข้อที่ต้องทบทวนแล้ว 🎉");sciPlay(0,q)}
 
 route();initCloud();
 
