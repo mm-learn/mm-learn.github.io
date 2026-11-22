@@ -724,6 +724,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--lilac);outline-
 .ctok{margin-top:12px;padding:12px;border-radius:14px;background:#dff7ea;color:#185c3c;font-size:17px}.ctbad{margin-top:12px;padding:12px;border-radius:14px;background:#ffe9ec;color:#7a1f30}.ctbad p{margin:6px 0 0;font-size:14px;line-height:1.5}
 .tabs .in{grid-template-columns:repeat(6,1fr)!important}.tab{font-size:12px!important;padding:8px 0 10px!important;white-space:nowrap}.tab span{font-size:24px!important}
 .ctlv small{font-size:9px!important;white-space:nowrap}
+.ctwrap{padding-bottom:120px!important}.ctcard{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px 14px;margin:8px 0}
+.ctlv{grid-template-columns:repeat(5,minmax(0,1fr))!important}.ctlv button{min-width:0;overflow:hidden}.ctlv small{display:block;max-width:100%;overflow:hidden;font-size:8px!important;letter-spacing:-2px}
+.ctx{grid-template-columns:repeat(4,minmax(0,1fr))!important}.ctres{max-width:100%}
 :root{--olbg:linear-gradient(160deg,#FFE3EE,#E9DDFF);--olcard:#FFFFFF;--olink:#4A3355;--olbtn:#FF7EAD}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -2894,7 +2897,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795316850";let OL_VCHK=0;
+const OL_VER="1795316970";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3010,7 +3013,7 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
   if(!nx)return modal(`<div style="text-align:center"><h2>🗺️ ขยายพื้นที่</h2><p>เมืองของคุณกว้างที่สุดแล้ว (${CN}×${CN}) 🎉</p><button class="go ghost" onclick="this.closest('.modal').remove()">ปิด</button></div>`);
   const c=CEXP[nx],ok=Object.keys(c).every(m=>have(m)>=c[m]);
   const m=modal(`<div style="text-align:center"><h2>🗺️ ขยายพื้นที่เมือง</h2><p>จาก <b>${CN}×${CN}</b> เป็น <b>${nx}×${nx}</b><br><small>ขยายออกรอบด้าน สิ่งที่สร้างไว้จะอยู่ตรงกลางเหมือนเดิม</small></p>
-   <div class="card">${Object.keys(c).map(k=>`<div style="display:flex;justify-content:space-between;padding:4px 0"><span>${ic(k)} ใช้ ${c[k]}</span><b style="color:${have(k)>=c[k]?"#3c9":"#e55"}">มี ${have(k)}</b></div>`).join("")}</div>
+   <div class="ctcard">${Object.keys(c).map(k=>`<div style="display:flex;justify-content:space-between;padding:4px 0"><span>${ic(k)} ใช้ ${c[k]}</span><b style="color:${have(k)>=c[k]?"#3c9":"#e55"}">มี ${have(k)}</b></div>`).join("")}</div>
    <button class="go fire" id="cxok" ${ok?"":"disabled"}>${ok?"ขยายเลย!":"ของยังไม่พอ"}</button><button class="go ghost" id="cxno">ยกเลิก</button></div>`);
   m.querySelector("#cxno").onclick=()=>m.remove();
   m.querySelector("#cxok").onclick=()=>{if(!pay(c))return;const d=(nx-CN)/2,m2=new Map();map.forEach((t,k)=>{const [x,y,z]=k.split(",").map(Number);m2.set((x+d)+","+y+","+(z+d),t)});
@@ -3028,7 +3031,7 @@ async function cityVisitList(){const m=modal(`<div style="text-align:center"><h2
  if(!olOn()){m.querySelector(".sheet").innerHTML=`<div style="text-align:center"><h2>👀 เมืองของเพื่อน</h2><p>ต้องเข้าระบบออนไลน์ (ชื่อ + PIN) ก่อน จึงจะเยี่ยมเมืองเพื่อนได้</p><button class="go ghost" onclick="this.closest('.modal').remove()">ปิด</button></div>`;return}
  let L2;try{L2=await cityList()}catch(e){m.querySelector(".sheet").innerHTML=`<div style="text-align:center"><h2>👀 เมืองของเพื่อน</h2><p>ระบบเยี่ยมเมืองยังไม่เปิด (รอผู้ปกครองอัปเดตกฎ Firebase)</p><button class="go ghost" onclick="this.closest('.modal').remove()">ปิด</button></div>`;return}
  const wk=wkKey(),team={k:0,t:0,g:0};L2.forEach(c=>{if(c.wk===wk&&team[c.home]!==undefined)team[c.home]+=c.wp});const mine=OL.sess&&OL.sess.bid;
- m.querySelector(".sheet").innerHTML=`<div><h2 style="text-align:center">👀 เมืองของเพื่อน</h2><div class="card"><b>🏆 แต้มทีมสัปดาห์นี้ (รวมทุกคน)</b>${S2K.map(k=>`<div class="tmrow" style="--kc:${k.c}"><span>${k.e} ${k.th}</span><div class="bar"><i style="width:${Math.min(100,team[k.id]/Math.max(1,...Object.values(team))*100)}%"></i></div><b>${team[k.id]}</b></div>`).join("")}</div>
+ m.querySelector(".sheet").innerHTML=`<div><h2 style="text-align:center">👀 เมืองของเพื่อน</h2><div class="ctcard"><b>🏆 แต้มทีมสัปดาห์นี้ (รวมทุกคน)</b>${S2K.map(k=>`<div class="tmrow" style="--kc:${k.c}"><span>${k.e} ${k.th}</span><div class="bar"><i style="width:${Math.min(100,team[k.id]/Math.max(1,...Object.values(team))*100)}%"></i></div><b>${team[k.id]}</b></div>`).join("")}</div>
   ${L2.sort((a,b)=>b.pts-a.pts).map(c=>`<button class="vrow" data-v="${c.id}"><span>${(S2KB[c.home]||S2K[0]).e}</span><b>${esc(c.name)}${c.id===mine?" (ฉัน)":""}</b><small>⭐${c.pts} · 👍${c.likes}</small></button>`).join("")||`<p class="note">ยังไม่มีใครสร้างเมือง เป็นคนแรกเลย!</p>`}<button class="go ghost" id="vx">ปิด</button></div>`;
  m.querySelector("#vx").onclick=()=>m.remove();m.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{m.remove();cityVisit(L2.find(c=>c.id===b.dataset.v))})}
 async function cityVisit(c){try{await loadThree()}catch(e){return toast("โหลดภาพ 3 มิติไม่ได้")}
@@ -3043,14 +3046,14 @@ const SCI={"items": {"1": {"q": "ข้อใดคือเกณฑ์ที�
 const SCITOP={life:["🌳","สิ่งมีชีวิต","wood"],matter:["🧪","วัสดุและสสาร","sand"],force:["⚡","แรงและพลังงาน","iron"],space:["🪐","โลกและอวกาศ","stone"]};
 const STREAK=n=>n>=10?4:n>=5?3:n>=3?2:1;
 function ctRes(){const s=s2();return `<div class="ctres"><span>💰 ${S.coins}</span>${Object.keys(BLK).map(k=>`<span>${BLK[k][0]} ${s.blk[k]||0}</span>`).join("")}<span>💡 ${S.bulbs}</span></div>`}
-function catCityTab(){const s=s2(),w=document.createElement("div");w.className="wrap";
+function catCityTab(){const s=s2(),w=document.createElement("div");w.className="wrap ctwrap";
  const stars=lv=>{const b=s.sci[lv]||0;return b>=5?"⭐⭐⭐":b>=4?"⭐⭐":b>=3?"⭐":""};
  w.innerHTML=`<h2 style="margin:6px 0">🏙️ เมืองของฉัน</h2>${ctRes()}
- <div class="card" style="text-align:center"><p class="note">ทำโจทย์วิทย์ ตอบถูกได้บล็อกทันที · ตอบถูกติดกันยิ่งได้มาก 🔥 (ตอนนี้ ${s.streak||0} ข้อ · สูงสุด ${s.best||0})</p>
+ <div class="ctcard" style="text-align:center"><p class="note">ทำโจทย์วิทย์ ตอบถูกได้บล็อกทันที · ตอบถูกติดกันยิ่งได้มาก 🔥 (ตอนนี้ ${s.streak||0} ข้อ · สูงสุด ${s.best||0})</p>
  <button class="go pink" id="cgo">🏗️ เข้าเมืองของฉัน</button><button class="go ghost" id="cvi">👀 เยี่ยมเมืองเพื่อน</button></div>
  <h3 style="margin:14px 0 6px">🔬 วิทยาศาสตร์ ป.4 · 20 ด่าน ด่านละ 5 ข้อ</h3>
  <div class="ctlv">${SCI.levels.map((L,i)=>`<button data-lv="${i}"><b>${i+1}</b><small>${L.map(n=>SCITOP[SCI.items[n].t][0]).join("")}${L.some(n=>SCI.items[n].hard)?"⭐":""}</small><i>${stars(i)||"&nbsp;"}</i></button>`).join("")}</div>
- <h3 style="margin:14px 0 6px">🔁 แลกบล็อกด้วยเหรียญ</h3><div class="card"><p class="note">💰 20 แลกได้ 2 ก้อน · วันละ 5 ครั้ง (วันนี้แลกแล้ว ${s.xc&&s.xc.d===new Date().toDateString()?s.xc.n:0}/5)</p>
+ <h3 style="margin:14px 0 6px">🔁 แลกบล็อกด้วยเหรียญ</h3><div class="ctcard"><p class="note">💰 20 แลกได้ 2 ก้อน · วันละ 5 ครั้ง (วันนี้แลกแล้ว ${s.xc&&s.xc.d===new Date().toDateString()?s.xc.n:0}/5)</p>
  <div class="ctx">${["wood","stone","sand","iron"].map(k=>`<button data-x="${k}">${BLK[k][0]} ${BLK[k][1]}</button>`).join("")}</div></div>`;
  app.innerHTML="";app.appendChild(w);
  w.querySelector("#cgo").onclick=()=>cityOpen();w.querySelector("#cvi").onclick=()=>cityVisitList();
