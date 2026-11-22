@@ -2899,7 +2899,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795317078";let OL_VCHK=0;
+const OL_VER="1795317183";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3056,13 +3056,13 @@ function catCityTab(){const s=s2(),w=document.createElement("div");w.className="
  <button class="go pink" id="cgo">🏗️ เข้าเมืองของฉัน</button><button class="go ghost" id="cvi">👀 เยี่ยมเมืองเพื่อน</button></div>
  <h3 style="margin:14px 0 6px">🔬 วิทยาศาสตร์ ป.4 · 20 ด่าน ด่านละ 5 ข้อ</h3><p class="note" style="margin:0 0 8px">ใต้เลขด่าน = บล็อกที่ได้เมื่อตอบถูก · 🪵 สิ่งมีชีวิต · 🏜️ วัสดุและสสาร · ⚙️ แรงและพลังงาน · 🪨 โลกและอวกาศ · 🔷 ข้อท้าทาย</p>
  <div class="ctlv">${SCI.levels.map((L,i)=>`<button data-lv="${i}"><b>${i+1}</b><small>${lvRes(L)}</small><i>${stars(i)||"&nbsp;"}</i></button>`).join("")}</div>
- <h3 style="margin:14px 0 6px">🔁 แลกบล็อกด้วยเหรียญ</h3><div class="ctcard"><p class="note">💰 20 แลกได้ 2 ก้อน · วันละ 5 ครั้ง (วันนี้แลกแล้ว ${s.xc&&s.xc.d===new Date().toDateString()?s.xc.n:0}/5)</p>
+ <h3 style="margin:14px 0 6px">🔁 แลกบล็อกด้วยเหรียญ</h3><div class="ctcard"><p class="note">💰 20 แลกได้ 2 ก้อน · วันละไม่เกิน 20 ก้อน (วันนี้แลกแล้ว ${(s.xc&&s.xc.d===new Date().toDateString()?s.xc.n:0)*2}/20 ก้อน)</p>
  <div class="ctx">${["wood","stone","sand","iron"].map(k=>`<button data-x="${k}">${BLK[k][0]} ${BLK[k][1]}</button>`).join("")}</div></div>`;
  app.innerHTML="";app.appendChild(w);
  w.querySelector("#cgo").onclick=()=>cityOpen();w.querySelector("#cvi").onclick=()=>cityVisitList();
  w.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>sciPlay(+b.dataset.lv));
  w.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{const d=new Date().toDateString();if(!s.xc||s.xc.d!==d)s.xc={d,n:0};
-  if(s.xc.n>=5)return toast("วันนี้แลกครบ 5 ครั้งแล้ว");if(S.coins<20)return toast("เหรียญไม่พอ (ต้องใช้ 20)");
+  if(s.xc.n>=10)return toast("วันนี้แลกครบ 20 ก้อนแล้ว");if(S.coins<20)return toast("เหรียญไม่พอ (ต้องใช้ 20)");
   S.coins-=20;s.blk[b.dataset.x]=(s.blk[b.dataset.x]||0)+2;s.xc.n++;save();toast(`ได้ ${BLK[b.dataset.x][0]} +2`);route()})}
 function sciPlay(lv){const s=s2(),ids=SCI.levels[lv];let i=0,score=0,got={};const L=["ก","ข","ค","ง"];
  const m=modal("","nolose ctq");const sh=m.querySelector(".sheet");
