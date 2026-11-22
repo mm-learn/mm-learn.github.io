@@ -2011,15 +2011,19 @@ function cityScene(cv,home,getMap,petsGiven){const T=THREE;let R;try{R=new T.Web
  size();rebuild();loop();window.addEventListener("resize",size);
  const rb0=rebuild;
  const petHit=(cx,cy)=>{const r=cv.getBoundingClientRect();let a=null,bd=1e9;PET.list.forEach(q=>{const w=q.g.position.clone();w.y+=q.sz*.4;w.project(cam);const sx=r.left+(w.x+1)/2*r.width,sy=r.top+(1-w.y)/2*r.height,d=Math.hypot(sx-cx,sy-cy),lim=Math.max(28,60*q.sz*12/Math.max(6,st.r));if(d<lim&&d<bd){bd=d;a=q}});if(!a)return null;const w=a.g.position.clone();w.y+=a.sz*1.2;w.project(cam);return {p:a.p,x:r.left+(w.x+1)/2*r.width,y:r.top+(1-w.y)/2*r.height}};
- return {st,rebuild,hit,petHit,ghost,size,setSpin:v=>spin=v,shot:()=>cv.toDataURL("image/jpeg",.8),stop:()=>{alive=false;window.removeEventListener("resize",size);try{R.dispose()}catch(e){}}}}
-function cityOrbit(cv,S3,onTap){let p0=null,moved=0,pin=null;const pts=new Map();
+ const gPick=(cx,cy)=>{const r=cv.getBoundingClientRect(),v=new T.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),rc=new T.Raycaster();rc.setFromCamera(v,cam);const pl=new T.Plane(new T.Vector3(0,1,0),0),o=new T.Vector3();return rc.ray.intersectPlane(pl,o)?o:null};
+ const zoomAt=(cx,cy,nr)=>{nr=Math.max(5,Math.min(CN*3,nr));const g=cx==null?null:gPick(cx,cy);if(g){const f=1-nr/st.r;ctr.x+=(g.x-ctr.x)*f;ctr.z+=(g.z-ctr.z)*f}if(nr>st.r&&nr>=CN*1.4){const k=Math.min(1,(nr-st.r)/Math.max(1,CN*3-st.r)*3),c0=CN/2-.5;ctr.x+=(c0-ctr.x)*k;ctr.z+=(c0-ctr.z)*k}st.r=nr;clampC()};
+ const clampC=()=>{ctr.x=Math.max(-.5,Math.min(CN-.5,ctr.x));ctr.z=Math.max(-.5,Math.min(CN-.5,ctr.z))};
+ const pan=(x0,y0,x1,y1)=>{const a=gPick(x0,y0),b=gPick(x1,y1);if(a&&b){ctr.x+=a.x-b.x;ctr.z+=a.z-b.z;clampC()}};
+ return {st,ctr,gPick,zoomAt,pan,rebuild,hit,petHit,ghost,size,setSpin:v=>spin=v,shot:()=>cv.toDataURL("image/jpeg",.8),stop:()=>{alive=false;window.removeEventListener("resize",size);try{R.dispose()}catch(e){}}}}
+function cityOrbit(cv,S3,onTap){let p0=null,moved=0,pin=null,mid=null;const pts=new Map();
  cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);p0=[e.clientX,e.clientY];moved=0;if(pts.size===2){const [a,b]=[...pts.values()];pin=Math.hypot(a[0]-b[0],a[1]-b[1])}});
  cv.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;const last=pts.get(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);
-  if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pin){S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r*pin/d))}pin=d;moved=99;return}
+  if(pts.size===2){const [a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;if(pin){if(S3.zoomAt){if(mid)S3.pan(mid[0],mid[1],mx,my);S3.zoomAt(mx,my,S3.st.r*pin/d)}else S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r*pin/d))}pin=d;mid=[mx,my];moved=99;return}
   const dx=e.clientX-last[0],dy=e.clientY-last[1];moved+=Math.abs(dx)+Math.abs(dy);if(moved>8){S3.st.th+=dx*.01;S3.st.ph=Math.max(.25,Math.min(1.45,S3.st.ph-dy*.01))}});
- const up=e=>{const had=pts.has(e.pointerId);pts.delete(e.pointerId);if(pts.size<2)pin=null;if(had&&moved<=8&&p0&&onTap)onTap(e.clientX,e.clientY);if(!pts.size)p0=null};
+ const up=e=>{const had=pts.has(e.pointerId);pts.delete(e.pointerId);if(pts.size<2){pin=null;mid=null}if(had&&moved<=8&&p0&&onTap)onTap(e.clientX,e.clientY);if(!pts.size)p0=null};
  cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",e=>{pts.delete(e.pointerId)});
- cv.addEventListener("wheel",e=>{e.preventDefault();S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r+(e.deltaY>0?1.5:-1.5)))},{passive:false})}
+ cv.addEventListener("wheel",e=>{e.preventDefault();const nr=S3.st.r*(e.deltaY>0?1.12:1/1.12);if(S3.zoomAt)S3.zoomAt(e.clientX,e.clientY,nr);else S3.st.r=Math.max(8,Math.min(CN*3,nr))},{passive:false})}
 /* ---- editor ---- */
 async function cityOpen(){const s=s2();const el=document.createElement("div");el.className="city";el.innerHTML=`<div class="cload">กำลังสร้างเมือง… 🏗️</div>`;document.body.appendChild(el);
  try{await loadThree()}catch(e){el.innerHTML=`<div class="cload">เครื่องนี้โหลดโหมด 3 มิติไม่ได้ ลองเชื่อมอินเทอร์เน็ตแล้วเปิดใหม่<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
@@ -2039,7 +2043,7 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
   pal.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{bp=b.dataset.bp;SND.tap();ui()});
   el.querySelector("#chint").textContent=mode==="put"?(brush?"แตะพื้นหรือด้านข้างบล็อกเพื่อวาง · แตะบล็อกที่เลือกอีกครั้งเพื่อยกเลิก":"เลือกบล็อกด้านล่างก่อน · ลากเพื่อหมุนเมือง · แตะสัตว์เพื่อดูชื่อ"):mode==="dig"?"แตะบล็อกเพื่อทุบ ได้บล็อกคืน (อิฐใช้เหรียญ ไม่คืนเหรียญ)":"เลือกแบบแปลน แล้วแตะพื้นเพื่อสร้างทั้งหลังในครั้งเดียว"};
  el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mode=b.dataset.m;SND.tap();ui()});
- el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{S3.st.r=Math.max(8,Math.min(CN*3,S3.st.r+(b.dataset.z==="+"?-3:3)))});
+ el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{const nr=S3.st.r+(b.dataset.z==="+"?-3:3);if(S3.zoomAt)S3.zoomAt(null,null,nr);else S3.st.r=Math.max(8,Math.min(CN*3,nr))});
  cityOrbit(cv,S3,(cx,cy)=>{const ph=S3.petHit&&S3.petHit(cx,cy);if(ph)return petPop(ph);const h=S3.hit(cx,cy);if(!h)return;const o=h.o;
   if(mode==="dig"){if(o.g)return;const k=o.x+","+o.y+","+o.z,t=map.get(k);map.delete(k);const B=CBLK[t];if(B.m!=="coins")s.blk[B.m]=(s.blk[B.m]||0)+1;SND.hit();commit();return}
   if(mode==="bp"){if(!bp)return toast("เลือกแบบแปลนก่อน");const B=BPRINT[bp];const x0=o.x+(o.g?0:Math.round(h.n.x)),y0=o.g?0:o.y+Math.round(h.n.y),z0=o.z+(o.g?0:Math.round(h.n.z));
@@ -5548,7 +5552,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795331028";let OL_VCHK=0;
+const OL_VER="1795331373";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
