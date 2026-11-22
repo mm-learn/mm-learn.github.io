@@ -5203,13 +5203,14 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795273409";let OL_VCHK=0;
+const OL_VER="1795316666";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}olBadge("🔄 มีเกมเวอร์ชันใหม่ กำลังอัพเดท…");setTimeout(()=>location.reload(),900)}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")olVerCheck(true)});
 setTimeout(()=>olVerCheck(true),4000);setInterval(()=>olVerCheck(),180000);
+
 
 route();initCloud();
 </script></body></html>

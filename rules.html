@@ -47,10 +47,10 @@ service cloud.firestore {
     // เมืองบ้านเกิด Season 2: เก็บแค่ชื่อ บล็อกที่สร้าง แต้มทีม และจำนวน 👍 (ไม่มีเซฟ ไม่มี PIN)
     function validCity() {
       return request.resource.data.keys().hasOnly([&#x27;app&#x27;, &#x27;name&#x27;, &#x27;grid&#x27;, &#x27;home&#x27;, &#x27;wk&#x27;, &#x27;wp&#x27;, &#x27;pts&#x27;, &#x27;likes&#x27;, &#x27;updated&#x27;])
-        &amp;&amp; request.resource.data.app == &#x27;rainbow-dragon&#x27;
+        &amp;&amp; request.resource.data.app in [&#x27;rainbow-dragon&#x27;, &#x27;math-garden&#x27;]
         &amp;&amp; request.resource.data.name is string &amp;&amp; request.resource.data.name.size() &lt;= 20
         &amp;&amp; request.resource.data.grid is string &amp;&amp; request.resource.data.grid.size() &lt;= 12000
-        &amp;&amp; request.resource.data.home in [&#x27;k&#x27;, &#x27;t&#x27;, &#x27;g&#x27;]
+        &amp;&amp; request.resource.data.home in [&#x27;k&#x27;, &#x27;t&#x27;, &#x27;g&#x27;, &#x27;c&#x27;]
         &amp;&amp; request.resource.data.wk is string &amp;&amp; request.resource.data.wk.size() &lt;= 10
         &amp;&amp; request.resource.data.wp is int &amp;&amp; request.resource.data.wp &gt;= 0 &amp;&amp; request.resource.data.wp &lt; 100000
         &amp;&amp; request.resource.data.pts is int &amp;&amp; request.resource.data.pts &gt;= 0 &amp;&amp; request.resource.data.pts &lt; 100000
