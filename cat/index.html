@@ -2906,7 +2906,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795320726";let OL_VCHK=0;
+const OL_VER="1795320872";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -2920,7 +2920,7 @@ const CAPP="math-garden";
 function s2(){if(!S.ct)S.ct={blk:{},city:"",cpts:0,liked:{},home:"c",sci:{},qd:{},streak:0,best:0,xc:{d:"",n:0}};const c=S.ct;c.home="c";c.blk=c.blk||{};c.sci=c.sci||{};c.qd=c.qd||{};return c}
 const BLK={wood:["🪵","ไม้"],stone:["🪨","หิน"],pearl:["🦪","ไข่มุก"],sand:["🏜️","ทราย"],iron:["⚙️","เหล็ก"],crystal:["🔷","คริสตัล"]};
 const S2K=[{id:"c",e:"🐱",th:"สวนคณิต"}],S2KB={c:{e:"🐱",th:"สวนคณิต"},k:{e:"🛡️"},t:{e:"🔮"},g:{e:"🏜️"}};
-if(typeof SND==="undefined")window.SND={gem(){},tap(){},ok(){},bad(){}};
+if(typeof SND==="undefined")window.SND={gem(){},tap(){},ok(){},bad(){},hit(){},win(){},lvl(){},coin(){}};else["gem","tap","ok","bad","hit","win","lvl","coin"].forEach(k=>{if(typeof SND[k]!=="function")SND[k]=()=>{}});
 function wkKey(){const d=new Date(),j=new Date(d.getFullYear(),0,1);return d.getFullYear()+"w"+Math.ceil(((d-j)/864e5+j.getDay()+1)/7)}
 function wkPts(){return 0}
 /* ===== Season 2: 3D home-city builder (Three.js, loaded on demand) + friend visits ===== */
