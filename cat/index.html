@@ -2906,7 +2906,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795321121";let OL_VCHK=0;
+const OL_VER="1795321434";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3205,4 +3205,17 @@ function cityPetInfo(type,stage){const b=PETS.findIndex(p=>p.id===type);if(b<0)r
 route();initCloud();
 
 </script>
-</body></html>
+<script>/* emoji fallback for old emoji fonts — Twemoji graphics CC-BY 4.0 */
+(function(){var M={"🟢": [12, "1f7e2"], "🟡": [12, "1f7e1"], "🟠": [12, "1f7e0"], "🟣": [12, "1f7e3"], "🟤": [12, "1f7e4"], "🧃": [12, "1f9c3"], "🪑": [12, "1fa91"], "🧑‍🏫": [12.1, "1f9d1-200d-1f3eb"], "🪁": [12, "1fa81"], "🟦": [12, "1f7e6"], "🧊": [12, "1f9ca"], "🧍": [12, "1f9cd"], "🦾": [12, "1f9be"], "🪵": [13, "1fab5"], "🪨": [13, "1faa8"], "🦪": [12, "1f9aa"], "🪖": [13, "1fa96"], "🪄": [13, "1fa84"], "🪞": [13, "1fa9e"], "🪙": [13, "1fa99"], "🪓": [12, "1fa93"], "🟥": [12, "1f7e5"], "🟨": [12, "1f7e8"], "🪶": [13, "1fab6"], "🟫": [12, "1f7eb"], "🟩": [12, "1f7e9"], "🪥": [13, "1faa5"], "🪴": [13, "1fab4"], "🫘": [14, "1fad8"], "🪟": [13, "1fa9f"], "🫛": [15, "1fadb"], "🪱": [13, "1fab1"], "🪷": [14, "1fab7"], "🛕": [12, "1f6d5"], "🩺": [12, "1fa7a"], "🧑‍🍳": [12.1, "1f9d1-200d-1f373"], "🪔": [12, "1fa94"], "🪣": [13, "1faa3"], "🛝": [14, "1f6dd"], "🪽": [15, "1fabd"], "🥱": [12, "1f971"], "🧑‍⚕️": [12.1, "1f9d1-200d-2695-fe0f"], "🧑‍⚕": [12.1, "1f9d1-200d-2695-fe0f"], "🧑‍🌾": [12.1, "1f9d1-200d-1f33e"], "🧑‍✈️": [12.1, "1f9d1-200d-2708-fe0f"], "🧑‍✈": [12.1, "1f9d1-200d-2708-fe0f"], "🧅": [12, "1f9c5"], "🧑‍🤝‍🧑": [12, "1f9d1-200d-1f91d-200d-1f9d1"], "🪮": [15, "1faae"], "🦦": [12, "1f9a6"], "🪀": [12, "1fa80"], "🦩": [12, "1f9a9"], "🦺": [12, "1f9ba"], "🩳": [12, "1fa73"], "🧏": [12, "1f9cf"], "🧑‍⚖️": [12.1, "1f9d1-200d-2696-fe0f"], "🧑‍⚖": [12.1, "1f9d1-200d-2696-fe0f"], "🧑‍🚒": [12.1, "1f9d1-200d-1f692"], "🧑‍🎤": [12.1, "1f9d1-200d-1f3a4"], "🧑‍🎨": [12.1, "1f9d1-200d-1f3a8"], "🧑‍🔬": [12.1, "1f9d1-200d-1f52c"], "🧑‍🔧": [12.1, "1f9d1-200d-1f527"], "🧑‍🚀": [12.1, "1f9d1-200d-1f680"], "🤍": [12, "1f90d"], "🪐": [12, "1fa90"]},P="../emoji/";
+function ok(e){try{var c=document.createElement("canvas");c.width=c.height=24;var x=c.getContext("2d");x.textBaseline="top";x.font="20px sans-serif";x.fillText(e,0,0);var d=x.getImageData(0,0,24,24).data;for(var i=0;i<d.length;i+=4){if(d[i+3]>50&&(Math.abs(d[i]-d[i+1])>40||Math.abs(d[i+1]-d[i+2])>40))return true}return false}catch(_){return true}}
+var lv=11;[["\ud83d\udfe2",12],["\ud83e\ude96",13],["\ud83e\uded8",14],["\ud83e\udebd",15]].forEach(function(t){if(lv===t[1]-1&&ok(t[0]))lv=t[1]});
+var keys=Object.keys(M).filter(function(k){return M[k][0]>lv});if(!keys.length)return;
+keys.sort(function(a,b){return b.length-a.length});var re=new RegExp("("+keys.map(function(k){return k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}).join("|")+")\ufe0f?","g");
+var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,OPTION:1,TITLE:1,CANVAS:1};
+function fix(n){if(n.nodeType===3){var t=n.nodeValue;re.lastIndex=0;if(!re.test(t))return;var p=n.parentNode;if(!p||SKIP[p.nodeName]||p.closest&&p.closest("svg"))return;
+  var f=document.createDocumentFragment(),last=0;t.replace(re,function(m,e,i){if(i>last)f.appendChild(document.createTextNode(t.slice(last,i)));var g=document.createElement("img");g.className="emj";g.alt=e;g.draggable=false;g.src=P+M[e][1]+".svg";f.appendChild(g);last=i+m.length;return m});
+  if(last<t.length)f.appendChild(document.createTextNode(t.slice(last)));p.replaceChild(f,n);return}
+ if(n.nodeType===1&&!SKIP[n.nodeName]&&n.nodeName!=="svg"){var c=n.childNodes;for(var i=c.length-1;i>=0;i--)fix(c[i])}}
+var st=document.createElement("style");st.textContent="img.emj{height:1em;width:1em;vertical-align:-.12em;display:inline-block;margin:0 .03em}";document.head.appendChild(st);
+fix(document.body);new MutationObserver(function(ms){ms.forEach(function(m){if(m.type==="characterData")fix(m.target);else m.addedNodes.forEach(fix)})}).observe(document.body,{childList:true,subtree:true,characterData:true});
+window.EMJLV=lv})();</script></body></html>
