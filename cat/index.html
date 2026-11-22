@@ -2939,7 +2939,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795334774";let OL_VCHK=0;
+const OL_VER="1795336111";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3389,7 +3389,7 @@ const cityEn={can:n=>enSt().v>=n,spend:n=>{enSt().v-=n},
   m.querySelector("#enx").onclick=()=>m.remove();m.querySelector("#engo").onclick=()=>{m.remove();const x=el&&el.querySelector("#cx");if(x)x.click();if(!IQCAT){TAB="s2";try{route()}catch(e){}}}}};
 /* ---- rare blocks: unlock by skill (dragon: subject ranks; cat: science levels + puzzles) ---- */
 const RKN=["ฝึกหัด","นักสู้","ชำนาญ","ยอดฝีมือ","ปรมาจารย์","ตำนาน"];
-function cxRanks(){const H=heroStats(),r={};H.forEach(x=>r[x.k]=x.pc>=1?5:Math.floor(x.pc*5));r.min=Math.min(r.k,r.t,r.g);r.boss=H.reduce((a,x)=>a+x.bw,0);return r}
+function cxRanks(){const H=meStats(),r={};H.forEach(x=>r[x.k]=x.pc>=1?5:Math.floor(x.pc*5));r.min=Math.min(r.k,r.t,r.g);r.boss=H.reduce((a,x)=>a+x.bw,0);return r}
 function cxCat(){const s=s2(),sc=s.sci||{},st=(s.iq||{});const pass=Object.values(sc).filter(v=>v>=3).length,full=Object.values(sc).filter(v=>v>=5).length;return {pass,full,iqok:st.ok||0,iqlv:st.lv||1,best:s.best||0}}
 function cityRareReq(k){
  if(IQCAT){const c=cxCat(),T={M:[c.pass>=3,"ผ่านด่านวิทย์ 3 ด่าน",`${c.pass}/3`],K:[c.pass>=6,"ผ่านด่านวิทย์ 6 ด่าน",`${c.pass}/6`],G:[c.iqok>=10,"ตอบโจทย์เชาว์ถูก 10 ข้อ",`${c.iqok}/10`],
