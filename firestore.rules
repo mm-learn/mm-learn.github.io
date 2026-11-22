@@ -39,7 +39,8 @@ service cloud.firestore {
     }
     // เมืองบ้านเกิด Season 2: เก็บแค่ชื่อ บล็อกที่สร้าง แต้มทีม และจำนวน 👍 (ไม่มีเซฟ ไม่มี PIN)
     function validCity() {
-      return request.resource.data.keys().hasOnly(['app', 'name', 'grid', 'home', 'wk', 'wp', 'pts', 'likes', 'updated'])
+      return request.resource.data.keys().hasOnly(['app', 'name', 'grid', 'home', 'wk', 'wp', 'pts', 'likes', 'updated', 'pets'])
+        && (!('pets' in request.resource.data) || (request.resource.data.pets is string && request.resource.data.pets.size() <= 200))
         && request.resource.data.app in ['rainbow-dragon', 'math-garden']
         && request.resource.data.name is string && request.resource.data.name.size() <= 20
         && request.resource.data.grid is string && request.resource.data.grid.size() <= 12000
