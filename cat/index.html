@@ -2939,7 +2939,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795336111";let OL_VCHK=0;
+const OL_VER="1795357379";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3289,11 +3289,20 @@ function iqSeq(lv){let t=[],why="";const a=1+IQ_R(lv<3?10:20);
  const mi=lv<=1?t.length-1:lv===2?1+IQ_R(t.length-1):t.length-1,ans=t[mi],d=Math.abs((t[1]-t[0]))||1;
  const show=t.map((v,i)=>i===mi?`<b class="iqq">?</b>`:`<b>${v}</b>`).join(`<i>,</i>`);
  return {q:`ตัวเลขที่หายไปคืออะไร`,big:`<div class="iqseq">${show}</div>`,say:"ตัวเลขที่หายไปคืออะไร "+t.map((v,i)=>i===mi?"อะไร":v).join(" "),...iqOpts(ans,[ans+d,ans-d,ans+1,ans-1,ans+2*d]),hint:"ลองดูว่าตัวเลขแต่ละตัวห่างกันเท่าไร",why}}
+function iqSeq1(lv){let t=[],why="",mi=4;
+ if(lv<=1){const d=IQ_P([1,2]),a=1+IQ_R(10);for(let i=0;i<5;i++)t.push(a+d*i);why=`เพิ่มทีละ ${d}`}
+ else if(lv===2){const d=IQ_P([2,5,10]),a=d*(1+IQ_R(4));for(let i=0;i<5;i++)t.push(a+d*i);why=`เพิ่มทีละ ${d}`;mi=IQ_R(2)?4:2}
+ else if(lv===3){const d=IQ_P([1,2,10]),a=d*8+IQ_R(10);for(let i=0;i<5;i++)t.push(a-d*i);why=`ลดลงทีละ ${d}`}
+ else if(lv===4){const d=IQ_P([3,4,5]),a=1+IQ_R(10);for(let i=0;i<5;i++)t.push(a+d*i);why=`เพิ่มทีละ ${d}`;mi=1+IQ_R(3)}
+ else if(lv===5){let v=1+IQ_R(5);for(let i=0;i<5;i++){t.push(v);v+=i+1}why="ระยะห่างเพิ่มขึ้นทีละ 1 (+1, +2, +3, +4)"}
+ else{const p=IQ_P([3,4,5]),q=IQ_P([1,2]);let v=5+IQ_R(10);for(let i=0;i<6;i++){t.push(v);v+=i%2?-q:p}why=`บวก ${p} แล้วลบ ${q} สลับกันไป`;mi=5}
+ const ans=t[mi],d=Math.abs(t[1]-t[0])||1,show=t.map((v,i)=>i===mi?`<b class="iqq">?</b>`:`<b>${v}</b>`).join(`<i>,</i>`);
+ return {q:"ตัวเลขที่หายไปคืออะไร",big:`<div class="iqseq">${show}</div>`,say:"ตัวเลขที่หายไปคืออะไร "+t.map((v,i)=>i===mi?"อะไร":v).join(" "),...iqOpts(ans,[ans+1,ans-1,ans+d,ans-d,ans+2]),hint:"ลองนับดูว่าแต่ละตัวห่างกันเท่าไร",why}}
 /* 2. repeating shape patterns */
 const IQSH=["🔴","🔵","⭐","🔺","💚","🔷","🌙","❤️","⚪","⬛","🍀","🌸"];
 function iqPat(lv){const n=lv<=1?2:lv===2?IQ_P([2,3]):lv<=4?IQ_P([3,4]):4,S=IQ_SH(IQSH).slice(0,n+1),u=[];
  if(lv===2&&n===3&&IQ_R(2)){u.push(S[0],S[0],S[1])}else if(lv>=3&&IQ_R(2)){u.push(S[0],S[1],S[1],S[2]);if(n>=4)u.push(S[3])}else for(let i=0;i<n;i++)u.push(S[i]);
- const L=u.length;if(lv>=5){const pos=12+IQ_R(9),ans=u[(pos-1)%L],row=[];for(let i=0;i<L*2;i++)row.push(u[i%L]);
+ const L=u.length;if(lv>=5){const pos=IQCAT?12+IQ_R(9):L+3+IQ_R(5),ans=u[(pos-1)%L],row=[];for(let i=0;i<L*2;i++)row.push(u[i%L]);
   return {q:`รูปเรียงซ้ำแบบนี้ไปเรื่อยๆ ตัวที่ ${pos} คือรูปอะไร`,big:`<div class="iqseq em">${row.join("")}<i>…</i></div>`,say:`รูปเรียงซ้ำไปเรื่อยๆ ตัวที่ ${pos} คือรูปอะไร`,...iqOpts(ans,IQ_SH(S.filter(x=>x!==ans))),hint:`ชุดหนึ่งมี ${L} รูป ลองนับเป็นชุดๆ`,why:`ชุดละ ${L} รูป · ${pos} ÷ ${L} เหลือเศษ ${(pos-1)%L+1} จึงเป็นรูปที่ ${(pos-1)%L+1} ของชุด`}}
  const len=L*2+1+IQ_R(L),row=[];for(let i=0;i<len;i++)row.push(u[i%L]);const ans=u[len%L];
  return {q:"รูปถัดไปคือรูปอะไร",big:`<div class="iqseq em">${row.join("")}<b class="iqq">?</b></div>`,say:"รูปถัดไปคือรูปอะไร",...iqOpts(ans,IQ_SH(S.filter(x=>x!==ans))),hint:"หาชุดที่เรียงซ้ำกันก่อน",why:`ชุดที่ซ้ำคือ ${u.join("")}`}}
@@ -3301,7 +3310,7 @@ function iqPat(lv){const n=lv<=1?2:lv===2?IQ_P([2,3]):lv<=4?IQ_P([3,4]):4,S=IQ_S
 const IQGRP=[["ผลไม้",["🍎","🍌","🍇","🍉","🍓","🍍","🍒","🍑"],"f"],["ผัก",["🥕","🥦","🌽","🥒","🍆","🥬"],"f"],["สัตว์บก",["🐶","🐱","🐰","🦊","🐻","🐼","🐯","🦁","🐮","🐷"],"a"],
  ["สัตว์น้ำ",["🐟","🐠","🐙","🦀","🐬","🐳"],"a"],["นก",["🐦","🦅","🦆","🦉","🦜","🐧"],"a"],["ยานพาหนะ",["🚗","🚌","🚑","🚒","🚲","🛵","🚂","✈️","🚀"],"v"],
  ["เครื่องดนตรี",["🎸","🎹","🎺","🎻","🥁"],"o"],["ลูกบอลกีฬา",["⚽","🏀","🏈","⚾","🎾","🏐"],"o"]];
-function iqOdd(lv){if(lv>=3&&IQ_R(3)===0){const k=lv>=5?IQ_P([3,4,6,7]):IQ_P([2,5,10]);const nm=k===2?"เลขคู่":`ตัวเลขที่ ${k} หารลงตัว`;const ok=IQ_SH([...Array(12)].map((_,i)=>k*(i+2))).slice(0,3);let bad;do{bad=5+IQ_R(k*12)}while(bad%k===0);
+function iqOdd(lv){if(IQCAT&&lv>=3&&IQ_R(3)===0){const k=lv>=5?IQ_P([3,4,6,7]):IQ_P([2,5,10]);const nm=k===2?"เลขคู่":`ตัวเลขที่ ${k} หารลงตัว`;const ok=IQ_SH([...Array(12)].map((_,i)=>k*(i+2))).slice(0,3);let bad;do{bad=5+IQ_R(k*12)}while(bad%k===0);
    const o=IQ_SH([...ok,bad]);return {q:"ข้อใดไม่เข้าพวก",say:"ข้อใดไม่เข้าพวก",opts:o,a:o.indexOf(bad),hint:"ลองหารด้วย 2, 3, 5 ดู",why:`${ok.join(", ")} เป็น${nm} แต่ ${bad} ไม่ใช่`}}
  let A,B;do{A=IQ_P(IQGRP);B=IQ_P(IQGRP)}while(A===B||(lv<=2?A[2]===B[2]:lv>=4?A[2]!==B[2]:false));
  const ok=IQ_SH(A[1]).slice(0,3),bad=IQ_P(B[1]),o=IQ_SH([...ok,bad]);return {q:"ข้อใดไม่เข้าพวก",say:"ข้อใดไม่เข้าพวก",opts:o,a:o.indexOf(bad),em:1,hint:"สามข้อเป็นของประเภทเดียวกัน",why:`${ok.join("")} เป็น${A[0]} แต่ ${bad} เป็น${B[0]}`}}
@@ -3325,7 +3334,7 @@ const IQMIR=["F","G","J","L","P","R","2","4","5","7","ก","ข","ค","ด","�
 function iqMir(){const ch=IQ_P(IQMIR),T=["scaleX(-1)","none","scaleY(-1)","rotate(180deg)"],o=IQ_SH(T);
  return {q:"ถ้าวางกระจกตั้งไว้ข้างๆ ภาพในกระจกเป็นแบบไหน",big:`<div class="iqmir"><span>${ch}</span><i></i></div>`,say:"ถ้าวางกระจกไว้ข้างๆ ภาพในกระจกเป็นแบบไหน",opts:o.map(t=>`<span class="iqglyph" style="transform:${t}">${ch}</span>`),a:o.indexOf("scaleX(-1)"),raw:1,hint:"ภาพในกระจกข้างๆ จะสลับซ้าย-ขวา แต่บน-ล่างเหมือนเดิม",why:"กระจกที่ตั้งข้างๆ สลับเฉพาะซ้ายกับขวา"}}
 /* 7. counting cubes (isometric) */
-function iqCube(lv,home){const W=lv<=1?IQ_P([2,3]):lv<=3?2:3,D=lv<=1?1:lv<=4?2:3,Hm=lv<=1?2:lv<=3?3:4;const h=[];
+function iqCube(lv,home){if(!IQCAT)lv=Math.min(lv,3);const W=lv<=1?IQ_P([2,3]):lv<=3?2:3,D=lv<=1?1:lv<=4?2:3,Hm=lv<=1?2:lv<=3?3:4;const h=[];
  for(let x=0;x<W;x++){h.push([]);for(let z=0;z<D;z++)h[x].push(1+IQ_R(Hm))}
  for(let it=0;it<6;it++)for(let x=0;x<W;x++)for(let z=0;z<D;z++){if(x>0&&h[x][z]>h[x-1][z])h[x][z]=h[x-1][z];if(z>0&&h[x][z]>h[x][z-1])h[x][z]=h[x][z-1]}
  const ans=h.flat().reduce((a,b)=>a+b,0),s=18,cx=s*.866,C={k:["#f08a6c","#c85a40","#e0715a"],t:["#7cc4ff","#3d8fd6","#5aa9ee"],g:["#f6cf72","#c99a35","#e3b552"],c:["#b9e07a","#78a83c","#98c75a"]}[home]||["#f08a6c","#c85a40","#e0715a"];
@@ -3337,7 +3346,7 @@ function iqCube(lv,home){const W=lv<=1?IQ_P([2,3]):lv<=3?2:3,D=lv<=1?1:lv<=4?2:3
  const hid=ans-h.flat().length;
  return {q:"มีลูกบาศก์ทั้งหมดกี่ก้อน",big:`<svg class="iqcube" viewBox="${(mnx-4).toFixed(0)} ${(mny-4).toFixed(0)} ${(mxx-mnx+8).toFixed(0)} ${(mxy-mny+8).toFixed(0)}">${P}</svg>`,say:"มีลูกบาศก์ทั้งหมดกี่ก้อน",
   ...iqOpts(ans,[h.flat().length+ (hid?0:1),ans+1,ans-1,ans+2].filter(v=>v!==ans)),hint:"ก้อนที่ซ้อนอยู่ข้างล่างก็ต้องนับด้วย ลองนับทีละกอง",why:`นับทีละกอง: ${h.flat().join(" + ")} = ${ans}`}}
-function iqGen(lv,home){lv=Math.max(1,Math.min(6,lv));const T=[["seq",iqSeq],["pat",iqPat],["odd",iqOdd],["cube",iqCube]];if(lv>=2)T.push(["mat",iqMat],["ana",iqAna]);if(lv>=3)T.push(["mir",iqMir]);
+function iqGen(lv,home){lv=Math.max(1,Math.min(6,lv));const T=[["seq",IQCAT?iqSeq:iqSeq1],["pat",iqPat],["odd",iqOdd],["cube",iqCube]];if(lv>=2)T.push(["mat",iqMat],["ana",iqAna]);if(lv>=3)T.push(["mir",iqMir]);
  const st=iqSt();let k;do{k=IQ_P(T)}while(T.length>1&&k[0]===st.last);st.last=k[0];const q=k[1](lv,home);q.type=k[0];q.lv=lv;return q}
 /* ---- state, rewards, guest popup ---- */
 function iqSt(){const s=s2();s.iq=s.iq||{lv:IQCAT?3:1,run:0,miss:0,n:0,ok:0,t:0,def:0,best:0,st:0};return s.iq}
