@@ -2939,7 +2939,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795357515";let OL_VCHK=0;
+const OL_VER="1795357895";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -3019,6 +3019,7 @@ const FLY=new Set(["owl","falcon","bat","moonowl","swan","reddragon"]);
 /* sky-high fliers: legendary species always; flying birds also once they reach their legendary form (stage>=4) */
 const FLYHI=new Set(["moonowl","reddragon"]),SWIM=new Set(["dolphin","puffer","squid","seahorse"]),WATERMIN=4;
 function cityWaterTiles(map){const top={};map.forEach((t,k)=>{const a=k.split(",");const id=a[0]+","+a[2];if(!top[id]||+a[1]>=top[id][0])top[id]=[+a[1],t]});return Object.keys(top).filter(id=>top[id][1]==="A").map(id=>id.split(",").map(Number))}
+function cityJump(a,dt){a.jt=(a.jt==null?2+Math.random()*4:a.jt)-dt;if(a.jt>0){a.g.rotation.x=0;return 0}const t=-a.jt/1.1;if(t>=1){a.jt=4+Math.random()*5;a.g.rotation.x=0;return 0}a.g.rotation.x=-Math.cos(t*Math.PI)*.9;return Math.sin(t*Math.PI)*1.4}
 function cityWaterN(map){let n=0;(map||new Map()).forEach(t=>{if(t==="A")n++});return n}
 const VPAL={siamese:{b:0xf1e3c8,d:0x5a3b2a,e:0x4aa3ff,n:0x8a5a44},persian:{b:0xf7f4ef,d:0xe8d9c6,e:0xf2a33a,n:0xf2a0b0},rabbit:{b:0xf2f2f2,d:0xcfcfd6,e:0x2b2b2b,n:0xf3a7b8,ear:1},
  dog:{b:0xe0aa58,d:0xb97a32,e:0x2b2b2b,n:0x2b2b2b},hamster:{b:0xfaf6f0,d:0xbfb3a8,e:0x111111,n:0xf3a7b8},redpanda:{b:0xc8532a,d:0x2a1a16,e:0x111111,n:0x111111,w:0xffffff},
@@ -3084,8 +3085,8 @@ function cityPets(T,sc,getMap,given){const list=given||(typeof cityPetList==="fu
   return a?[a.x,a.z]:[1,1]};
  const wset=()=>{const W=cityWaterTiles(getMap());return {W,has:new Set(W.map(w=>w[0]+","+w[1]))}};
  const pickW=a=>{const {W,has}=wset();const ok=W.filter(([x,z])=>{const d=Math.hypot(x-a.x,z-a.z),n=Math.ceil(d*4);for(let i=1;i<=n;i++){const t=i/n;if(!has.has(Math.round(a.x+(x-a.x)*t)+","+Math.round(a.z+(z-a.z)*t)))return false}return true});return ok.length?ok[Math.floor(Math.random()*ok.length)]:[a.x,a.z]};
- list.slice(0,5).forEach(p=>{const sw=SWIM.has(p.type);let w0=null;if(sw){if(cityWaterN(getMap())<WATERMIN)return;const {W}=wset();if(!W.length)return;w0=W[Math.floor(Math.random()*W.length)]}
-  const g=voxPet(T,p.type);g.userData.fly=FLY.has(p.type);g.userData.hi=FLYHI.has(p.type)||(g.userData.fly&&(p.stage||0)>=4);g.userData.sw=sw;const sz=g.userData.hero?.85:.55+.22*(p.stage||0);g.scale.set(sz,sz,sz);g.traverse(o=>{o.userData.pet=P.length});sc.add(g);
+ list.slice(0,5).forEach(p=>{const sw=SWIM.has(p.type);let w0=null;if(sw){const nm=p.name||"สัตว์น้ำ",wn=cityWaterN(getMap());if(wn<WATERMIN){setTimeout(()=>toast(`🐟 ${nm} ยังไม่ออกมา: ต้องมีบล็อกน้ำ 💧 อย่างน้อย ${WATERMIN} ก้อน (ตอนนี้ ${wn})`),900);return}const {W}=wset();if(!W.length){setTimeout(()=>toast(`🐟 ${nm} ยังไม่ออกมา: บ่อน้ำถูกบล็อกอื่นทับอยู่ ต้องมีน้ำที่ผิวบนสุด`),900);return}w0=W[Math.floor(Math.random()*W.length)]}
+  const g=voxPet(T,p.type);g.userData.fly=FLY.has(p.type);g.userData.hi=FLYHI.has(p.type)||(g.userData.fly&&(p.stage||0)>=4);g.userData.sw=sw;if(sw)g.rotation.order="YXZ";const sz=g.userData.hero?.85:(.55+.22*(p.stage||0))*(sw?1.35:1);g.scale.set(sz,sz,sz);g.traverse(o=>{o.userData.pet=P.length});sc.add(g);
   const sh=new T.Mesh(new T.CircleGeometry(sz*.38,20),new T.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.2}));sh.rotation.x=-Math.PI/2;sc.add(sh);
   const [x,z]=w0||pick();if(sw)sh.visible=false;P.push({g,sh,sz,p,x,z,tx:x,tz:z,y:top(x,z),wait:Math.random()*2,ph:Math.random()*6,alt:0,fl:0,ft:3+Math.random()*6})});
  return {list:P,objs:()=>P.map(a=>a.g),tick(dt){P.forEach(a=>{a.ph+=dt*8;if(a.wait>0){a.wait-=dt}else{const dx=a.tx-a.x,dz=a.tz-a.z,d=Math.hypot(dx,dz);
@@ -3094,7 +3095,7 @@ function cityPets(T,sc,getMap,given){const list=given||(typeof cityPetList==="fu
    if(a.g.userData.fly){a.ft-=dt;if(a.ft<=0){a.fl=a.fl?0:1;a.ft=a.fl?6+Math.random()*6:4+Math.random()*6;if(a.fl){a.wait=0;[a.tx,a.tz]=pick()}else{const wl=new Set(cityWaterTiles(getMap()).map(v=>v[0]+","+v[1]));if(wl.has(Math.round(a.x)+","+Math.round(a.z))){a.fl=1;a.ft=2;a.wait=0;[a.tx,a.tz]=pick()}}}
     if(a.fl&&a.wait>0){a.wait=0;[a.tx,a.tz]=pick()}a.alt+=((a.fl?(a.g.userData.hi?5.5+Math.sin(a.ph*.08)*1:2.5+Math.sin(a.ph*.15)):0)-a.alt)*Math.min(1,dt*(a.g.userData.hi?.8:1.5))}
    if(a.g.userData.sw){const ix=Math.round(a.x),iz=Math.round(a.z),wt=wset().has.has(ix+","+iz);a.g.visible=wt;if(!wt){const {W}=wset();if(W.length){[a.x,a.z]=W[Math.floor(Math.random()*W.length)];[a.tx,a.tz]=[a.x,a.z]}}}
-   const ty=top(Math.round(a.x),Math.round(a.z))+a.alt-(a.g.userData.sw?.5:0);a.y+=(ty-a.y)*Math.min(1,dt*8);const bob=a.wait>0?0:Math.abs(Math.sin(a.ph))*.06;
+   const ty=top(Math.round(a.x),Math.round(a.z))+a.alt-(a.g.userData.sw?.5-cityJump(a,dt):0);a.y+=(ty-a.y)*Math.min(1,dt*8);const bob=a.wait>0?0:Math.abs(Math.sin(a.ph))*.06;
    if(a.g.userData.hero){heroAnim(a.g,a.ph*.6,a.wait<=0)}a.g.position.set(a.x,a.y-.5+(a.g.userData.hero?0:bob)+(a.g.userData.swim?(a.g.userData.sw?Math.sin(a.ph*.3)*.05:.15+Math.sin(a.ph*.3)*.06):0),a.z);a.sh.position.set(a.x,top(Math.round(a.x),Math.round(a.z))-.49,a.z);a.sh.material.opacity=.2/(1+a.alt*.5)})}}}
 function cityScene(cv,home,getMap,petsGiven){const T=THREE;let R;try{R=new T.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true})}catch(e){return null}
  R.setPixelRatio(Math.min(2,window.devicePixelRatio||1));const sc=new T.Scene();sc.background=new T.Color(home==="t"?0x9fd8ff:home==="g"?0xffe0a8:0xbfe3ff);
