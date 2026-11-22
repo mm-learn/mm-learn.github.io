@@ -401,6 +401,7 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .mcard.full{padding:0;justify-content:flex-end}.mcard .mfull{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .mcard.full .mtxt{width:100%;padding:28px 8px 10px;background:linear-gradient(180deg,transparent,rgba(5,8,30,.75) 45%,rgba(5,8,30,.92));text-shadow:0 1px 3px #000}.mcard.full small{color:#e6ecff}.mcard.full i{opacity:.8}
 .mcard.full.leg{box-shadow:0 0 14px #ffd84d88}
+.petI{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -5205,8 +5206,13 @@ function petView(id){const s=s2pets(),p=PETB[id],xp=s.pc[id]||0,cur=petForm(xp);
   z.querySelectorAll(".pvtab button").forEach(b=>b.onclick=e=>{e.stopPropagation();f=+b.dataset.f;z.classList.remove("big");draw()});
   z.querySelector(".zx").onclick=()=>z.remove()};
  draw();z.onclick=e=>{if(e.target===z)z.remove()};document.body.appendChild(z)}
+/* long-press any pet picture (even inside a selectable button) to see it big */
+let PVLP=0,PVT=null;document.addEventListener("pointerdown",e=>{const t=e.target;if(!(t instanceof HTMLImageElement)||!t.classList.contains("petI")||!t.dataset.pid||t.closest(".b2,.s2b,.battle"))return;const x=e.clientX,y=e.clientY;clearTimeout(PVT);
+ PVT=setTimeout(()=>{PVLP=1;petView(t.dataset.pid);setTimeout(()=>PVLP=0,800)},480);const cancel=ev=>{if(ev.type!=="pointermove"||Math.hypot(ev.clientX-x,ev.clientY-y)>10){clearTimeout(PVT);["pointerup","pointermove","pointercancel"].forEach(k=>document.removeEventListener(k,cancel))}};["pointerup","pointermove","pointercancel"].forEach(k=>document.addEventListener(k,cancel))},true);
+document.addEventListener("contextmenu",e=>{if(e.target.classList&&e.target.classList.contains("petI"))e.preventDefault()},true);
 document.addEventListener("click",e=>{const t=e.target;if(!(t instanceof HTMLImageElement)||t.closest(".zoom"))return;
- if(t.classList.contains("petI")&&t.dataset.pid&&!t.closest(".b2,.s2b,.battle")){e.preventDefault();e.stopPropagation();petView(t.dataset.pid);return}
+ if(PVLP){PVLP=0;e.preventDefault();e.stopPropagation();return}
+ if(t.classList.contains("petI")&&t.dataset.pid&&!t.closest(".b2,.s2b,.battle,button,[data-p]")){e.preventDefault();e.stopPropagation();petView(t.dataset.pid);return}
  if(t.classList.contains("mythI")||t.closest(".mascot")||/\/(veh|myth|mascot)_/.test(t.getAttribute("src")||"")&&t.closest(".mcard,.mascot,.vgrid,.veh")){e.preventDefault();e.stopPropagation();zoom(t.src)}},true);
 
 /* ---------- bonus pets: Thief zone rewards + winter event ---------- */
@@ -5661,7 +5667,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795357379";let OL_VCHK=0;
+const OL_VER="1795357515";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
