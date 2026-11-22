@@ -1860,15 +1860,33 @@ const cityEncode=(m,n)=>(n&&n>12?"@"+B36[n]:"")+[...m].map(([k,t])=>{const [x,y,
 function cityPts(m){let h=0;const ty=new Set();m.forEach((t,k)=>{ty.add(t);h=Math.max(h,+k.split(",")[1]+1)});return m.size+ty.size*5+h*3}
 function loadThree(){return new Promise((res,rej)=>{if(window.THREE)return res(THREE);const sc=document.createElement("script");sc.src="s2/three.min.js";sc.onload=()=>window.THREE?res(THREE):rej(new Error("no three"));sc.onerror=()=>rej(new Error("load"));document.head.appendChild(sc)})}
 /* ---- renderer shared by edit + visit ---- */
+
+/* 16x16 pixel textures per block type (original simple patterns) */
+const BTEX={};
+function blkTex(k,c){if(BTEX[k])return BTEX[k];const cv=document.createElement("canvas");cv.width=cv.height=16;const x=cv.getContext("2d");
+ const hx=v=>"#"+v.toString(16).padStart(6,"0"),sh=(v,f)=>{let r=v>>16&255,g=v>>8&255,b=v&255;const t=f<0?0:255,a=Math.abs(f);r=Math.round(r+(t-r)*a);g=Math.round(g+(t-g)*a);b=Math.round(b+(t-b)*a);return `rgb(${r},${g},${b})`};
+ let sd=k.charCodeAt(0)*97+13;const R=()=>(sd=(sd*16807)%2147483647)/2147483647;const px=(i,j,col)=>{x.fillStyle=col;x.fillRect(i,j,1,1)};
+ x.fillStyle=hx(c);x.fillRect(0,0,16,16);
+ if(k==="W"){for(let j=0;j<16;j++){if(j%4===3)for(let i=0;i<16;i++)px(i,j,sh(c,-.28));else for(let i=0;i<16;i++)if(R()<.18)px(i,j,sh(c,R()<.5?-.15:.1))}for(let j=0;j<4;j++)px((j*7+3)%16,j*4+1,sh(c,-.35))}
+ else if(k==="L"){for(let i=0;i<70;i++)px(Math.floor(R()*16),Math.floor(R()*16),sh(c,R()<.6?-.3:.25))}
+ else if(k==="S"){for(let i=0;i<60;i++)px(Math.floor(R()*16),Math.floor(R()*16),sh(c,R()<.5?-.22:.18));x.strokeStyle=sh(c,-.4);x.lineWidth=1;x.beginPath();x.moveTo(3,2.5);x.lineTo(7,5.5);x.lineTo(6,9.5);x.moveTo(11,8.5);x.lineTo(14,12.5);x.stroke()}
+ else if(k==="D"){for(let i=0;i<55;i++)px(Math.floor(R()*16),Math.floor(R()*16),sh(c,R()<.6?-.15:.2))}
+ else if(k==="P"){for(let j=0;j<16;j++)for(let i=0;i<16;i++){const v=Math.sin((i+j)/3)*.12;px(i,j,sh(c,v))}for(let i=0;i<6;i++)px(Math.floor(R()*16),Math.floor(R()*16),"#fff")}
+ else if(k==="I"){x.fillStyle=sh(c,-.25);x.fillRect(0,0,16,1);x.fillRect(0,15,16,1);x.fillRect(0,0,1,16);x.fillRect(15,0,1,16);x.fillRect(0,7,16,1);[[2,2],[13,2],[2,13],[13,13],[2,9],[13,9]].forEach(([i,j])=>{px(i,j,sh(c,-.45));px(i+1,j-1,"#fff")})}
+ else if(k==="C"){for(let j=0;j<16;j++)for(let i=0;i<16;i++){const d=(i+j)%8;if(d===0)px(i,j,sh(c,.45));else if(d===4)px(i,j,sh(c,-.2))}}
+ else if(k==="R"||k==="B"||k==="Y"){const m=sh(c,k==="Y"?-.35:.55);x.fillStyle=m;for(let j=0;j<16;j+=4){x.fillRect(0,j,16,1);const o=(j/4)%2?4:0;for(let i=o;i<16;i+=8)x.fillRect(i,j,1,4)}for(let i=0;i<20;i++)px(Math.floor(R()*16),Math.floor(R()*16),sh(c,-.12))}
+ else if(k==="A"){for(let j=2;j<16;j+=5)for(let i=0;i<16;i++)if((i+j)%6<3)px(i,j,sh(c,.35))}
+ x.fillStyle="rgba(0,0,0,.18)";x.fillRect(0,0,16,1);x.fillRect(0,0,1,16);
+ BTEX[k]=cv;return cv}
 function cityScene(cv,home,getMap){const T=THREE;let R;try{R=new T.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true})}catch(e){return null}
  R.setPixelRatio(Math.min(2,window.devicePixelRatio||1));const sc=new T.Scene();sc.background=new T.Color(home==="t"?0x9fd8ff:home==="g"?0xffe0a8:0xbfe3ff);
  sc.add(new T.HemisphereLight(0xffffff,0x667788,.85));const dl=new T.DirectionalLight(0xffffff,.75);dl.position.set(8,14,6);sc.add(dl);
  const cam=new T.PerspectiveCamera(45,1,.1,200);const st={th:.8,ph:.95,r:Math.round(CN*1.8)};const ctr=new T.Vector3(CN/2-.5,0,CN/2-.5);
  const place=()=>{cam.position.set(ctr.x+st.r*Math.sin(st.ph)*Math.cos(st.th),ctr.y+st.r*Math.cos(st.ph),ctr.z+st.r*Math.sin(st.ph)*Math.sin(st.th));cam.lookAt(ctr)};
- const geo=new T.BoxGeometry(1,1,1),mats={};Object.keys(CBLK).forEach(k=>{const B=CBLK[k];mats[k]=new T.MeshLambertMaterial({color:B.c,transparent:!!B.op,opacity:B.op||1})});
+ const geo=new T.BoxGeometry(1,1,1),mats={};Object.keys(CBLK).forEach(k=>{const B=CBLK[k];const tx=new T.CanvasTexture(blkTex(k,B.c));tx.magFilter=T.NearestFilter;tx.minFilter=T.NearestFilter;mats[k]=new T.MeshLambertMaterial({map:tx,transparent:!!B.op,opacity:B.op||1})});
  const gc=home==="t"?[0x7ccf6b,0xe9d9a0]:home==="g"?[0xe0b866,0xd2a650]:[0x6cc36a,0x5fb35d];const ground=[];
  {const N=CN,cvs=document.createElement("canvas");cvs.width=cvs.height=N*8;const cx=cvs.getContext("2d");const hx=c=>"#"+c.toString(16).padStart(6,"0");
-  for(let x=0;x<N;x++)for(let z=0;z<N;z++){cx.fillStyle=hx(gc[(x+z)%2]);cx.fillRect(x*8,z*8,8,8)}const tx=new T.CanvasTexture(cvs);tx.magFilter=T.NearestFilter;tx.minFilter=T.NearestFilter;
+  let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;for(let x=0;x<N;x++)for(let z=0;z<N;z++){cx.fillStyle=hx(gc[(x+z)%2]);cx.fillRect(x*8,z*8,8,8);for(let i=0;i<4;i++){cx.fillStyle=rnd()<.5?"rgba(0,0,0,.10)":"rgba(255,255,255,.10)";cx.fillRect(x*8+Math.floor(rnd()*8),z*8+Math.floor(rnd()*8),1,1)}}const tx=new T.CanvasTexture(cvs);tx.magFilter=T.NearestFilter;tx.minFilter=T.NearestFilter;
   const side=new T.MeshLambertMaterial({color:gc[0]}),top=new T.MeshLambertMaterial({map:tx});
   const g=new T.Mesh(new T.BoxGeometry(N,1,N),[side,side,top,side,side,side]);g.position.set(N/2-.5,-1,N/2-.5);g.userData={g:1,y:-1};sc.add(g);ground.push(g)}
  const eg=new T.EdgesGeometry(geo),em=new T.LineBasicMaterial({color:0x000000,transparent:true,opacity:.18});
@@ -5203,7 +5221,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795316666";let OL_VCHK=0;
+const OL_VER="1795316850";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
