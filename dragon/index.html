@@ -385,6 +385,12 @@ img.petI,img.mythI,.mascot img{cursor:zoom-in}
 .iqfb{min-height:1.2em;margin:10px 0 6px;font-size:15px}.iqyes{color:#3c9}.iqno{color:#ff8a6a}.iqrew{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px}.iqrew span{background:#ffffff14;border-radius:999px;padding:3px 10px}
 .iqbtm{margin-top:6px}.iqwait{border:0;border-radius:999px;padding:6px 10px;background:#ffd84d;color:#3a2a00;font-weight:800;animation:iqbob 1.2s ease-in-out infinite;margin-left:6px;white-space:nowrap}
 .cpets button.nowater{opacity:.45;filter:grayscale(.6)}.cpets button small{display:block;font-size:11px;opacity:.85}
+.enb{background:linear-gradient(90deg,#ffd84d,#ffb02e)!important;color:#3a2a00!important;font-weight:800}
+#cqst{margin:10px 0}.enrow{display:flex;align-items:center;gap:10px;background:#ffd84d22;border:2px solid #ffd84d66;border-radius:14px;padding:8px 12px;margin-bottom:10px}.enbig{font-size:24px;font-weight:900;color:#ffc83a;white-space:nowrap}.enbig small{font-size:13px;opacity:.7}.enrow>small{font-size:12px;opacity:.85;line-height:1.35}
+.qbd{background:#ffffff0e;border-radius:16px;padding:10px;display:grid;gap:8px}.qbh{display:flex;justify-content:space-between;align-items:baseline;gap:6px;flex-wrap:wrap}.qbh small{opacity:.75;font-size:12px}
+.qit{display:flex;gap:8px;align-items:center;background:#ffffff0d;border-radius:12px;padding:6px 8px}.qit.done{opacity:.6}.qwho{font-size:28px}.qmain{flex:1;min-width:0}.qmain b{display:block;font-size:14px}.qmain small{font-size:11.5px;opacity:.8}.qmain .hsb{height:6px;margin-top:4px}.qmain .hsb i{background:#ffc83a}.qn{font-weight:800;font-size:13px;white-space:nowrap}
+.cb.lock{opacity:.55;filter:grayscale(.5)}.cb.rare{border-color:#c9a2ff!important;box-shadow:0 0 0 1px #c9a2ff55 inset}.cb.rare.r3,.cb.rare.r4,.cb.rare.r5{border-color:#ffd84d!important;box-shadow:0 0 8px #ffd84d66}
+.rareun{display:flex;align-items:center;gap:10px;justify-content:center;font-size:18px;margin:6px 0}.rareun span{font-size:36px}.rareun small{opacity:.75}.iqrare{color:#c48bff}
 :root{--olbg:radial-gradient(800px 500px at 50% 0,#26307a,#0A0F24);--olcard:#151D45;--olink:#EEF2FF;--olbtn:linear-gradient(180deg,#FF8A5B,#FF4E2E)}#olb{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);z-index:300;background:#000c;color:#fff;border-radius:99px;padding:6px 14px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;white-space:nowrap}#olb.show{opacity:1;transform:translateX(-50%)}
 .ollog{position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--olbg);overflow:auto}
 .olcard{width:100%;max-width:400px;background:var(--olcard);color:var(--olink);border-radius:26px;padding:24px 20px;box-shadow:0 20px 60px #0005;text-align:center}
@@ -1593,9 +1599,9 @@ function s2craft(){const s=s2();
 /* ---- finish a Season 2 lesson ---- */
 function s2Finish(stars){S.daily.les=1;const p=L.p,pr=S.prog[p]||{},was=pr.done,s=s2(),lv=S2LV.find(l=>l.id===p);
  S.prog[p]={done:1,stars:Math.max(pr.stars||0,stars)};const br=lv.k.length>1,gainW=was?1:2+stars,sp=br?"crystal":lv.k==="t"?"pearl":lv.k==="g"?"sand":"stone",gainS=was?(br?1:0):(lv.k==="k"&&!lv.z?0:br?stars:stars),gainI=!was&&(lv.z>=1||br)&&stars===3?1:0;s.blk.wood=(s.blk.wood||0)+gainW;if(gainS)s.blk[sp]=(s.blk[sp]||0)+gainS;if(gainI)s.blk.iron=(s.blk.iron||0)+gainI;const ups=petGain(1+stars+(was?0:2));wkAdd(was?stars*3:stars*10+(br?20:0));const brBuilt=br&&!was&&/3$/.test(lv.id);if(brBuilt){s.blk.egg=(s.blk.egg||0)+1;S.gems+=1}
- let bulb=0;if(!was){S.bulbs++;bulb=1}const grew=!was&&(s2cleared()===5||s2cleared()===10||s2cleared()===20);
+ const okN=(L&&L.qs?L.qs.filter((_,i)=>L.res[i]&&L.res[i].first).length:0),enG=typeof enLevel==="function"?enLevel(lv.k[0],was,stars,okN):0;let bulb=0;if(!was){S.bulbs++;bulb=1}const grew=!was&&(s2cleared()===5||s2cleared()===10||s2cleared()===20);
  const home=S2KB[s.home]||S2K[0],st=s2stage();save();const el=$(".lesson");if(el)el.remove();L=null;route();
- const m=modal(`<div style="text-align:center"><div style="font-size:60px">${grew?home.pet[0]:"🏆"}</div><h2>${grew?`${home.pet[st]} โตขึ้นแล้ว!`:"ผ่านด่านแล้ว!"}</h2><p>ได้ ${BLK.wood[0]} ไม้ ×${gainW}${gainS?` · ${BLK[sp][0]} ${BLK[sp][1]} ×${gainS}`:""}${gainI?" · ⚙️ เหล็ก ×1":""}${bulb?" · 💡 +1":""}</p>${brBuilt?`<p><b>🌉 สร้างสะพานเสร็จแล้ว!</b> ได้ 🥚 ×1 · 💎 ×1</p>`:""}${ups.length?`<p>✨ ${ups.join(", ")} วิวัฒนาการแล้ว!</p>`:""}<p class="note">ทีม ${home.th} +${was?stars*3:stars*10+(br?20:0)} แต้มสัปดาห์นี้</p><button class="go" id="rok">เยี่ยม!</button><button class="go ghost sm" id="rcr">🔨 ไปโต๊ะคราฟต์</button></div>`,"stay");
+ const m=modal(`<div style="text-align:center"><div style="font-size:60px">${grew?home.pet[0]:"🏆"}</div><h2>${grew?`${home.pet[st]} โตขึ้นแล้ว!`:"ผ่านด่านแล้ว!"}</h2><p>ได้ ${BLK.wood[0]} ไม้ ×${gainW}${gainS?` · ${BLK[sp][0]} ${BLK[sp][1]} ×${gainS}`:""}${gainI?" · ⚙️ เหล็ก ×1":""}${bulb?" · 💡 +1":""}${enG?` · 🔋 +${enG}`:""}</p>${brBuilt?`<p><b>🌉 สร้างสะพานเสร็จแล้ว!</b> ได้ 🥚 ×1 · 💎 ×1</p>`:""}${ups.length?`<p>✨ ${ups.join(", ")} วิวัฒนาการแล้ว!</p>`:""}<p class="note">ทีม ${home.th} +${was?stars*3:stars*10+(br?20:0)} แต้มสัปดาห์นี้</p><button class="go" id="rok">เยี่ยม!</button><button class="go ghost sm" id="rcr">🔨 ไปโต๊ะคราฟต์</button></div>`,"stay");
  m.querySelector("#rok").onclick=()=>m.remove();m.querySelector("#rcr").onclick=()=>{m.remove();s2craft()};confetti(90)}
 /* ===== Season 2 boss battle (turn-based, FF / Pokemon style) ===== */
 let S2B=null;
@@ -1633,7 +1639,7 @@ function s2bHit(ok){const b=S2B,fx=$("#s2e"),ps=$("#s2p");let log="";
  b.log=log;const st=$("#s2stage");if(st){const d=document.createElement("div");d.innerHTML=s2bStage(true);setTimeout(()=>{st.outerHTML=d.firstChild.outerHTML},350)}
  const f=$("#lf");f.className="foot "+(ok?"good":"bad");f.firstChild.innerHTML=`<div class="fb">${esc(log)}</div><button class="go ${ok?"teal":"fire"}" id="nx">ต่อไป</button>`;
  $("#nx").onclick=()=>{if(b.hp<=0)s2bWin();else if(b.me<=0)s2bLose();else s2bMenu()};$("#nx").focus()}
-function s2bWin(){const b=S2B,s=s2(),first=!s.bs[b.id];s.bs[b.id]=1;const r=b.B.rew,g={};
+function s2bWin(){const b=S2B,s=s2(),first=!s.bs[b.id];s.bs[b.id]=1;if(typeof enGain==="function")enGain(10);const r=b.B.rew,g={};
  eggSync(s.home);Object.keys(r).forEach(k=>{g[k]=first?r[k]:Math.ceil(r[k]/3);s.blk[k]=(s.blk[k]||0)+g[k]});eggSync(b.B.k);S.coins+=first?40:10;if(first)S.gems+=1;if(first&&b.B.final&&b.B.k!=="x"&&!s.pets.includes(b.B.k))s.pets.push(b.B.k);wkAdd(first?50:15);if(first&&b.id==="cl"){s.end=1;S.gems+=5}const ups=petGain(first?6:2);save();SND.win();confetti(120);
  $("#lp").style.width="100%";$("#lb").innerHTML=`<div class="sum"><div class="big">🏆</div><h2>ชนะ ${b.B.n}!</h2><p>${Object.keys(g).map(k=>`${BLK[k][0]} ×${g[k]}`).join(" · ")} · 💰${first?40:10}${first?" · 💎 +1":""}</p>${first&&b.id==="b1"?`<p class="note">สะพานปริศนาเปิดแล้ว!</p>`:""}${ups.length?`<p>✨ ${ups.join(", ")} วิวัฒนาการแล้ว!</p>`:""}${first&&b.id==="cl"?`<p class="note">💎 +5 · เธอคือผู้เชื่อมสามอาณาจักร!</p>`:""}${first&&b.B.final===1?`<p class="note">ปลอดหมอกแล้ว! ${S2KB[b.B.k].leg} ตื่นขึ้นมาเป็นสัตว์คู่ใจใหม่ของเธอ ${S2KB[b.B.k].pet[0]}</p>`:""}<button class="go teal" id="out">กลับแผนที่</button></div>`;setFootEmpty();$("#out").onclick=()=>{const end=b.id==="cl"&&first;S2B=null;closeLesson();if(end)setTimeout(s2ending,300)}}
 function s2bLose(){const b=S2B,s2s=s2();s2s.blk.wood=(s2s.blk.wood||0)+1;save();
@@ -1871,8 +1877,15 @@ function s2ending(){const lines=["หมอกดำสลายไปแล้�
 
 /* ===== Season 2: 3D home-city builder (Three.js, loaded on demand) + friend visits ===== */
 let CN=12;const CH=8,CSZ=[12,16,24,32],CEXP={16:{coins:300,wood:10,stone:10},24:{coins:800,iron:8,gems:10},32:{coins:1500,crystal:8,gems:25}},B36="0123456789abcdefghijklmnopqrstuvwxyz";
-const CBLK={W:{m:"wood",c:0xa0703f,n:"ไม้"},L:{m:"wood",c:0x4caf50,n:"ใบไม้"},S:{m:"stone",c:0x8f9098,n:"หิน"},P:{m:"pearl",c:0xf6e3ef,n:"ไข่มุก"},D:{m:"sand",c:0xe8c66a,n:"ทราย"},I:{m:"iron",c:0xcfd6de,n:"เหล็ก"},C:{m:"crystal",c:0x5fd8f7,op:.72,n:"คริสตัล"},R:{m:"coins",cost:3,c:0xd2483a,n:"อิฐแดง"},B:{m:"coins",cost:3,c:0x3b6fd8,n:"อิฐฟ้า"},Y:{m:"coins",cost:3,c:0xf2c94c,n:"อิฐทอง"},A:{m:"coins",cost:2,c:0x3fa9f5,op:.6,n:"น้ำ"}};
-const CICON={W:"🪵",L:"🍃",S:"🪨",P:"🦪",D:"🏜️",I:"⚙️",C:"🔷",R:"🟥",B:"🟦",Y:"🟨",A:"💧"};
+const CBLK={W:{m:"wood",c:0xa0703f,n:"ไม้"},L:{m:"wood",c:0x4caf50,n:"ใบไม้"},S:{m:"stone",c:0x8f9098,n:"หิน"},P:{m:"pearl",c:0xf6e3ef,n:"ไข่มุก"},D:{m:"sand",c:0xe8c66a,n:"ทราย"},I:{m:"iron",c:0xcfd6de,n:"เหล็ก"},C:{m:"crystal",c:0x5fd8f7,op:.72,n:"คริสตัล"},R:{m:"coins",cost:3,c:0xd2483a,n:"อิฐแดง"},B:{m:"coins",cost:3,c:0x3b6fd8,n:"อิฐฟ้า"},Y:{m:"coins",cost:3,c:0xf2c94c,n:"อิฐทอง"},A:{m:"coins",cost:2,c:0x3fa9f5,op:.6,n:"น้ำ"},
+ M:{m:"amy",c:0x9b5de5,n:"อเมทิสต์",r:1},K:{m:"coral",c:0xff7f6e,n:"ปะการัง",r:1},G:{m:"gold",c:0xf5c518,n:"ทองคำแท่ง",r:1},O:{m:"obsid",c:0x2a1f3d,n:"ออบซิเดียน",r:2},Z:{m:"lapis",c:0x2850c8,n:"ลาพิส",r:2},
+ Q:{m:"ice",c:0xa8e4ff,op:.82,n:"น้ำแข็งธารน้ำแข็ง",r:2},H:{m:"glow",c:0xffe08a,glow:1,n:"หินเรืองแสง",r:2},E:{m:"emer",c:0x2ecc71,n:"มรกต",r:3},X:{m:"diam",c:0x7ef9ff,n:"เพชร",r:4},J:{m:"regg",c:0xff6ad5,n:"ไข่มังกรสายรุ้ง",r:5,one:1}};
+const RAREK=Object.keys(CBLK).filter(k=>CBLK[k].r);
+function rIcon(k){const c=CBLK[k].c,sh=f=>{let r=c>>16&255,g=c>>8&255,b=c&255;const t=f<0?0:255,a=Math.abs(f);return `rgb(${Math.round(r+(t-r)*a)},${Math.round(g+(t-g)*a)},${Math.round(b+(t-b)*a)})`};
+ if(k==="J")return `<svg viewBox="0 0 20 22" width="1.1em" height="1.1em" style="vertical-align:-.2em"><defs><linearGradient id="rgJ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6ad5"/><stop offset=".35" stop-color="#ffd84d"/><stop offset=".65" stop-color="#5fe3ff"/><stop offset="1" stop-color="#8a6bff"/></linearGradient></defs><ellipse cx="10" cy="12" rx="8" ry="9.5" fill="url(#rgJ)" stroke="#0004"/><ellipse cx="7" cy="8" rx="2" ry="3" fill="#fff8"/></svg>`;
+ return `<svg viewBox="0 0 20 20" width="1.1em" height="1.1em" style="vertical-align:-.2em"><polygon points="10,1 19,5.5 10,10 1,5.5" fill="${sh(.3)}"/><polygon points="1,5.5 10,10 10,19 1,14.5" fill="${sh(-.1)}"/><polygon points="19,5.5 10,10 10,19 19,14.5" fill="${sh(-.3)}"/>${CBLK[k].glow?`<circle cx="10" cy="6" r="2" fill="#fff"/>`:k==="X"||k==="E"||k==="M"?`<polygon points="10,3 13,5.5 10,8 7,5.5" fill="#fff9"/>`:""}</svg>`}
+const CICON={W:"🪵",L:"🍃",S:"🪨",P:"🦪",D:"🏜️",I:"⚙️",C:"🔷",R:"🟥",B:"🟦",Y:"🟨",A:"💧"};RAREK.forEach(k=>CICON[k]=rIcon(k));
+const bx3=(w,d,h,wall,roof,door,ex)=>{const a=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++)for(let z=0;z<d;z++){const edge=x===0||z===0||x===w-1||z===d-1;if(!edge)continue;if(door&&y<2&&z===0&&x===Math.floor(w/2))continue;a.push([x,y,z,(y===1&&(x+z)%2&&!(x===0&&z===0))?"P":wall])}for(let x=0;x<w;x++)for(let z=0;z<d;z++)a.push([x,h,z,roof]);return a.concat(ex||[])};
 const BPRINT={
  house:{e:"🏠",n:"บ้าน",v:(()=>{const a=[];for(let x=0;x<3;x++)for(let z=0;z<3;z++){a.push([x,0,z,x===1&&z===0?"":"W"]);a.push([x,1,z,(x===1&&z===0)?"":"W"]);a.push([x,2,z,"R"])}a.push([1,3,1,"R"]);return a.filter(v=>v[3])})()},
  tower:{e:"🗼",n:"หอคอย",v:(()=>{const a=[];for(let y=0;y<4;y++)for(let x=0;x<2;x++)for(let z=0;z<2;z++)a.push([x,y,z,"S"]);a.push([0,4,0,"S"],[1,4,1,"S"],[0,4,1,"Y"]);return a})()},
@@ -1880,6 +1893,12 @@ const BPRINT={
  wall:{e:"🧱",n:"กำแพง",v:[[0,0,0,"S"],[1,0,0,"S"],[2,0,0,"S"],[3,0,0,"S"],[0,1,0,"S"],[1,1,0,"S"],[2,1,0,"S"],[3,1,0,"S"],[0,2,0,"S"],[2,2,0,"S"]]},
  well:{e:"⛲",n:"บ่อน้ำ",v:[[0,0,0,"S"],[1,0,0,"S"],[2,0,0,"S"],[0,0,1,"S"],[2,0,1,"S"],[0,0,2,"S"],[1,0,2,"S"],[2,0,2,"S"],[1,0,1,"A"]]},
  dock:{e:"⚓",n:"ท่าเรือ",v:[[0,0,0,"W"],[1,0,0,"W"],[2,0,0,"W"],[3,0,0,"W"],[0,0,1,"W"],[1,0,1,"W"],[2,0,1,"W"],[3,0,1,"W"],[0,0,2,"A"],[1,0,2,"A"],[2,0,2,"A"],[3,0,2,"A"]]},
+ school:{e:"🏫",n:"โรงเรียน",q:1,v:bx3(5,3,3,"R","S",1,[[2,4,1,"Y"],[2,5,1,"Y"]])},
+ lab:{e:"🧪",n:"ห้องแล็บ",q:1,v:bx3(3,3,3,"I","C",1,[[1,4,1,"A"]])},
+ observ:{e:"🔭",n:"หอดูดาว",q:1,v:(()=>{const a=[];for(let y=0;y<4;y++)for(let x=0;x<2;x++)for(let z=0;z<2;z++)a.push([x,y,z,"S"]);[[0,4,0],[1,4,0],[0,4,1],[1,4,1],[0,5,0],[1,5,1]].forEach(v=>a.push([...v,"C"]));a.push([1,5,0,"I"],[1,6,0,"I"]);return a})()},
+ library:{e:"📚",n:"ห้องสมุด",q:1,v:bx3(4,3,3,"W","B",1,[[0,3,0,"Y"],[3,3,0,"Y"]].filter(()=>false))},
+ market:{e:"🏪",n:"ตลาด",q:1,v:[[0,0,0,"W"],[3,0,0,"W"],[0,0,2,"W"],[3,0,2,"W"],[0,1,0,"W"],[3,1,0,"W"],[0,1,2,"W"],[3,1,2,"W"],...[0,1,2,3].flatMap(x=>[0,1,2].map(z=>[x,2,z,(x+z)%2?"R":"Y"])),[1,0,1,"D"],[2,0,1,"D"]]},
+ museum:{e:"🏛️",n:"พิพิธภัณฑ์",q:1,v:(()=>{const a=[];for(let x=0;x<5;x++)for(let z=0;z<3;z++)a.push([x,0,z,"P"]);[0,2,4].forEach(x=>{a.push([x,1,0,"P"],[x,2,0,"P"],[x,1,2,"P"],[x,2,2,"P"])});for(let x=0;x<5;x++)for(let z=0;z<3;z++)a.push([x,3,z,"P"]);a.push([1,4,1,"P"],[2,4,1,"P"],[3,4,1,"P"],[2,5,1,"Y"]);return a})()},
  tent:{e:"⛺",n:"กระโจม",v:[[0,0,0,"D"],[2,0,0,"D"],[0,0,2,"D"],[2,0,2,"D"],[0,1,0,"P"],[1,1,0,"P"],[2,1,0,"P"],[0,1,1,"P"],[2,1,1,"P"],[0,1,2,"P"],[1,1,2,"P"],[2,1,2,"P"],[1,2,1,"Y"]]}};
 const bpCost=bp=>{const c={};bp.v.forEach(v=>{const B=CBLK[v[3]],m=B.m;c[m]=(c[m]||0)+(B.cost||1)});return c};
 const citySize=str=>str&&str[0]==="@"?Math.max(12,B36.indexOf(str[1])):12;
@@ -1904,6 +1923,13 @@ function blkTex(k,c){if(BTEX[k])return BTEX[k];const cv=document.createElement("
  else if(k==="C"){for(let j=0;j<16;j++)for(let i=0;i<16;i++){const d=(i+j)%8;if(d===0)px(i,j,sh(c,.45));else if(d===4)px(i,j,sh(c,-.2))}}
  else if(k==="R"||k==="B"||k==="Y"){const m=sh(c,k==="Y"?-.35:.55);x.fillStyle=m;for(let j=0;j<16;j+=4){x.fillRect(0,j,16,1);const o=(j/4)%2?4:0;for(let i=o;i<16;i+=8)x.fillRect(i,j,1,4)}for(let i=0;i<20;i++)px(Math.floor(R()*16),Math.floor(R()*16),sh(c,-.12))}
  else if(k==="A"){for(let j=2;j<16;j+=5)for(let i=0;i<16;i++)if((i+j)%6<3)px(i,j,sh(c,.35))}
+ else if(k==="M"||k==="X"||k==="E"||k==="Z"){for(let i=0;i<9;i++){const a=Math.floor(R()*14)+1,b=Math.floor(R()*14)+1;px(a,b,sh(c,.6));px(a+1,b,sh(c,.3));px(a,b+1,sh(c,-.25))}if(k==="Z")for(let i=0;i<10;i++)px(Math.floor(R()*16),Math.floor(R()*16),"#f5d36a")}
+ else if(k==="O"){for(let i=0;i<40;i++)px(Math.floor(R()*16),Math.floor(R()*16),sh(c,R()<.5?.18:-.3));for(let i=0;i<5;i++)px(Math.floor(R()*16),Math.floor(R()*16),"#8a5cff")}
+ else if(k==="G"){x.fillStyle=sh(c,.35);x.fillRect(1,1,14,2);x.fillStyle=sh(c,-.25);x.fillRect(0,14,16,2);x.fillRect(14,0,2,16);for(let i=0;i<6;i++)px(Math.floor(R()*16),Math.floor(R()*16),"#fff8c0")}
+ else if(k==="K"){for(let i=0;i<60;i++)px(Math.floor(R()*16),Math.floor(R()*16),sh(c,R()<.5?.3:-.2));for(let i=0;i<8;i++)px(Math.floor(R()*16),Math.floor(R()*16),"#ffe6f0")}
+ else if(k==="Q"){for(let j=0;j<16;j++)for(let i=0;i<16;i++)if((i*3+j)%11===0)px(i,j,"#ffffff")}
+ else if(k==="H"){for(let j=0;j<16;j++)for(let i=0;i<16;i++){const d=Math.hypot(i-7.5,j-7.5);if(d<3)px(i,j,"#fffbe6");else if(R()<.25)px(i,j,sh(c,-.2))}}
+ else if(k==="J"){const C=["#ff6ad5","#ffd84d","#5fe3ff","#8a6bff","#3cd27a"];for(let j=0;j<16;j++)for(let i=0;i<16;i++)px(i,j,C[Math.floor((i+j*1.3)/4)%5]);for(let i=0;i<6;i++)px(Math.floor(R()*16),Math.floor(R()*16),"#ffffff")}
  x.fillStyle="rgba(0,0,0,.18)";x.fillRect(0,0,16,1);x.fillRect(0,0,1,16);
  BTEX[k]=cv;return cv}
 
@@ -1994,7 +2020,7 @@ function cityScene(cv,home,getMap,petsGiven){const T=THREE;let R;try{R=new T.Web
  sc.add(new T.HemisphereLight(0xffffff,0x667788,.85));const dl=new T.DirectionalLight(0xffffff,.75);dl.position.set(8,14,6);sc.add(dl);
  const cam=new T.PerspectiveCamera(45,1,.1,200);const st={th:.8,ph:.95,r:Math.round(CN*1.8)};const ctr=new T.Vector3(CN/2-.5,0,CN/2-.5);
  const place=()=>{cam.position.set(ctr.x+st.r*Math.sin(st.ph)*Math.cos(st.th),ctr.y+st.r*Math.cos(st.ph),ctr.z+st.r*Math.sin(st.ph)*Math.sin(st.th));cam.lookAt(ctr)};
- const geo=new T.BoxGeometry(1,1,1),mats={};Object.keys(CBLK).forEach(k=>{const B=CBLK[k];const tx=new T.CanvasTexture(blkTex(k,B.c));tx.magFilter=T.NearestFilter;tx.minFilter=T.NearestFilter;mats[k]=new T.MeshLambertMaterial({map:tx,transparent:!!B.op,opacity:B.op||1})});
+ const geo=new T.BoxGeometry(1,1,1),mats={};Object.keys(CBLK).forEach(k=>{const B=CBLK[k];const tx=new T.CanvasTexture(blkTex(k,B.c));tx.magFilter=T.NearestFilter;tx.minFilter=T.NearestFilter;mats[k]=new T.MeshLambertMaterial({map:tx,transparent:!!B.op,opacity:B.op||1,emissive:B.glow||k==="J"?B.c:0,emissiveIntensity:B.glow?.55:k==="J"?.25:0})});
  const gc=home==="t"?[0x7ccf6b,0xe9d9a0]:home==="g"?[0xe0b866,0xd2a650]:[0x6cc36a,0x5fb35d];const ground=[];
  {const N=CN,cvs=document.createElement("canvas");cvs.width=cvs.height=N*8;const cx=cvs.getContext("2d");const hx=c=>"#"+c.toString(16).padStart(6,"0");
   let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;for(let x=0;x<N;x++)for(let z=0;z<N;z++){cx.fillStyle=hx(gc[(x+z)%2]);cx.fillRect(x*8,z*8,8,8);for(let i=0;i<4;i++){cx.fillStyle=rnd()<.5?"rgba(0,0,0,.10)":"rgba(255,255,255,.10)";cx.fillRect(x*8+Math.floor(rnd()*8),z*8+Math.floor(rnd()*8),1,1)}}const tx=new T.CanvasTexture(cvs);tx.magFilter=T.NearestFilter;tx.minFilter=T.NearestFilter;
@@ -2031,18 +2057,18 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
  try{await loadThree()}catch(e){el.innerHTML=`<div class="cload">เครื่องนี้โหลดโหมด 3 มิติไม่ได้ ลองเชื่อมอินเทอร์เน็ตแล้วเปิดใหม่<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
  CN=citySize(s.city);let map=cityDecode(s.city),mode="put",brush=null,bp=null;const home=s.home||"k";
  el.innerHTML=`<div class="chead"><button class="x" id="cx" aria-label="ปิด">✕</button><div><b>🏰 เมืองของ ${esc(S.name)}</b><small id="cpt"></small></div><button class="go ghost sm" id="cvis" style="width:auto;margin:0">👀 เยี่ยมเพื่อน</button></div>
-  <div class="cres" id="cres"></div><canvas id="ccv"></canvas><div class="ctool"><div class="cmode"><button data-m="put">➕ วาง</button><button data-m="dig">⛏️ ทุบ</button><button data-m="bp">📐 แบบแปลน</button><button id="cexp">🗺️ ขยาย</button><button data-z="-">🔍−</button><button data-z="+">🔍+</button></div><div class="cpal2" id="cpal"></div><p class="note" id="chint"></p></div>`;
+  <div class="cres" id="cres"></div><canvas id="ccv"></canvas><div class="ctool"><div class="cmode"><button data-m="put">➕ วาง</button><button data-m="dig">⛏️ ทุบ</button><button data-m="bp">📐 แบบแปลน</button><button id="cqb">📋 ภารกิจ</button><button id="cexp">🗺️ ขยาย</button><button data-z="-">🔍−</button><button data-z="+">🔍+</button></div><div class="cpal2" id="cpal"></div><p class="note" id="chint"></p></div>`;
  const cv=el.querySelector("#ccv");const S3=cityScene(cv,home,()=>map);if(!S3){el.innerHTML=`<div class="cload">เครื่องนี้เปิดภาพ 3 มิติไม่ได้ (WebGL ปิดอยู่)<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
  const have=m=>m==="coins"?S.coins:m==="gems"?S.gems:(s.blk[m]||0);
  const pay=c=>{if(!Object.keys(c).every(m=>have(m)>=c[m]))return false;Object.keys(c).forEach(m=>{if(m==="coins")S.coins-=c[m];else if(m==="gems")S.gems-=c[m];else s.blk[m]-=c[m]});return true};
  const commit=()=>{s.city=cityEncode(map,CN);s.cpts=cityPts(map);save();S3.rebuild();ui();cityPushSoon()};
- const ui=()=>{el.querySelector("#cres").innerHTML=`<span>💰 ${S.coins}</span>`+["wood","stone","pearl","sand","iron","crystal"].map(k=>`<span>${(BLK[k]||["🧱"])[0]} ${s.blk[k]||0}</span>`).join("")+`<span>💎 ${S.gems}</span>`;el.querySelector("#cpt").textContent=` · พื้นที่ ${CN}×${CN} · ${map.size} บล็อก · ⭐ ${cityPts(map)} คะแนนเมือง`;
+ const ui=()=>{el.querySelector("#cres").innerHTML=(typeof cityEn!=="undefined"?cityEn.html():"")+`<span>💰 ${S.coins}</span>`+["wood","stone","pearl","sand","iron","crystal"].map(k=>`<span>${(BLK[k]||["🧱"])[0]} ${s.blk[k]||0}</span>`).join("")+`<span>💎 ${S.gems}</span>`+RAREK.filter(k=>s.blk[CBLK[k].m]).map(k=>`<span>${CICON[k]} ${s.blk[CBLK[k].m]}</span>`).join("");el.querySelector("#cpt").textContent=` · พื้นที่ ${CN}×${CN} · ${map.size} บล็อก · ⭐ ${cityPts(map)} คะแนนเมือง`;
   el.querySelectorAll("[data-m]").forEach(b=>b.classList.toggle("on",b.dataset.m===mode));
   const pal=el.querySelector("#cpal");
-  if(mode==="bp")pal.innerHTML=Object.keys(BPRINT).map(k=>{const B=BPRINT[k],c=bpCost(B),ok=Object.keys(c).every(m=>have(m)>=c[m]);return `<button class="cb ${bp===k?"sel":""} ${ok?"":"poor"}" data-bp="${k}"><span>${B.e}</span><b>${B.n}</b><small>${Object.keys(c).map(m=>`${m==="coins"?"💰":BLK[m][0]}${c[m]}`).join(" ")}</small></button>`}).join("");
-  else pal.innerHTML=Object.keys(CBLK).map(k=>{const B=CBLK[k];return `<button class="cb ${brush===k&&mode==="put"?"sel":""}" data-b="${k}"><span>${CICON[k]}</span><b>${B.n}</b><small>${B.m==="coins"?`💰${B.cost}`:`มี ${have(B.m)}`}</small></button>`}).join("");
-  pal.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{brush=brush===b.dataset.b&&mode==="put"?null:b.dataset.b;mode="put";SND.tap();ui()});
-  pal.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{bp=b.dataset.bp;SND.tap();ui()});
+  if(mode==="bp")pal.innerHTML=Object.keys(BPRINT).map(k=>{const B=BPRINT[k],c=bpCost(B),lk=B.q&&!(s.bpu||{})[k],ok=!lk&&Object.keys(c).every(m=>have(m)>=c[m]);return `<button class="cb ${bp===k?"sel":""} ${ok?"":"poor"} ${lk?"lock":""}" data-bp="${k}"><span>${lk?"🔒":B.e}</span><b>${B.n}</b><small>${lk?"รางวัลภารกิจ":Object.keys(c).map(m=>`${m==="coins"?"💰":(BLK[m]||["🧱"])[0]}${c[m]}`).join(" ")}</small></button>`}).join("");
+  else pal.innerHTML=Object.keys(CBLK).filter(k=>!CBLK[k].r||typeof cityRareReq==="function").map(k=>{const B=CBLK[k],rq=B.r?cityRareReq(k):null,lock=B.r&&!have(B.m)&&!rq.ok;return `<button class="cb ${brush===k&&mode==="put"?"sel":""} ${B.r?"rare r"+B.r:""} ${lock?"lock":""}" data-b="${k}"><span>${lock?"🔒":CICON[k]}</span><b>${B.n}</b><small>${B.m==="coins"?`💰${B.cost}`:lock?"ล็อกอยู่":`มี ${have(B.m)}`}</small></button>`}).join("");
+  pal.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{const k=b.dataset.b,B=CBLK[k];if(B.r&&!have(B.m)){const rq=cityRareReq(k);const mm=modal(`<div style="text-align:center"><div style="font-size:54px">${rq.ok?CICON[k]:"🔒"}</div><h2>${B.n}</h2><p>${rq.ok?"ปลดล็อกแล้ว แต่ใช้หมดแล้ว":"ยังล็อกอยู่"}</p><p class="note">${rq.need}</p><p class="note">ได้เพิ่มจาก: ทำภารกิจประจำวันครบ 3 อย่าง · แขกมาเยี่ยม (มีโอกาสเล็กน้อย)</p><button class="go" id="rqok">เข้าใจแล้ว</button></div>`);mm.querySelector("#rqok").onclick=()=>mm.remove();return}brush=brush===k&&mode==="put"?null:k;mode="put";SND.tap();ui()});
+  pal.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{const B=BPRINT[b.dataset.bp];if(B.q&&!(s.bpu||{})[b.dataset.bp])return toast(`🔒 ${B.n} ได้จากภารกิจประจำวัน ดูได้ที่ 📋 ภารกิจ`);bp=b.dataset.bp;SND.tap();ui()});
   el.querySelector("#chint").textContent=mode==="put"?(brush?"แตะพื้นหรือด้านข้างบล็อกเพื่อวาง · แตะบล็อกที่เลือกอีกครั้งเพื่อยกเลิก":"เลือกบล็อกด้านล่างก่อน · ลากเพื่อหมุนเมือง · แตะสัตว์เพื่อดูชื่อ"):mode==="dig"?"แตะบล็อกเพื่อทุบ ได้บล็อกคืน (อิฐใช้เหรียญ ไม่คืนเหรียญ)":"เลือกแบบแปลน แล้วแตะพื้นเพื่อสร้างทั้งหลังในครั้งเดียว"};
  el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mode=b.dataset.m;SND.tap();ui()});
  el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{const nr=S3.st.r+(b.dataset.z==="+"?-3:3);if(S3.zoomAt)S3.zoomAt(null,null,nr);else S3.st.r=Math.max(8,Math.min(CN*3,nr))});
@@ -2051,11 +2077,11 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
   if(mode==="bp"){if(!bp)return toast("เลือกแบบแปลนก่อน");const B=BPRINT[bp];const x0=o.x+(o.g?0:Math.round(h.n.x)),y0=o.g?0:o.y+Math.round(h.n.y),z0=o.z+(o.g?0:Math.round(h.n.z));
    const cells=B.v.map(v=>[x0+v[0],y0+v[1],z0+v[2],v[3]]);if(cells.some(c=>c[0]<0||c[0]>=CN||c[2]<0||c[2]>=CN||c[1]>=CH))return toast("พื้นที่ไม่พอ ลองแตะใกล้กลางเมือง");
    if(cells.some(c=>map.has(c[0]+","+c[1]+","+c[2])))return toast("มีบล็อกขวางอยู่ ลองที่ว่างอื่น");
-   if(!pay(bpCost(B)))return toast("บล็อกไม่พอ ผ่านด่านเพื่อเก็บเพิ่ม");cells.forEach(c=>map.set(c[0]+","+c[1]+","+c[2],c[3]));SND.gem();confetti(40);commit();return}
+   const EN=typeof cityEn!=="undefined"?cityEn:null;if(EN&&!EN.can(cells.length))return EN.need(cells.length,el);if(!pay(bpCost(B)))return toast("บล็อกไม่พอ ผ่านด่านเพื่อเก็บเพิ่ม");if(EN)EN.spend(cells.length);cells.forEach(c=>map.set(c[0]+","+c[1]+","+c[2],c[3]));SND.gem();confetti(40);commit();return}
   const x=o.x+Math.round(h.n.x),y=o.y+Math.round(h.n.y),z=o.z+Math.round(h.n.z);if(x<0||x>=CN||z<0||z>=CN||y<0||y>=CH)return toast(y>=CH?"สูงสุดแค่ "+CH+" ชั้น":"นอกเขตเมือง");
-  if(!brush)return toast("เลือกบล็อกด้านล่างก่อน แล้วค่อยแตะเพื่อวาง");const B=CBLK[brush];if(typeof cityGate==="function"&&!cityGate(B))return;if(!pay({[B.m]:B.cost||1}))return toast(`${B.n}ไม่พอ${B.m==="coins"?" (ใช้เหรียญ)":" ผ่านด่านเพื่อเก็บเพิ่ม"}`);map.set(x+","+y+","+z,brush);SND.tap();commit()});
+  if(!brush)return toast("เลือกบล็อกด้านล่างก่อน แล้วค่อยแตะเพื่อวาง");const B=CBLK[brush];if(typeof cityGate==="function"&&!cityGate(B))return;if(B.one&&[...map.values()].includes(brush))return toast(`${B.n} มีได้ชิ้นเดียวในเมือง`);const EN=typeof cityEn!=="undefined"?cityEn:null;if(EN&&!EN.can(1))return EN.need(1,el);if(!pay({[B.m]:B.cost||1}))return toast(`${B.n}ไม่พอ${B.m==="coins"?" (ใช้เหรียญ)":" ผ่านด่านเพื่อเก็บเพิ่ม"}`);if(EN)EN.spend(1);map.set(x+","+y+","+z,brush);SND.tap();commit()});
  el.querySelector("#cx").onclick=()=>{S3.stop();el.remove();route()};
- el.querySelector("#cvis").onclick=()=>cityVisitList();
+ el.querySelector("#cvis").onclick=()=>cityVisitList();{const qb=el.querySelector("#cqb");if(typeof questView==="function")qb.onclick=()=>questView(()=>ui());else qb.remove()}
  el.querySelector("#cexp").onclick=()=>{const nx=CSZ[CSZ.indexOf(CN)+1];const ic=m=>m==="coins"?"💰":m==="gems"?"💎":(BLK[m]||["🧱"])[0];
   if(!nx)return modal(`<div style="text-align:center"><h2>🗺️ ขยายพื้นที่</h2><p>เมืองของคุณกว้างที่สุดแล้ว (${CN}×${CN}) 🎉</p><button class="go ghost" onclick="this.closest('.modal').remove()">ปิด</button></div>`);
   const c=CEXP[nx],ok=Object.keys(c).every(m=>have(m)>=c[m]);
@@ -5375,8 +5401,8 @@ function iqSt(){const s=s2();s.iq=s.iq||{lv:IQCAT?3:1,run:0,miss:0,n:0,ok:0,t:0,
 const IQGUEST=[["🧙","พ่อมดนักปริศนา"],["🦉","นกฮูกช่างสงสัย"],["🐢","เต่าผู้รอบรู้"],["🧚","นางฟ้าเจ้าปัญหา"],["🤖","หุ่นยนต์ไขปริศนา"],["🦊","จิ้งจอกเจ้าเล่ห์"]];
 function iqReward(lv,first,st){const s=s2(),home=s.home||"k",sp=IQCAT?IQ_P(["stone","sand","pearl"]):home==="t"?"pearl":home==="g"?"sand":"stone",g={};
  if(!first){g.wood=1}else if(lv<=2){g.wood=2}else if(lv<=4){g.wood=1;g[sp]=1}else{g.wood=1;g.iron=1}
- if(first&&st>0&&st%3===0)g.crystal=(g.crystal||0)+1;Object.keys(g).forEach(k=>s.blk[k]=(s.blk[k]||0)+g[k]);return g}
-const iqIcon=k=>typeof PAL!=="undefined"&&PAL[k]&&typeof blkIcon==="function"?blkIcon(PAL[k]):"🧱";
+ if(first&&st>0&&st%3===0)g.crystal=(g.crystal||0)+1;Object.keys(g).forEach(k=>s.blk[k]=(s.blk[k]||0)+g[k]);if(typeof enGain==="function"){const e=enGain(first?2:1);if(e)g["🔋"]=e}if(first&&typeof rareGive==="function"&&Math.random()<(lv>=4?.1:.06)){const rk=rareGive(1);g["rare:"+rk]=1}if(first&&typeof qTick==="function")qTick("iq","iq",1);return g}
+const iqIcon=k=>k==="🔋"?"🔋":k.startsWith("rare:")?`<b class="iqrare">${CICON[k.slice(5)]} ${CBLK[k.slice(5)].n}!</b>`:typeof PAL!=="undefined"&&PAL[k]&&typeof blkIcon==="function"?blkIcon(PAL[k]):"🧱";
 let IQOPEN=false;
 function iqAsk(onDone){if(IQOPEN)return;const s=s2(),st=iqSt(),Q=iqGen(st.lv,s.home||"k"),G=IQ_P(IQGUEST);IQOPEN=true;let tries=0,closed=false;
  const m=modal(`<div class="iqbox"><div class="iqg"><span class="iqge">${G[0]}</span><div><b>${G[1]}</b><small>${IQCAT?"โจทย์เชาว์ประจำเมือง":"มาเยี่ยมเมือง! ตอบปริศนาได้ของขวัญ"} · ระดับ ${"⭐".repeat(Math.min(6,st.lv))}</small></div></div>
@@ -5406,6 +5432,58 @@ function cityIQStart(el,refresh){const st=iqSt();const head=el.querySelector(".c
  const ask=()=>{if(!el.isConnected)return;iqAsk(()=>{badge();try{refresh()}catch(e){}})};badge();
  if(Date.now()-(st.t||0)>IQGAP||IQCAT)setTimeout(()=>{if(el.isConnected&&!document.querySelector(".modal"))ask()},IQCAT?900:1500);
  const iv=setInterval(()=>{if(!el.isConnected)return clearInterval(iv);if(Date.now()-(st.t||0)>IQGAP&&!document.querySelector(".modal"))ask()},15000)}
+
+/* ===== City economy: 🔋 build energy, daily quests, rare blocks (shared by dragon + cat apps) ===== */
+const ENMAX=300,ENDAY=10,ENSTART=30;
+const cxToday=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+function enSt(){const s=s2();if(!s.en)s.en={v:ENSTART,d:""};const t=cxToday();if(s.en.d!==t){s.en.d=t;s.en.v=Math.min(ENMAX,s.en.v+ENDAY)}return s.en}
+function enGain(n){const e=enSt(),b=e.v;e.v=Math.min(ENMAX,e.v+n);return e.v-b}
+const cityEn={can:n=>enSt().v>=n,spend:n=>{enSt().v-=n},
+ html:()=>`<span class="enb" title="พลังก่อสร้าง">🔋 ${enSt().v}</span>`,
+ need:(n,el)=>{const v=enSt().v;try{SND.bad()}catch(e){}const m=modal(`<div style="text-align:center"><div style="font-size:56px">🔋</div><h2>พลังก่อสร้างไม่พอ</h2><p>ต้องใช้ <b>${n}</b> 🔋 · ตอนนี้มี <b>${v}</b> 🔋</p>
+  <div class="${IQCAT?"ctcard":"card"}" style="text-align:left;font-size:14px;line-height:1.7">${IQCAT?"✅ ตอบโจทย์วิทย์ถูก +2🔋 (ข้อที่เคยตอบแล้ว +1)<br>🌟 ด่านไหนถูกครบ 5 ข้อ +5🔋":"✅ ตอบใบงานถูก +2🔋 (ด่านที่เล่นซ้ำ +1)<br>⭐⭐⭐ ได้ 3 ดาว +5🔋<br>🐉 ชนะบอส +10🔋"}<br>📋 ทำภารกิจประจำวัน +15🔋<br>🧩 ตอบปริศนาจากแขก +2🔋<br>🌅 ทุกวันได้ฟรี +${ENDAY}🔋</div>
+  <p class="note">การทุบ ดูเมือง และเยี่ยมเพื่อน ไม่ใช้พลัง</p><button class="go fire" id="engo">📚 ไปทำโจทย์เติมพลัง</button><button class="go ghost" id="enx">ไว้ก่อน</button></div>`);
+  m.querySelector("#enx").onclick=()=>m.remove();m.querySelector("#engo").onclick=()=>{m.remove();const x=el&&el.querySelector("#cx");if(x)x.click();if(!IQCAT){TAB="s2";try{route()}catch(e){}}}}};
+/* ---- rare blocks: unlock by skill (dragon: subject ranks; cat: science levels + puzzles) ---- */
+const RKN=["ฝึกหัด","นักสู้","ชำนาญ","ยอดฝีมือ","ปรมาจารย์","ตำนาน"];
+function cxRanks(){const H=heroStats(),r={};H.forEach(x=>r[x.k]=x.pc>=1?5:Math.floor(x.pc*5));r.min=Math.min(r.k,r.t,r.g);r.boss=H.reduce((a,x)=>a+x.bw,0);return r}
+function cxCat(){const s=s2(),sc=s.sci||{},st=(s.iq||{});const pass=Object.values(sc).filter(v=>v>=3).length,full=Object.values(sc).filter(v=>v>=5).length;return {pass,full,iqok:st.ok||0,iqlv:st.lv||1,best:s.best||0}}
+function cityRareReq(k){
+ if(IQCAT){const c=cxCat(),T={M:[c.pass>=3,"ผ่านด่านวิทย์ 3 ด่าน",`${c.pass}/3`],K:[c.pass>=6,"ผ่านด่านวิทย์ 6 ด่าน",`${c.pass}/6`],G:[c.iqok>=10,"ตอบโจทย์เชาว์ถูก 10 ข้อ",`${c.iqok}/10`],
+   O:[c.pass>=10,"ผ่านด่านวิทย์ 10 ด่าน",`${c.pass}/10`],Z:[c.iqlv>=5,"โจทย์เชาว์ถึงระดับ 5",`ระดับ ${c.iqlv}`],Q:[c.pass>=14,"ผ่านด่านวิทย์ 14 ด่าน",`${c.pass}/14`],H:[c.best>=10,"ตอบวิทย์ถูกติดกัน 10 ข้อ",`ดีที่สุด ${c.best}`],
+   E:[c.pass>=18,"ผ่านด่านวิทย์ 18 ด่าน",`${c.pass}/18`],X:[c.full>=20,"ถูกครบ 5/5 ทั้ง 20 ด่าน",`${c.full}/20`],J:[c.full>=20&&c.iqlv>=6,"ถูกครบทั้ง 20 ด่าน และโจทย์เชาว์ระดับ 6",`${c.full}/20 · ระดับ ${c.iqlv}`]}[k];
+  return {ok:T[0],need:`ปลดล็อกเมื่อ: ${T[1]} (ตอนนี้ ${T[2]})`}}
+ const r=cxRanks(),nm={k:"คณิต",t:"วิทย์",g:"สังคม"},one=(sb,lv)=>[r[sb]>=lv,`พลัง${nm[sb]}ถึงระดับ "${RKN[lv]}"`,`ตอนนี้ "${RKN[r[sb]]}"`],all=lv=>[r.min>=lv,`ทั้ง 3 วิชาถึงระดับ "${RKN[lv]}"`,`ต่ำสุดตอนนี้ "${RKN[r.min]}"`];
+ const T={M:one("k",1),K:one("t",1),G:one("g",1),O:one("t",2),Z:one("k",2),Q:one("g",2),H:[r.boss>=3,"ชนะบอส 3 ตัว",`${r.boss}/3`],E:all(3),X:all(4),J:all(5)}[k];
+ return {ok:T[0],need:`ปลดล็อกเมื่อ: ${T[1]} (${T[2]}) · ดูพลังได้ที่การ์ดตัวละคร`}}
+function rareCheck(){const s=s2();s.ru=s.ru||{};const got=[];RAREK.forEach(k=>{if(!s.ru[k]&&cityRareReq(k).ok){s.ru[k]=1;const B=CBLK[k],n=B.one?1:8;s.blk[B.m]=(s.blk[B.m]||0)+n;got.push([k,n])}});
+ if(got.length){save();const m=modal(`<div style="text-align:center"><h2>🔓 ปลดล็อกบล็อกหายาก!</h2>${got.map(([k,n])=>`<div class="rareun"><span>${CICON[k]}</span><b>${CBLK[k].n}</b><small>ได้รับ ×${n}</small></div>`).join("")}<p class="note">ไปวางในเมืองได้เลย (วางใช้ 🔋 เหมือนบล็อกอื่น)</p><button class="go fire" id="ruok">เยี่ยมเลย!</button></div>`,"stay");m.querySelector("#ruok").onclick=()=>m.remove();try{confetti(80);SND.gem()}catch(e){}}return got}
+function rareRandom(){const s=s2(),un=RAREK.filter(k=>!CBLK[k].one&&(s.ru||{})[k]);const pool=un.length?un:RAREK.filter(k=>CBLK[k].r===1);return pool[Math.floor(Math.random()*pool.length)]}
+function rareGive(n){const k=rareRandom(),B=CBLK[k];const s=s2();s.blk[B.m]=(s.blk[B.m]||0)+n;return k}
+/* ---- daily quests ---- */
+const QBP=["school","lab","observ","library","market","museum"];
+const QSUB=IQCAT?{t:["🔬","วิทย์"],iq:["🧩","เชาว์"]}:{k:["🧮","คณิต"],t:["🔬","วิทย์"],g:["🌏","สังคม"]};
+const QWHO=[["👩‍🏫","คุณครู"],["🧑‍🔬","นักวิทยาศาสตร์"],["👷","ช่างก่อสร้าง"],["🧑‍🌾","ชาวสวน"],["👮","ตำรวจเมือง"],["🧙","พ่อมด"],["👸","เจ้าหญิง"],["🧑‍🍳","พ่อครัว"]];
+function qGen(){const s=s2();s.bpu=s.bpu||{};const free=QBP.filter(b=>!s.bpu[b]),bps=[...free.sort(()=>Math.random()-.5),...QBP.sort(()=>Math.random()-.5)];const L=[];let i=0;
+ const mk=(sb,ty,need,txt)=>{const w=QWHO[Math.floor(Math.random()*QWHO.length)];L.push({sb,ty,need,have:0,txt,bp:bps[i++],who:w,done:0})};
+ if(IQCAT){const a=Math.random()<.5;mk("t","pass",a?2:1,a?"ผ่านด่านวิทย์ 2 ด่าน (ถูก 3 ข้อขึ้นไป)":"ผ่านด่านวิทย์ 1 ด่าน แบบถูกครบ 5 ข้อ");if(!a)L[0].ty="full";mk("t","ok",10,"ตอบวิทย์ถูก 10 ข้อ");mk("iq","iq",3,"ตอบโจทย์เชาว์ถูก 3 ข้อ")}
+ else ["k","t","g"].forEach(sb=>{const r=Math.random(),n=QSUB[sb][1];if(r<.4)mk(sb,"pass",1,`ผ่านด่าน${n} 1 ด่าน`);else if(r<.7)mk(sb,"star3",1,`ได้ 3 ดาว ด่าน${n} 1 ด่าน`);else mk(sb,"ok",15,`ตอบ${n}ถูก 15 ข้อ`)});
+ return {d:cxToday(),L,all:0}}
+function qSt(){const s=s2();if(!s.qst||s.qst.d!==cxToday())s.qst=qGen();return s.qst}
+function qTick(sb,ty,n){const q=qSt(),s=s2(),fin=[];q.L.forEach(x=>{if(x.done||x.sb!==sb)return;const hit=x.ty===ty||(ty==="star3"&&x.ty==="pass")||(ty==="full"&&(x.ty==="pass"||x.ty==="star3"));if(!hit)return;x.have=Math.min(x.need,x.have+n);
+  if(x.have>=x.need){x.done=1;s.bpu=s.bpu||{};const nb=!s.bpu[x.bp];s.bpu[x.bp]=1;enGain(15);fin.push(x);x.nb=nb}});
+ let bonus=null;if(fin.length&&!q.all&&q.L.every(x=>x.done)){q.all=1;bonus=rareGive(1)}
+ if(fin.length){save();setTimeout(()=>{fin.forEach((x,i)=>setTimeout(()=>toast(`📋 ภารกิจสำเร็จ! ${x.who[0]} ได้แบบแปลน ${BPRINT[x.bp].e} ${BPRINT[x.bp].n}${x.nb?"":" (มีแล้ว)"} · +15🔋`),i*1800));if(bonus)setTimeout(()=>toast(`🎁 ครบ 3 ภารกิจวันนี้! ได้ ${CICON[bonus]} ${CBLK[bonus].n} ×1`),fin.length*1800)},600)}}
+function questHTML(){const q=qSt();return `<div class="qbd"><div class="qbh"><b>📋 ภารกิจประจำวัน</b><small>${q.L.filter(x=>x.done).length}/${q.L.length} · ครบทั้งหมดได้บล็อกหายาก 🎁</small></div>${q.L.map(x=>`<div class="qit ${x.done?"done":""}"><span class="qwho">${x.who[0]}</span><div class="qmain"><b>${QSUB[x.sb][0]} ${x.txt}</b><small>${x.who[1]}อยากได้ ${BPRINT[x.bp].e} ${BPRINT[x.bp].n} · +15🔋</small><div class="hsb"><i style="width:${x.have/x.need*100}%"></i></div></div><span class="qn">${x.done?"✅":x.have+"/"+x.need}</span></div>`).join("")}</div>`}
+function questView(cb){const m=modal(`<div>${questHTML()}<p class="note" style="text-align:center">ได้แบบแปลนอาคารพิเศษไปสร้างในเมือง (📐 แบบแปลน) · ภารกิจใหม่ทุกวัน</p><button class="go" id="qok">ปิด</button></div>`);m.querySelector("#qok").onclick=()=>{m.remove();cb&&cb()}}
+/* ---- hooks into each app ---- */
+function enLevel(sb,was,stars,ok){let g=enGain((was?1:2)*ok);if(stars>=3)g+=enGain(5);qTick(sb,"pass",1);if(stars>=3)qTick(sb,"star3",1);if(ok)qTick(sb,"ok",ok);return g}
+function enAnswer(rep){const g=enGain(rep?1:2);qTick("t","ok",1);return g?` · +${g}🔋`:""}
+function enCatLevel(score){let g=0;if(score>=3)qTick("t","pass",1);if(score>=5){g=enGain(5);qTick("t","full",1)}setTimeout(rareCheck,400);return g}
+/* city tab: energy + quest board under the enter button */
+function cxTabDecor(){const g=document.getElementById("cgo");if(!g||document.getElementById("cqst"))return;const d=document.createElement("div");d.id="cqst";d.innerHTML=`<div class="enrow"><span class="enbig">🔋 ${enSt().v}<small>/${ENMAX}</small></span><small>พลังก่อสร้าง · วาง 1 บล็อกใช้ 1🔋 · ทำโจทย์เพื่อเติม</small></div>${questHTML()}`;g.insertAdjacentElement("beforebegin",d);setTimeout(rareCheck,300)}
+if(typeof cityTab==="function"){const _c=cityTab;cityTab=function(){const r=_c.apply(this,arguments);try{cxTabDecor()}catch(e){console.warn(e)}return r};if(typeof TABPG!=="undefined")TABPG.city=cityTab}
+if(typeof catCityTab==="function"){const _c=catCityTab;catCityTab=function(){const r=_c.apply(this,arguments);setTimeout(()=>{try{cxTabDecor()}catch(e){console.warn(e)}},0);return r}}
 
 /* ===== Admin test mode: separate local sandbox, everything unlocked, never touches player saves ===== */
 const ADM_H="f1cb8fd26529fd7ed75789960c9194e25b03db19db9e1556ae0d91c3a80e7874";
@@ -5554,7 +5632,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795332598";let OL_VCHK=0;
+const OL_VER="1795333589";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -5565,7 +5643,7 @@ setTimeout(()=>olVerCheck(true),4000);setInterval(()=>olVerCheck(),180000);
 
 route();initCloud();
 </script><script>/* emoji fallback for old emoji fonts — Twemoji graphics CC-BY 4.0 */
-(function(){var M={"🟢": [12, "1f7e2"], "🟡": [12, "1f7e1"], "🟠": [12, "1f7e0"], "🟣": [12, "1f7e3"], "🟤": [12, "1f7e4"], "🧃": [12, "1f9c3"], "🪑": [12, "1fa91"], "🧑‍🏫": [12.1, "1f9d1-200d-1f3eb"], "🪁": [12, "1fa81"], "🟦": [12, "1f7e6"], "🧊": [12, "1f9ca"], "🧍": [12, "1f9cd"], "🦾": [12, "1f9be"], "🪵": [13, "1fab5"], "🪨": [13, "1faa8"], "🦪": [12, "1f9aa"], "🪖": [13, "1fa96"], "🪄": [13, "1fa84"], "🪞": [13, "1fa9e"], "🪙": [13, "1fa99"], "🪓": [12, "1fa93"], "🟥": [12, "1f7e5"], "🟨": [12, "1f7e8"], "🪶": [13, "1fab6"], "🟫": [12, "1f7eb"], "🟩": [12, "1f7e9"], "🪥": [13, "1faa5"], "🪴": [13, "1fab4"], "🫘": [14, "1fad8"], "🪟": [13, "1fa9f"], "🫛": [15, "1fadb"], "🪱": [13, "1fab1"], "🪷": [14, "1fab7"], "🛕": [12, "1f6d5"], "🩺": [12, "1fa7a"], "🧑‍🍳": [12.1, "1f9d1-200d-1f373"], "🪔": [12, "1fa94"], "🪣": [13, "1faa3"], "🛝": [14, "1f6dd"], "🪽": [15, "1fabd"], "🥱": [12, "1f971"], "🧑‍⚕️": [12.1, "1f9d1-200d-2695-fe0f"], "🧑‍⚕": [12.1, "1f9d1-200d-2695-fe0f"], "🧑‍🌾": [12.1, "1f9d1-200d-1f33e"], "🧑‍✈️": [12.1, "1f9d1-200d-2708-fe0f"], "🧑‍✈": [12.1, "1f9d1-200d-2708-fe0f"], "🧅": [12, "1f9c5"], "🧑‍🤝‍🧑": [12, "1f9d1-200d-1f91d-200d-1f9d1"], "🪮": [15, "1faae"], "🦦": [12, "1f9a6"], "🪀": [12, "1fa80"], "🦩": [12, "1f9a9"], "🦺": [12, "1f9ba"], "🩳": [12, "1fa73"], "🧏": [12, "1f9cf"], "🧑‍⚖️": [12.1, "1f9d1-200d-2696-fe0f"], "🧑‍⚖": [12.1, "1f9d1-200d-2696-fe0f"], "🧑‍🚒": [12.1, "1f9d1-200d-1f692"], "🧑‍🎤": [12.1, "1f9d1-200d-1f3a4"], "🧑‍🎨": [12.1, "1f9d1-200d-1f3a8"], "🧑‍🔬": [12.1, "1f9d1-200d-1f52c"], "🧑‍🔧": [12.1, "1f9d1-200d-1f527"], "🧑‍🚀": [12.1, "1f9d1-200d-1f680"], "🤍": [12, "1f90d"], "🪐": [12, "1fa90"]},P="../emoji/";
+(function(){var M={"🟢": [12, "1f7e2"], "🟡": [12, "1f7e1"], "🟠": [12, "1f7e0"], "🟣": [12, "1f7e3"], "🟤": [12, "1f7e4"], "🧃": [12, "1f9c3"], "🪑": [12, "1fa91"], "🧑‍🏫": [12.1, "1f9d1-200d-1f3eb"], "🪁": [12, "1fa81"], "🟦": [12, "1f7e6"], "🧊": [12, "1f9ca"], "🧍": [12, "1f9cd"], "🦾": [12, "1f9be"], "🪵": [13, "1fab5"], "🪨": [13, "1faa8"], "🦪": [12, "1f9aa"], "🪖": [13, "1fa96"], "🪄": [13, "1fa84"], "🪞": [13, "1fa9e"], "🪙": [13, "1fa99"], "🪓": [12, "1fa93"], "🟥": [12, "1f7e5"], "🟨": [12, "1f7e8"], "🪶": [13, "1fab6"], "🟫": [12, "1f7eb"], "🟩": [12, "1f7e9"], "🪥": [13, "1faa5"], "🪴": [13, "1fab4"], "🫘": [14, "1fad8"], "🪟": [13, "1fa9f"], "🫛": [15, "1fadb"], "🪱": [13, "1fab1"], "🪷": [14, "1fab7"], "🛕": [12, "1f6d5"], "🩺": [12, "1fa7a"], "🧑‍🍳": [12.1, "1f9d1-200d-1f373"], "🪔": [12, "1fa94"], "🪣": [13, "1faa3"], "🛝": [14, "1f6dd"], "🪽": [15, "1fabd"], "🥱": [12, "1f971"], "🧑‍⚕️": [12.1, "1f9d1-200d-2695-fe0f"], "🧑‍⚕": [12.1, "1f9d1-200d-2695-fe0f"], "🧑‍🌾": [12.1, "1f9d1-200d-1f33e"], "🧑‍✈️": [12.1, "1f9d1-200d-2708-fe0f"], "🧑‍✈": [12.1, "1f9d1-200d-2708-fe0f"], "🧅": [12, "1f9c5"], "🧑‍🤝‍🧑": [12, "1f9d1-200d-1f91d-200d-1f9d1"], "🪮": [15, "1faae"], "🦦": [12, "1f9a6"], "🧑‍🔬": [12.1, "1f9d1-200d-1f52c"], "🪀": [12, "1fa80"], "🦩": [12, "1f9a9"], "🦺": [12, "1f9ba"], "🩳": [12, "1fa73"], "🧏": [12, "1f9cf"], "🧑‍⚖️": [12.1, "1f9d1-200d-2696-fe0f"], "🧑‍⚖": [12.1, "1f9d1-200d-2696-fe0f"], "🧑‍🚒": [12.1, "1f9d1-200d-1f692"], "🧑‍🎤": [12.1, "1f9d1-200d-1f3a4"], "🧑‍🎨": [12.1, "1f9d1-200d-1f3a8"], "🧑‍🔧": [12.1, "1f9d1-200d-1f527"], "🧑‍🚀": [12.1, "1f9d1-200d-1f680"], "🤍": [12, "1f90d"], "🪐": [12, "1fa90"]},P="../emoji/";
 function ok(e){try{var c=document.createElement("canvas");c.width=c.height=24;var x=c.getContext("2d");x.textBaseline="top";x.font="20px sans-serif";x.fillText(e,0,0);var d=x.getImageData(0,0,24,24).data;for(var i=0;i<d.length;i+=4){if(d[i+3]>50&&(Math.abs(d[i]-d[i+1])>40||Math.abs(d[i+1]-d[i+2])>40))return true}return false}catch(_){return true}}
 var lv=11;[["\ud83d\udfe2",12],["\ud83e\ude96",13],["\ud83e\uded8",14],["\ud83e\udebd",15]].forEach(function(t){if(lv===t[1]-1&&ok(t[0]))lv=t[1]});
 var keys=Object.keys(M).filter(function(k){return M[k][0]>lv});if(!keys.length)return;
