@@ -2860,8 +2860,14 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 function olBackup(why){try{if(typeof S==="undefined"||!S||olScore(S)<=0)return;const k=KEY+"_bak";let L=[];try{L=JSON.parse(localStorage.getItem(k)||"[]")}catch(e){}
  const sig=olScore(S)+"|"+(S.updated||0);if(L.some(b=>b.sig===sig))return;L.unshift({sig,t:Date.now(),why,s:S});L=L.slice(0,3);localStorage.setItem(k,JSON.stringify(L))}catch(e){}}
 async function olApply(code){const o=await readCode(code);olBackup("apply");
- if(OL_APP==="rainbow-dragon"&&S&&S.name&&o&&o.name&&String(S.name).toLowerCase()===String(o.name).toLowerCase()&&olScore(S)>0){const m=Object.assign(fresh(),olMergeVal(JSON.parse(JSON.stringify(S)),o,(S.updated||0)>=(o.updated||0)));m.name=o.name;m.updated=Math.max(S.updated||0,o.updated||0);OL.mergedOnApply=olSig(m)!==olSig(Object.assign(fresh(),o));S=m}
+ if(OL_APP==="rainbow-dragon"&&S&&S.name&&o&&o.name&&String(S.name).toLowerCase()===String(o.name).toLowerCase()&&olScore(S)>0){const m=olFixCity(Object.assign(fresh(),olMergeVal(JSON.parse(JSON.stringify(S)),o,(S.updated||0)>=(o.updated||0))),S,o);m.name=o.name;m.updated=Math.max(S.updated||0,o.updated||0);OL.mergedOnApply=olSig(m)!==olSig(Object.assign(fresh(),o));S=m}
  else{S=Object.assign(fresh(),o)}try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* the city is one big string: pick the version that was BUILT most recently (cityT), not the save that happened last.
+   Old saves have no stamp: then keep the bigger city (expanded size first, then more blocks). */
+function olCitySz(x){const c=(x&&x.s2&&x.s2.city)||"";return [c[0]==="@"||c[0]==="~"?parseInt(c[1],36)||0:0,(typeof cityDecode==="function"?cityDecode(c).size:c.length)]}
+function olFixCity(m,a,b){try{const sa=a&&a.s2,sb=b&&b.s2;if(!m||!m.s2||!sa||!sb||(!sa.city&&!sb.city))return m;const ta=sa.cityT||0,tb=sb.cityT||0;let w;
+ if(ta!==tb)w=ta>tb?sa:sb;else{const za=olCitySz(a),zb=olCitySz(b);w=(za[0]!==zb[0]?za[0]>zb[0]:za[1]>=zb[1])?sa:sb}
+ m.s2.city=w.city;if(w.cpts!=null)m.s2.cpts=w.cpts;if(w.cexp!=null)m.s2.cexp=w.cexp;m.s2.cityT=Math.max(ta,tb)}catch(e){}return m}
 function olScore(x){if(!x)return 0;let n=Object.keys(x.prog||{}).length*10+Object.keys(x.boss||{}).length*20+Object.keys(x.arena||{}).length*20+Object.keys(x.bossWon||{}).length*20;
  for(const v of Object.values(x.dxp||{}))n+=+v||0;for(const c of (x.cats||[]))if(c)n+=+c.age||0;return n}
 function olBase(u){if(!OL.sess)return;OL.sess.base=u;try{localStorage.setItem(OL_KEY,JSON.stringify(OL.sess))}catch(e){}}
@@ -2877,7 +2883,7 @@ const olSig=o=>{const c=Object.assign({},o);delete c.updated;return olCanon(c)};
 async function olSync(){if(!OL.sess||!olOn())return;try{const d=await olGet(OL.sess.id);if(!d){OL.synced=true;olPush();return}
   const lu=S.updated||0,base=OL.sess.base||0;if(Math.abs(d.updated-lu)<=1000){olBase(d.updated);OL.synced=true;olBoardPush();return}
   if(OL_APP==="rainbow-dragon"){let c=null;try{c=await readCode(d.data)}catch(e){}
-   if(c){const m=Object.assign(fresh(),olMergeVal(JSON.parse(JSON.stringify(S)),c,lu>=d.updated));m.name=c.name||m.name;const same=olSig(m)===olSig(Object.assign(fresh(),c)),grew=olSig(m)!==olSig(S);
+   if(c){const m=olFixCity(Object.assign(fresh(),olMergeVal(JSON.parse(JSON.stringify(S)),c,lu>=d.updated)),S,c);m.name=c.name||m.name;const same=olSig(m)===olSig(Object.assign(fresh(),c)),grew=olSig(m)!==olSig(S);
     S=m;S.updated=same?d.updated:Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}OL.synced=true;
     if(same)olBase(d.updated);else await olPutNow();
     if(grew&&!document.querySelector(".lesson,.screen.g4,.modal"))route();if(grew||!same)olBadge(same?"☁️ โหลดเซฟล่าสุดแล้ว":"☁️ รวมความคืบหน้าจากทุกเครื่องแล้ว");olBoardPush();return}}
@@ -2939,7 +2945,7 @@ async function olBoardList(){const out=[];let tok="";do{const r=await fetch(olBU
   tok=j.nextPageToken}while(tok);return out}
 
 /* ===== auto-update: a tab left open on an old version reloads itself ===== */
-const OL_VER="1795357895";let OL_VCHK=0;
+const OL_VER="1795863530";let OL_VCHK=0;
 async function olVerCheck(force){if(!force&&Date.now()-OL_VCHK<60000)return;OL_VCHK=Date.now();
  try{const r=await fetch("../version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const j=await r.json();if(j.v&&j.v!==OL_VER){OL.newver=1;olTryReload()}}catch(e){}}
 function olTryReload(){if(!OL.newver)return;if(document.visibilityState!=="visible"||document.querySelector(".lesson,.modal,.g4play,.quiz,.game")){clearTimeout(OL.rlt);OL.rlt=setTimeout(olTryReload,4000);return}
@@ -2982,9 +2988,14 @@ const BPRINT={
  museum:{e:"🏛️",n:"พิพิธภัณฑ์",q:1,v:(()=>{const a=[];for(let x=0;x<5;x++)for(let z=0;z<3;z++)a.push([x,0,z,"P"]);[0,2,4].forEach(x=>{a.push([x,1,0,"P"],[x,2,0,"P"],[x,1,2,"P"],[x,2,2,"P"])});for(let x=0;x<5;x++)for(let z=0;z<3;z++)a.push([x,3,z,"P"]);a.push([1,4,1,"P"],[2,4,1,"P"],[3,4,1,"P"],[2,5,1,"Y"]);return a})()},
  tent:{e:"⛺",n:"กระโจม",v:[[0,0,0,"D"],[2,0,0,"D"],[0,0,2,"D"],[2,0,2,"D"],[0,1,0,"P"],[1,1,0,"P"],[2,1,0,"P"],[0,1,1,"P"],[2,1,1,"P"],[0,1,2,"P"],[1,1,2,"P"],[2,1,2,"P"],[1,2,1,"Y"]]}};
 const bpCost=bp=>{const c={};bp.v.forEach(v=>{const B=CBLK[v[3]],m=B.m;c[m]=(c[m]||0)+(B.cost||1)});return c};
-const citySize=str=>str&&str[0]==="@"?Math.max(12,B36.indexOf(str[1])):12;
-const cityDecode=str=>{const m=new Map();for(let i=str&&str[0]==="@"?2:0;i+3<(str||"").length;i+=4){const x=B36.indexOf(str[i]),y=B36.indexOf(str[i+1]),z=B36.indexOf(str[i+2]),t=str[i+3];if(x>=0&&y>=0&&z>=0&&CBLK[t])m.set(x+","+y+","+z,t)}return m};
-const cityEncode=(m,n)=>(n&&n>12?"@"+B36[n]:"")+[...m].map(([k,t])=>{const [x,y,z]=k.split(",").map(Number);return B36[x]+B36[y]+B36[z]+t}).join("");
+const citySize=str=>str&&(str[0]==="@"||str[0]==="~")?Math.max(12,B36.indexOf(str[1])):12;
+/* city format v2 "~": size, then per layer "|"+y and a run-length list of cells (x-major): type char (or "." empty) + optional run length 2..35 in base36.
+   v1 ("@" or plain) = 4 chars per block; still read for old saves. */
+const cityDecode=str=>{const m=new Map();str=str||"";if(str[0]==="~"){const n=Math.max(12,B36.indexOf(str[1]));let y=0,pos=0,i=2;while(i<str.length){const c=str[i++];if(c==="|"){y=B36.indexOf(str[i++]);pos=0;continue}let r=1;if(i<str.length&&B36.indexOf(str[i])>=2){r=B36.indexOf(str[i]);i++}
+  if(c!=="."&&CBLK[c])for(let k=0;k<r;k++){const p=pos+k;m.set(Math.floor(p/n)+","+y+","+(p%n),c)}pos+=r}return m}
+ for(let i=str[0]==="@"?2:0;i+3<str.length;i+=4){const x=B36.indexOf(str[i]),y=B36.indexOf(str[i+1]),z=B36.indexOf(str[i+2]),t=str[i+3];if(x>=0&&y>=0&&z>=0&&CBLK[t])m.set(x+","+y+","+z,t)}return m};
+const cityEncode=(m,n)=>{n=n||12;const L=new Map();m.forEach((t,k)=>{const [x,y,z]=k.split(",").map(Number);if(x<0||z<0||x>=n||z>=n)return;if(!L.has(y))L.set(y,new Array(n*n).fill("."));L.get(y)[x*n+z]=t});
+ let o="~"+B36[n];[...L.keys()].sort((a,b)=>a-b).forEach(y=>{const a=L.get(y);let e=a.length;while(e>0&&a[e-1]===".")e--;o+="|"+B36[y];let i=0;while(i<e){const c=a[i];let r=1;while(i+r<e&&a[i+r]===c&&r<35)r++;o+=c+(r>1?B36[r]:"");i+=r}});return o};
 function cityPts(m){let h=0;const ty=new Set();m.forEach((t,k)=>{ty.add(t);h=Math.max(h,+k.split(",")[1]+1)});return m.size+ty.size*5+h*3}
 function loadThree(){return new Promise((res,rej)=>{if(window.THREE)return res(THREE);const sc=document.createElement("script");sc.src="../dragon/s2/three.min.js";sc.onload=()=>window.THREE?res(THREE):rej(new Error("no three"));sc.onerror=()=>rej(new Error("load"));document.head.appendChild(sc)})}
 /* ---- renderer shared by edit + visit ---- */
@@ -3143,7 +3154,7 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
  const cv=el.querySelector("#ccv");const S3=cityScene(cv,home,()=>map);if(!S3){el.innerHTML=`<div class="cload">เครื่องนี้เปิดภาพ 3 มิติไม่ได้ (WebGL ปิดอยู่)<br><button class="go" id="cx0">ปิด</button></div>`;el.querySelector("#cx0").onclick=()=>el.remove();return}
  const have=m=>m==="coins"?S.coins:m==="gems"?S.bulbs:(s.blk[m]||0);
  const pay=c=>{if(!Object.keys(c).every(m=>have(m)>=c[m]))return false;Object.keys(c).forEach(m=>{if(m==="coins")S.coins-=c[m];else if(m==="gems")S.bulbs-=c[m];else s.blk[m]-=c[m]});return true};
- const commit=()=>{s.city=cityEncode(map,CN);s.cpts=cityPts(map);save();S3.rebuild();ui();cityPushSoon()};
+ const commit=()=>{s.city=cityEncode(map,CN);s.cityT=Date.now();s.cpts=cityPts(map);save();S3.rebuild();ui();cityPushSoon()};
  const ui=()=>{el.querySelector("#cres").innerHTML=(typeof cityEn!=="undefined"?cityEn.html():"")+`<span>💰 ${S.coins}</span>`+["wood","stone","pearl","sand","iron","crystal"].map(k=>`<span>${(BLK[k]||["🧱"])[0]} ${s.blk[k]||0}</span>`).join("")+`<span>💡 ${S.bulbs}</span>`+RAREK.filter(k=>s.blk[CBLK[k].m]).map(k=>`<span>${CICON[k]} ${s.blk[CBLK[k].m]}</span>`).join("");el.querySelector("#cpt").textContent=` · พื้นที่ ${CN}×${CN} · ${map.size} บล็อก · ⭐ ${cityPts(map)} คะแนนเมือง`;
   el.querySelectorAll("[data-m]").forEach(b=>b.classList.toggle("on",b.dataset.m===mode));
   const pal=el.querySelector("#cpal");
@@ -3154,7 +3165,7 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
   el.querySelector("#chint").textContent=mode==="put"?(brush?"แตะพื้นหรือด้านข้างบล็อกเพื่อวาง · แตะบล็อกที่เลือกอีกครั้งเพื่อยกเลิก":"เลือกบล็อกด้านล่างก่อน · ลากเพื่อหมุนเมือง · แตะสัตว์เพื่อดูชื่อ"):mode==="dig"?"แตะบล็อกเพื่อทุบ ได้บล็อกคืน (อิฐใช้เหรียญ ไม่คืนเหรียญ)":"เลือกแบบแปลน แล้วแตะพื้นเพื่อสร้างทั้งหลังในครั้งเดียว"};
  el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mode=b.dataset.m;SND.tap();ui()});
  el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>{const nr=S3.st.r+(b.dataset.z==="+"?-3:3);if(S3.zoomAt)S3.zoomAt(null,null,nr);else S3.st.r=Math.max(8,Math.min(CN*3,nr))});
- cityOrbit(cv,S3,(cx,cy)=>{const ph=S3.petHit&&S3.petHit(cx,cy);if(ph)return petPop(ph);const h=S3.hit(cx,cy);if(!h)return;const o=h.o;
+ cityOrbit(cv,S3,(cx,cy)=>{const ph=S3.petHit&&S3.petHit(cx,cy);if(ph){ph.fy=cy;return petPop(ph)}const h=S3.hit(cx,cy);if(!h)return;const o=h.o;
   if(mode==="dig"){if(o.g)return;const k=o.x+","+o.y+","+o.z,t=map.get(k);map.delete(k);const B=CBLK[t];if(B.m!=="coins")s.blk[B.m]=(s.blk[B.m]||0)+1;SND.hit();commit();return}
   if(mode==="bp"){if(!bp)return toast("เลือกแบบแปลนก่อน");const B=BPRINT[bp];const x0=o.x+(o.g?0:Math.round(h.n.x)),y0=o.g?0:o.y+Math.round(h.n.y),z0=o.z+(o.g?0:Math.round(h.n.z));
    const cells=B.v.map(v=>[x0+v[0],y0+v[1],z0+v[2],v[3]]);if(cells.some(c=>c[0]<0||c[0]>=CN||c[2]<0||c[2]>=CN||c[1]>=CH))return toast("พื้นที่ไม่พอ ลองแตะใกล้กลางเมือง");
@@ -3172,13 +3183,13 @@ async function cityOpen(){const s=s2();const el=document.createElement("div");el
    <button class="go fire" id="cxok" ${ok?"":"disabled"}>${ok?"ขยายเลย!":"ของยังไม่พอ"}</button><button class="go ghost" id="cxno">ยกเลิก</button></div>`);
   m.querySelector("#cxno").onclick=()=>m.remove();
   m.querySelector("#cxok").onclick=()=>{if(!pay(c))return;const d=(nx-CN)/2,m2=new Map();map.forEach((t,k)=>{const [x,y,z]=k.split(",").map(Number);m2.set((x+d)+","+y+","+(z+d),t)});
-   map=m2;CN=nx;m.remove();s.city=cityEncode(map,CN);s.cpts=cityPts(map);save();S3.stop();el.remove();SND.gem();confetti(60);toast(`ขยายเมืองเป็น ${CN}×${CN} แล้ว!`);cityOpen()}};ui();if(typeof cityIQStart==="function")cityIQStart(el,()=>ui());if(!map.size)setTimeout(()=>{toast("เริ่มด้วยแบบแปลน 📐 บ้านหรือต้นไม้ก็ได้!");say("มาสร้างเมืองบ้านเกิดกันเถอะ","th")},400)}
+   map=m2;CN=nx;m.remove();s.city=cityEncode(map,CN);s.cityT=Date.now();s.cpts=cityPts(map);save();S3.stop();el.remove();SND.gem();confetti(60);toast(`ขยายเมืองเป็น ${CN}×${CN} แล้ว!`);cityOpen()}};ui();if(typeof cityIQStart==="function")cityIQStart(el,()=>ui());if(!map.size)setTimeout(()=>{toast("เริ่มด้วยแบบแปลน 📐 บ้านหรือต้นไม้ก็ได้!");say("มาสร้างเมืองบ้านเกิดกันเถอะ","th")},400)}
 /* ---- online: publish my city, list + visit friends ---- */
 const olCUrl=(id,q)=>`https://firestore.googleapis.com/v1/projects/${OL_CFG.projectId}/databases/(default)/documents/city${id?"/"+id:""}?key=${OL_CFG.apiKey}${q||""}`;
 let CITYT=0;function cityPushSoon(){clearTimeout(CITYT);CITYT=setTimeout(cityPush,4000)}
 async function cityPush(){try{if(!OL.sess||!olOn()||typeof olBid!=="function")return;const s=s2();if(!s.city)return;const id=await olBid();if(!id)return;
  let likes=0;const r0=await fetch(olCUrl(id));if(r0.ok){const j=await r0.json();likes=+((j.fields||{}).likes||{}).integerValue||0}
- const f={app:{stringValue:CAPP},name:{stringValue:String(S.name).slice(0,20)},grid:{stringValue:s.city.slice(0,12000)},home:{stringValue:s.home||"k"},wk:{stringValue:wkKey()},wp:{integerValue:String(wkPts())},pts:{integerValue:String(s.cpts||0)},likes:{integerValue:String(likes)},updated:{integerValue:String(Date.now())},pets:{stringValue:cityPetsEnc()}};
+ const f={app:{stringValue:CAPP},name:{stringValue:String(S.name).slice(0,20)},grid:{stringValue:(()=>{const g=cityEncode(cityDecode(s.city),citySize(s.city));return g.length<=12000?g:g.slice(0,12000)})()},home:{stringValue:s.home||"k"},wk:{stringValue:wkKey()},wp:{integerValue:String(wkPts())},pts:{integerValue:String(s.cpts||0)},likes:{integerValue:String(likes)},updated:{integerValue:String(Date.now())},pets:{stringValue:cityPetsEnc()}};
  await fetch(olCUrl(id),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:f})})}catch(e){}}
 async function cityList(){const r=await fetch(olCUrl("","&pageSize=100"));if(!r.ok)throw new Error(r.status);const j=await r.json();
  return (j.documents||[]).map(d=>{const f=d.fields||{},v=k=>f[k]?(f[k].stringValue!==undefined?f[k].stringValue:+f[k].integerValue):undefined;return{id:d.name.split("/").pop(),name:v("name"),grid:v("grid"),pets:v("pets")||"",app:v("app"),home:v("home"),wk:v("wk"),wp:v("wp")||0,pts:v("pts")||0,likes:v("likes")||0}}).filter(c=>c.name)}
@@ -3192,15 +3203,16 @@ async function cityVisitList(){const m=modal(`<div style="text-align:center"><h2
 async function cityVisit(c){try{await loadThree()}catch(e){return toast("โหลดภาพ 3 มิติไม่ได้")}
  const s=s2();s.liked=s.liked||{};const CN0=CN;CN=citySize(c.grid);const map=cityDecode(c.grid);const el=document.createElement("div");el.className="city";
  el.innerHTML=`<div class="chead"><button class="x" id="cx" aria-label="ปิด">✕</button><div><b>${(S2KB[c.home]||S2K[0]).e} เมืองของ ${esc(c.name)}</b><small> · ⭐ ${c.pts} · 👍 <span id="lk">${c.likes}</span></small></div><button class="go fire sm" id="like" style="width:auto;margin:0" ${s.liked[c.id]?"disabled":""}>👍 ชอบ</button></div><canvas id="ccv"></canvas><p class="note" style="text-align:center">ลากเพื่อหมุน · ดูอย่างเดียว</p>`;
- document.body.appendChild(el);const S3=cityScene(el.querySelector("#ccv"),c.home,()=>map,cityPetsDec(c.pets,c.app));if(!S3){el.remove();return toast("เครื่องนี้เปิดภาพ 3 มิติไม่ได้")}S3.setSpin(.003);cityOrbit(el.querySelector("#ccv"),S3,(cx,cy)=>{S3.setSpin(0);const ph=S3.petHit&&S3.petHit(cx,cy);if(ph)petPop(ph)});
+ document.body.appendChild(el);const S3=cityScene(el.querySelector("#ccv"),c.home,()=>map,cityPetsDec(c.pets,c.app));if(!S3){el.remove();return toast("เครื่องนี้เปิดภาพ 3 มิติไม่ได้")}S3.setSpin(.003);cityOrbit(el.querySelector("#ccv"),S3,(cx,cy)=>{S3.setSpin(0);const ph=S3.petHit&&S3.petHit(cx,cy);if(ph){ph.fy=cy;petPop(ph)}});
  el.querySelector("#cx").onclick=()=>{S3.stop();el.remove();CN=CN0};
  el.querySelector("#like").onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{const r=await fetch(olCUrl(c.id,"&updateMask.fieldPaths=likes"),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{likes:{integerValue:String(c.likes+1)}}})});
   if(!r.ok)throw 0;c.likes++;el.querySelector("#lk").textContent=c.likes;s.liked[c.id]=true;save();SND.gem();confetti(40)}catch(err){b.disabled=false;toast("ส่ง 👍 ไม่สำเร็จ ลองใหม่")}}}
 
 function petPop(ph){document.querySelectorAll(".petpop").forEach(e=>e.remove());const d=document.createElement("div");d.className="petpop";
  d.className="petpop"+(ph.p.html?" pphero":"");d.innerHTML=`${ph.p.pic||""}<b>${esc(ph.p.name||"")}</b>${ph.p.html||`<small>${esc(ph.p.sub||"")}</small>`}`;document.body.appendChild(d);
- const w=d.offsetWidth,h=d.offsetHeight;d.style.left=Math.max(8,Math.min(innerWidth-w-8,ph.x-w/2))+"px";d.style.top=Math.max(8,ph.y-h-10)+"px";
- d.onclick=()=>d.remove();setTimeout(()=>d.remove(),4000)}
+ const w=d.offsetWidth,h=d.offsetHeight;d.style.left=Math.max(8,Math.min(innerWidth-w-8,ph.x-w/2))+"px";
+ let top=ph.y-h-10;if(top<8){const below=(ph.fy||ph.y)+44;top=below+h<=innerHeight-8?below:Math.max(8,innerHeight-h-8)}d.style.top=top+"px";
+ const t0=Date.now();d.onclick=e=>{e.stopPropagation();if(Date.now()-t0>600)d.remove()};d.addEventListener("pointerdown",e=>e.stopPropagation());setTimeout(()=>{if(d.isConnected)d.remove()},ph.p.html?6000:4500)}
 
 /* pets shared with visitors: "type|stage|name;..." */
 function cityPetsEnc(){try{const L=typeof cityPetList==="function"?cityPetList():[];let out="";L.slice(0,5).forEach(p=>{const it=[p.type,p.stage||0,String(p.name||"").replace(/[|;]/g,"").slice(0,16)].join("|");if((out?out.length+1:0)+it.length<=200)out+=(out?";":"")+it});return out}catch(e){return ""}}
